@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-init, create/recover a Blaze repository
+# blaze-init, create or recover a Blaze repository
 # Copyright (C) 2008, 2009 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -20,8 +20,8 @@ use warnings;
 use File::Basename;
 use File::Spec::Functions;
 use Getopt::Long;
-use Text::Wrap;
 use POSIX qw(strftime);
+use Text::Wrap;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -51,7 +51,8 @@ sub display_help {
   my $NAME = NAME;
 
   print << "END_HELP";
-Usage: $NAME -h | -v
+Usage: $NAME [-q] [-d directory]
+       $NAME -h | -v
 
   -d, --destdir directory     specify the destination directory
   -q, --quiet                 avoid displaying unnecessary messages
@@ -190,3 +191,72 @@ print "Created/recovered a Blaze repository in " .
 
 # Return success:
 exit 0;
+
+__END__
+
+=head1 NAME
+
+blaze-init - create or recover a Blaze repository
+
+=head1 SYNOPSIS
+
+B<blaze-init> [B<-q>] [B<-d> I<directory>]
+
+B<blaze-init> B<-h> | B<-v>
+
+=head1 DESCRIPTION
+
+B<blaze-init>'s job is either to create a fresh new Blaze repository, or to
+recover an existing one, changing the configuration and template files back
+to their original state while leaving the user data (i.e. both static pages
+and blog posts) untouched.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-d>, B<--destdir> I<directory>
+
+Use selected destination I<directory> instead of the default current
+working one.
+
+=item B<-q>, B<--quiet>
+
+Avoid displaying messages that are not necessary.
+
+=item B<-h>, B<--help>
+
+Display usage information and exit.
+
+=item B<-v>, B<--version>
+
+Display version information and exit.
+
+=back
+
+=head1 SEE ALSO
+
+B<perl>(1).
+
+=head1 AUTHOR
+
+Written by Jaromir Hradilek <jhradilek@gmail.com>.
+
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the GNU Free Documentation License, Version 1.3 or any later
+version published by the Free Software Foundation; with no Invariant
+Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license is included as a file called FDL in the main
+directory of the blaze source package.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2008, 2009 Jaromir Hradilek
+
+This program is free software; see the source for copying conditions. It is
+distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+
+=cut
