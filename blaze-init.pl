@@ -75,8 +75,8 @@ TICULAR PURPOSE.
 END_VERSION
 }
 
-# Create the directory tree:
-sub mktree {
+# Create given directories:
+sub make_directories {
   my $dirs = shift || die "Missing argument";
   my $mask = shift || 0777;
 
@@ -142,7 +142,7 @@ GetOptions(
 );
 
 # Create the directory tree:
-mktree [
+make_directories [
   catdir($destdir, '.blaze'),                       # Root directory.
   catdir($destdir, '.blaze', 'theme'),              # Templates.
   catdir($destdir, '.blaze', 'style'),              # Stylesheets.
@@ -183,6 +183,10 @@ else {
   # Log the repository recovery:
   add_to_log($logfile, "Recovered the Blaze repository.");
 }
+
+# Report success:
+print "Created/recovered a Blaze repository in " .
+      catdir($destdir, '.blaze') . ".\n" if $verbose;
 
 # Return success:
 exit 0;
