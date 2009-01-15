@@ -142,6 +142,9 @@ GetOptions(
   'destdir|d=s'   => sub { $destdir = $_[1]; },
 );
 
+# Detect superfluous options:
+exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
+
 # Create the directory tree:
 make_directories [
   catdir($destdir, '.blaze'),                       # Root directory.

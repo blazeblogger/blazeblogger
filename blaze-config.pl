@@ -21,7 +21,6 @@ use File::Basename;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;
-use POSIX qw(strftime);
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -101,7 +100,7 @@ GetOptions(
   'destdir|d=s'   => sub { $destdir = $_[1]; },
 );
 
-# Check for missing options::
+# Check missing options::
 exit_with_error("Missing option.", 22) if (scalar(@ARGV) == 0);
 
 # Read the configuration file:
@@ -122,6 +121,9 @@ if (exists $options{$ARGV[0]}) {
     # Save the configuration file:
     WriteINI($filename, $config)
       or exit_with_error("Unable to write to `$filename'.", 13);
+
+    # Report success: 
+    print "The option has been successfully saved.\n" if $verbose;
   }
   else {
     # Check whether the option is set:
@@ -151,9 +153,9 @@ blaze-config - display or set the Blaze repository options
 
 =head1 SYNOPSIS
 
-B<blaze-init> [B<-q>] [B<-d> I<directory>] I<name> [I<value...>]
+B<blaze-config> [B<-q>] [B<-d> I<directory>] I<name> [I<value...>]
 
-B<blaze-init> B<-h> | B<-v>
+B<blaze-config> B<-h> | B<-v>
 
 =head1 DESCRIPTION
 
