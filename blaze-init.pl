@@ -17,11 +17,11 @@
 
 use strict;
 use warnings;
+use Text::Wrap;
 use File::Basename;
 use File::Spec::Functions;
 use Getopt::Long;
 use POSIX qw(strftime);
-use Text::Wrap;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -157,7 +157,7 @@ make_directories [
 
 # Create the default configuration file:
 write_to_file(catfile($destdir, '.blaze', 'config'), << "END_CONFIG");
-TODO: Write configuration file template.
+;TODO: Write configuration file template.
 END_CONFIG
 
 # Create the default theme file:
