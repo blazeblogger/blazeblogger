@@ -65,7 +65,7 @@ sub display_help {
   my $NAME = NAME;
 
   print << "END_HELP";
-Usage: $NAME [-q] [-d directory] option [value]
+Usage: $NAME [-q] [-d directory] name [value...]
        $NAME -h | -v
 
   -d, --destdir directory     specify the destination directory
@@ -142,3 +142,126 @@ else {
 
 # Return success:
 exit 0;
+
+__END__
+
+=head1 NAME
+
+blaze-config - display or set the Blaze repository options
+
+=head1 SYNOPSIS
+
+B<blaze-init> [B<-q>] [B<-d> I<directory>] I<name> [I<value...>]
+
+B<blaze-init> B<-h> | B<-v>
+
+=head1 DESCRIPTION
+
+B<blaze-config> is a simple configuration tool for Blaze. Depending on the
+number of given command-line arguments, it either displays the current
+value of the specified option, or sets/replaces it with the new one.
+
+The accepted option I<name> is in the form of dot separated section and key
+(e.g. user.name). For the complete list of available options along with the
+explanation of their meaning, see the appropriate section below.
+
+=head1 OPTIONS
+
+=head2 Command-line options
+
+=over
+
+=item B<-d>, B<--destdir> I<directory>
+
+Use selected destination I<directory> instead of the default current
+working one.
+
+=item B<-q>, B<--quiet>
+
+Avoid displaying messages that are not necessary.
+
+=item B<-h>, B<--help>
+
+Display usage information and exit.
+
+=item B<-v>, B<--version>
+
+Display version information and exit.
+
+=back
+
+=head2 Available option names
+
+=over
+
+=item B<user.name>
+
+User's name to be used as a default posts' author and possibly in the
+copyright notice.
+
+=item B<user.email>
+
+User's e-mail; so far, this option is not actually used anywhere.
+
+=item B<blog.title>
+
+Blog title.
+
+=item B<blog.subtitle>
+
+Blog subtitle, supposedly a brief, single-line description of what should
+an occasional visitor expect to find.
+
+=item B<blog.codepage>
+
+Blog encoding in the form recognised by the W3C HTML 4.01 Strict standard
+(e.g. UTF-8).
+
+=item B<blog.theme>
+
+Blog theme; the value should point to an existing file in the .blaze/theme
+directory, although the .html suffix can be safely omitted.
+
+=item B<blog.style>
+
+Blog stylesheet; the value should point to an existing file in the
+.blaze/style directory, although the .css suffix can be safely omitted.
+
+=back
+
+=head1 FILES
+
+=over
+
+=item I<.blaze/config>
+
+Blaze configuration file.
+
+=back
+
+=head1 SEE ALSO
+
+B<perl>(1).
+
+=head1 AUTHOR
+
+Written by Jaromir Hradilek <jhradilek@gmail.com>.
+
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the GNU Free Documentation License, Version 1.3 or any later
+version published by the Free Software Foundation; with no Invariant
+Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license is included as a file called FDL in the main
+directory of the blaze source package.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2008, 2009 Jaromir Hradilek
+
+This program is free software; see the source for copying conditions. It is
+distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+
+=cut
