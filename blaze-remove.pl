@@ -28,7 +28,7 @@ use constant NAME    => basename($0, '.pl');        # Script name.
 use constant VERSION => '0.0.1';                    # Script version.
 
 # General script settings:
-our $type    = 'post';                              # Data type.
+our $type    = 'post';                              # Type: post or page.
 our $destdir = '.';                                 # Destination folder.
 our $verbose = 1;                                   # Verbosity level.
 
@@ -52,11 +52,12 @@ sub display_help {
   my $NAME = NAME;
 
   print << "END_HELP";
-Usage: $NAME [-pq] [-d directory] id
+Usage: $NAME [-pqP] [-d directory] id
        $NAME -h | -v
 
   -d, --destdir directory     specify the destination directory
-  -p, --page                  remove static page instead of the post
+  -p, --page                  remove the static page instead of the post
+  -P, --post                  remove the blog post; the default option
   -q, --quiet                 avoid displaying unnecessary messages
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
@@ -107,6 +108,7 @@ GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
   'page|p'        => sub { $type    = 'page'; },
+  'post|P'        => sub { $type    = 'post'; },
   'quiet|q'       => sub { $verbose = 0;      },
   'destdir|d=s'   => sub { $destdir = $_[1];  },
 );
@@ -149,7 +151,7 @@ blaze-remove - remove a blog post or a page from the Blaze repozitory
 
 =head1 SYNOPSIS
 
-B<blaze-remove> [B<-pq>] [B<-d> I<directory>] id
+B<blaze-remove> [B<-pqP>] [B<-d> I<directory>] I<id>
 
 B<blaze-remove> B<-h> | B<-v>
 
@@ -170,6 +172,10 @@ working one.
 =item B<-p>, B<--page>
 
 Remove the static page instead of the blog post.
+
+=item B<-P>, B<--post>
+
+Remove the blog post; this is the default option.
 
 =item B<-q>, B<--quiet>
 
