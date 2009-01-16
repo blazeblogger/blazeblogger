@@ -116,6 +116,10 @@ GetOptions(
 # Check missing options:
 exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 1);
 
+# Check the repository is present (however naive this method is):
+exit_with_error("Not a Blaze repository! Try `blaze-init' first.", 1)
+  unless (-d catdir($destdir, '.blaze'));
+
 # Prepare the file names:
 my $head = catfile($destdir, '.blaze', "${type}s", 'head', $ARGV[0]);
 my $body = catfile($destdir, '.blaze', "${type}s", 'body', $ARGV[0]);

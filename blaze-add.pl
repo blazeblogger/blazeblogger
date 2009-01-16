@@ -173,6 +173,10 @@ GetOptions(
 # Check missing options:
 exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 
+# Check the repository is present (however naive this method is):
+exit_with_error("Not a Blaze repository! Try `blaze-init' first.", 1)
+  unless (-d catdir($destdir, '.blaze'));
+
 # Unless the file is supplied, create a new one:
 unless ($file) {
   $file = catfile($destdir, '.blaze', 'temp');

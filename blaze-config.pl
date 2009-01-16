@@ -106,6 +106,10 @@ GetOptions(
 # Check missing options::
 exit_with_error("Missing option.", 22) if (scalar(@ARGV) == 0);
 
+# Check the repository is present (however naive this method is):
+exit_with_error("Not a Blaze repository! Try `blaze-init' first.", 1)
+  unless (-d catdir($destdir, '.blaze'));
+
 # Read the configuration file:
 my $filename = catfile($destdir, '.blaze', 'config');
 my $config   = ReadINI($filename)
