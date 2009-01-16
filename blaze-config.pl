@@ -32,16 +32,19 @@ our $verbose = 1;                                   # Verbosity level.
 
 # List of valid options:
 our %options = (
-  # User related settings:
-  'user.name'     => "User's name to be used as a default posts' author.",
-  'user.email'    => "User's e-mail; not to be used anywhere so far.",
-
   # Blog related settings:
   'blog.title'    => "Blog title.",
   'blog.subtitle' => "Blog subtitle.",
-  'blog.codepage' => "Blog encoding in a form recognized by HTML 4.01.",
   'blog.theme'    => "Blog theme; the .html suffix can be omitted.",
   'blog.style'    => "Blog stylesheet; the .css suffix can be omitted.",
+
+  # Core settings:
+  'core.editor'   => "Text editor.",
+  'core.encoding' => "File encoding in a form recognized by HTML 4.01.",
+
+  # User related settings:
+  'user.name'     => "User's name to be used as a default posts' author.",
+  'user.email'    => "User's e-mail; not to be used anywhere so far.",
 );
 
 # Set up the __WARN__ signal handler:
@@ -196,15 +199,6 @@ Display version information and exit.
 
 =over
 
-=item B<user.name>
-
-User's name to be used as a default posts' author and possibly in the
-copyright notice.
-
-=item B<user.email>
-
-User's e-mail; so far, this option is not actually used anywhere.
-
 =item B<blog.title>
 
 Blog title.
@@ -213,11 +207,6 @@ Blog title.
 
 Blog subtitle, supposedly a brief, single-line description of what should
 an occasional visitor expect to find.
-
-=item B<blog.codepage>
-
-Blog encoding in the form recognised by the W3C HTML 4.01 Strict standard
-(e.g. UTF-8).
 
 =item B<blog.theme>
 
@@ -228,6 +217,24 @@ directory, although the .html suffix can be safely omitted.
 
 Blog stylesheet; the value should point to an existing file in the
 .blaze/style directory, although the .css suffix can be safely omitted.
+
+=item B<core.editor>
+
+Text editor to be used for editing purposes.
+
+=item B<core.encoding>
+
+Records encoding in the form recognised by the W3C HTML 4.01 standard (e.g.
+UTF-8).
+
+=item B<user.name>
+
+User's name to be used as a default posts' author and possibly in the
+copyright notice.
+
+=item B<user.email>
+
+User's e-mail; so far, this option is not actually used anywhere.
 
 =back
 

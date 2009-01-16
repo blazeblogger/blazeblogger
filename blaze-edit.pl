@@ -146,6 +146,9 @@ my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 # Open the record in the external editor:
 system($edit, $file) == 0 or exit_with_error("Unable to run `$edit'.", 1);
 
+# Log the record editing:
+add_to_log($log, "Edited the $type $part with ID $ARGV[0].");
+
 # Report success:
 print "Your changes have been successfully saved.\n" if $verbose;
 
@@ -233,7 +236,7 @@ Blaze configuration file.
 
 =head1 SEE ALSO
 
-B<perl>(1).
+B<blaze-config>(1), B<perl>(1).
 
 =head1 AUTHOR
 
