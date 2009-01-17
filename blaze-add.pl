@@ -30,7 +30,6 @@ use constant VERSION => '0.0.1';                    # Script version.
 
 # General script settings:
 our $type    = 'post';                              # Type: post or page.
-our $file    = '';                                  # File to add.
 our $destdir = '.';                                 # Destination folder.
 our $verbose = 1;                                   # Verbosity level.
 
@@ -54,11 +53,10 @@ sub display_help {
   my $NAME = NAME;
 
   print << "END_HELP";
-Usage: $NAME [-pqP] [-d directory] [-f file]
+Usage: $NAME [-pqP] [-d directory] [file]
        $NAME -h | -v
 
   -d, --destdir directory     specify the destination directory
-  -f, --file file             specify the file to add
   -p, --page                  add the static page instead of the post
   -P, --post                  add the blog post; the default option
   -q, --quiet                 avoid displaying unnecessary messages
@@ -167,15 +165,17 @@ GetOptions(
   'post|P'        => sub { $type    = 'post'; },
   'quiet|q'       => sub { $verbose = 0;      },
   'destdir|d=s'   => sub { $destdir = $_[1];  },
-  'file|f=s'      => sub { $file    = $_[1];  },
 );
 
-# Check missing options:
-exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
+# Check superfluous options:
+exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) > 1);
 
 # Check the repository is present (however naive this method is):
 exit_with_error("Not a Blaze repository! Try `blaze-init' first.", 1)
   unless (-d catdir($destdir, '.blaze'));
+
+# If provided, use existing file:
+my $file = $ARGV[0] || '';
 
 # Unless the file is supplied, create a new one:
 unless ($file) {
@@ -195,16 +195,16 @@ unless ($file) {
 
   # Write the temporary file:
   write_to_file($file, << "END_TEMP");
-# This and following lines beginning with `#' are the $type header.  Please
+# This and following lines beginning with  `#' are the $type header.  Please
 # take your time and replace these options with desired values. Just remem-
 # ber that the date has to be in an YYYY-MM-DD form and that  the tags is a
 # comma separated list of categories the post (pages ignore these)  belong.
 #
-#   title:  Replace this with your $type title
+#   title:
 #   author: $name
 #   date:   $date
 #   tags:
-# 
+#
 # The header ends here. The rest is the content of your $type.
 
 END_TEMP
@@ -213,7 +213,7 @@ END_TEMP
   system($edit, $file) == 0 or exit_with_error("Unable to run `$edit'.",1);
 }
 
-# Open the temporary file for reading:
+# Open the file for reading:
 if (open(TEMP, "$file")) {
   my $header = {};
   my $line   = '';
@@ -232,8 +232,8 @@ if (open(TEMP, "$file")) {
     last unless $line =~ /^#/;
 
     # Parse header data:
-    if ($line =~ / (title|author|date|tags):\s*(\S.*)$/) {
-      $header->{'header'}->{$1} = $2;
+    if ($line =~ /(title|author|date|tags):\s*(\S.*)$/) {
+      $header->{header}->{$1} = $2;
     }
   }
 
@@ -243,6 +243,9 @@ if (open(TEMP, "$file")) {
 
   # Write the body:
   write_to_file($body, $line . do { local $/; <TEMP> });
+
+  # Close the temporary file:
+  close(TEMP);
 
   # Log the record addition:
   add_to_log($log, "Added the $type with ID $id.");
@@ -266,7 +269,7 @@ blaze-add - add a blog post or a page to the Blaze repository
 
 =head1 SYNOPSIS
 
-B<blaze-add> [B<-pqP>] [B<-d> I<directory>] [B<-f> I<file>]
+B<blaze-add> [B<-pqP>] [B<-d> I<directory>] [I<file>]
 
 B<blaze-add> B<-h> | B<-v>
 
@@ -284,10 +287,6 @@ external editor is opened to let you create a new content.
 
 Use selected destination I<directory> instead of the default current
 working one.
-
-=item B<-f>, B<--file> I<file>
-
-Add the I<file> instead of opening an external text editor.
 
 =item B<-p>, B<--page>
 
