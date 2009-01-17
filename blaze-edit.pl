@@ -133,7 +133,7 @@ GetOptions(
   'destdir|d=s'   => sub { $destdir = $_[1];  },
 );
 
-# Check missing options:
+# Check superfluous options:
 exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 1);
 
 # Check the repository is present (however naive this method is):
@@ -269,11 +269,11 @@ working one.
 
 =item B<-p>, B<--page>
 
-Remove the static page instead of the blog post.
+Edit the static page instead of the blog post.
 
 =item B<-P>, B<--post>
 
-Remove the blog post; this is the default option.
+Edit the blog post; this is the default option.
 
 =item B<-q>, B<--quiet>
 
