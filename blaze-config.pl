@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-config, display or set the Blaze repository options
+# blaze-config, display or set the BlazeBlogger repository options
 # Copyright (C) 2008, 2009 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -27,30 +27,30 @@ use constant NAME    => basename($0, '.pl');        # Script name.
 use constant VERSION => '0.0.1';                    # Script version.
 
 # General script settings:
-our $destdir = '.';                                 # Destination folder.
+our $blogdir = '.';                                 # Repository location.
 our $verbose = 1;                                   # Verbosity level.
 
 # List of valid options:
 our %options = (
   # Blog related settings:
-  'blog.title'    => "Blog title.",
-  'blog.subtitle' => "Blog subtitle.",
-  'blog.theme'    => "Blog theme; the .html suffix can be omitted.",
-  'blog.style'    => "Blog stylesheet; the .css suffix can be omitted.",
+  'blog.title'     => "Blog title.",
+  'blog.subtitle'  => "Blog subtitle.",
+  'blog.theme'     => "Blog theme; the .html suffix can be omitted.",
+  'blog.style'     => "Blog stylesheet; the .css suffix can be omitted.",
 
   # Core settings:
-  'core.editor'   => "Text editor.",
-  'core.encoding' => "File encoding in a form recognized by HTML 4.01.",
+  'core.editor'    => "Text editor to be used for editing purposes.",
+  'core.encoding'  => "File encoding in a form recognized by HTML 4.01.",
+  'core.extension' => "File extension for the generated pages.",
 
   # User related settings:
-  'user.name'     => "User's name to be used as a default posts' author.",
-  'user.email'    => "User's e-mail; not to be used anywhere so far.",
+  'user.name'      => "User's name to be used as a default posts' author.",
+  'user.email'     => "User's e-mail; not to be used anywhere so far.",
 );
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
-  my $message  = shift;
-  print STDERR NAME . ": $message";
+  print STDERR NAME . ": " . (shift);
 };
 
 # Display given message and terminate the script:
@@ -66,21 +66,28 @@ sub exit_with_error {
 sub display_help {
   my $NAME = NAME;
 
+  # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-q] [-d directory] name [value...]
+Usage: $NAME [-qV] [-b directory] name [value...]
        $NAME -h | -v
 
-  -d, --destdir directory     specify the destination directory
+  -b, --blogdir directory     specify the directory where the BlazeBlogger
+                              repository is placed
   -q, --quiet                 avoid displaying unnecessary messages
+  -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
+
+  # Return success:
+  return 1;
 }
 
 # Display version information:
 sub display_version {
   my ($NAME, $VERSION) = (NAME, VERSION);
 
+  # Print the message to the STDOUT:
   print << "END_VERSION";
 $NAME $VERSION
 
@@ -90,6 +97,9 @@ distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
 TICULAR PURPOSE.
 END_VERSION
+
+  # Return success:
+  return 1;
 }
 
 # Set up the options parser:
@@ -100,18 +110,19 @@ GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
   'quiet|q'       => sub { $verbose = 0;     },
-  'destdir|d=s'   => sub { $destdir = $_[1]; },
+  'verbose|V'     => sub { $verbose = 1;     },
+  'blogdir|b=s'   => sub { $blogdir = $_[1]; },
 );
 
 # Check missing options::
 exit_with_error("Missing option.", 22) if (scalar(@ARGV) == 0);
 
 # Check the repository is present (however naive this method is):
-exit_with_error("Not a Blaze repository! Try `blaze-init' first.", 1)
-  unless (-d catdir($destdir, '.blaze'));
+exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.", 1)
+  unless (-d catdir($blogdir, '.blaze'));
 
 # Read the configuration file:
-my $filename = catfile($destdir, '.blaze', 'config');
+my $filename = catfile($blogdir, '.blaze', 'config');
 my $config   = ReadINI($filename)
                or exit_with_error("Unable to read `$filename'.", 13);
 
@@ -156,19 +167,20 @@ __END__
 
 =head1 NAME
 
-blaze-config - display or set the Blaze repository options
+blaze-config - display or set the BlazeBlogger repository options
 
 =head1 SYNOPSIS
 
-B<blaze-config> [B<-q>] [B<-d> I<directory>] I<name> [I<value...>]
+B<blaze-config> [B<-qV>] [B<-b> I<directory>] I<name> [I<value...>]
 
 B<blaze-config> B<-h> | B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-config> is a simple configuration tool for Blaze. Depending on the
-number of given command-line arguments, it either displays the current
-value of the specified option, or sets/replaces it with the new one.
+B<blaze-config> is a simple configuration tool for the BlazeBlogger.
+Depending on the number of given command-line arguments, it either displays
+the current value of the specified option, or sets/replaces it with the new
+one.
 
 The accepted option I<name> is in the form of dot separated section and key
 (e.g. user.name). For the complete list of available options along with the
@@ -180,14 +192,18 @@ explanation of their meaning, see the appropriate section below.
 
 =over
 
-=item B<-d>, B<--destdir> I<directory>
+=item B<-b>, B<--blogdir> I<directory>
 
-Use selected destination I<directory> instead of the default current
-working one.
+Specify the I<directory> where the BlazeBlogger repository is placed. The
+default option is the current working directory.
 
 =item B<-q>, B<--quiet>
 
 Avoid displaying messages that are not necessary.
+
+=item B<-V>, B<--verbose>
+
+Display all messages. This is the default option.
 
 =item B<-h>, B<--help>
 
@@ -215,12 +231,12 @@ an occasional visitor expect to find.
 =item B<blog.theme>
 
 Blog theme; the value should point to an existing file in the .blaze/theme
-directory, although the .html suffix can be safely omitted.
+directory, although the .html extension can be safely omitted.
 
 =item B<blog.style>
 
 Blog stylesheet; the value should point to an existing file in the
-.blaze/style directory, although the .css suffix can be safely omitted.
+.blaze/style directory, although the .css extension can be safely omitted.
 
 =item B<core.editor>
 
@@ -229,12 +245,17 @@ Text editor to be used for editing purposes.
 =item B<core.encoding>
 
 Records encoding in the form recognised by the W3C HTML 4.01 standard (e.g.
-UTF-8).
+the default UTF-8).
+
+=item B<core.extension>
+
+File extension for the generated pages. By default, the `html' is used as a
+reasonable choice.
 
 =item B<user.name>
 
-User's name to be used as a default posts' author and possibly in the
-copyright notice.
+User's name to be used as a default posts' author and in the copyright
+notice.
 
 =item B<user.email>
 
@@ -248,7 +269,7 @@ User's e-mail; so far, this option is not actually used anywhere.
 
 =item I<.blaze/config>
 
-Blaze configuration file.
+BlazeBlogger configuration file.
 
 =back
 
@@ -266,7 +287,7 @@ version published by the Free Software Foundation; with no Invariant
 Sections, no Front-Cover Texts, and no Back-Cover Texts.
 
 A copy of the license is included as a file called FDL in the main
-directory of the blaze source package.
+directory of the BlazeBlogger source package.
 
 =head1 COPYRIGHT
 
