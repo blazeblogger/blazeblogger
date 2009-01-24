@@ -114,50 +114,47 @@ GetOptions(
   'blogdir|b=s'   => sub { $blogdir = $_[1]; },
 );
 
-# Check missing options::
+# Check missing options:
 exit_with_error("Missing option.", 22) if (scalar(@ARGV) == 0);
 
 # Check the repository is present (however naive this method is):
-exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.", 1)
+exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# Read the configuration file:
-my $filename = catfile($blogdir, '.blaze', 'config');
-my $config   = ReadINI($filename)
-               or exit_with_error("Unable to read `$filename'.", 13);
-
 # Check whether the option is valid:
-if (exists $options{$ARGV[0]}) {
-  # Get option key pair:
-  my ($section, $key) = split(/\./, shift(@ARGV));
+exit_with_error("Invalid option `$ARGV[0]'.", 22)
+  unless (exists $options{$ARGV[0]});
 
-  # Decide whether to get or set the value:
-  if (scalar(@ARGV) != 0) {
-    # Use the rest of the arguments as a value:
-    $config->{$section}->{$key} = join(' ', @ARGV);
+# Read the configuration file:
+my $file = catfile($blogdir, '.blaze', 'config');
+my $conf = ReadINI($file)
+           or exit_with_error("Unable to read `$file'.", 13);
 
-    # Save the configuration file:
-    WriteINI($filename, $config)
-      or exit_with_error("Unable to write to `$filename'.", 13);
+# Get option key pair:
+my ($section, $key) = split(/\./, shift(@ARGV));
 
-    # Report success: 
-    print "The option has been successfully saved.\n" if $verbose;
-  }
-  else {
-    # Check whether the option is set:
-    if (my $value = $config->{$section}->{$key}) {
-      # Display the value:
-      print "$value\n";
-    }
-    else {
-      # Return failure:
-      exit 1;
-    }
-  }
+# Decide whether to get or set the value:
+if (scalar(@ARGV) != 0) {
+  # Use the rest of the arguments as a value:
+  $conf->{$section}->{$key} = join(' ', @ARGV);
+
+  # Save the configuration file:
+  WriteINI($file, $conf)
+    or exit_with_error("Unable to write to `$file'.", 13);
+
+  # Report success: 
+  print "The option has been successfully saved.\n" if $verbose;
 }
 else {
-  # Report failure:
-  exit_with_error("Invalid option `$ARGV[0]'.", 22);
+  # Check whether the option is set:
+  if (my $value = $conf->{$section}->{$key}) {
+    # Display the value:
+    print "$value\n";
+  }
+  else {
+    # Return failure:
+    exit 1;
+  }
 }
 
 # Return success:
