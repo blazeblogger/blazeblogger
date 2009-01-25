@@ -109,6 +109,73 @@ sub write_to_file {
   return 1;
 }
 
+# Check the header for the erroneous or missing data:
+sub check_header {
+  my $data = shift || die "Missing argument";
+  my $id   = shift || die "Missing argument";
+  my $type = shift || die "Missing argument";
+
+  # Check whether the title is specified:
+  unless ($data->{header}->{title}) {
+    # Display the appropriate warning:
+    print STDERR NAME . ": Missing title in the $type with ID $id.\n"
+      if $verbose;
+  }
+
+  # Check whether the author is specified:
+  if (my $author = $data->{header}->{author}) {
+    # Check whether it contains forbidden characters:
+    if ($author =~ /[^\w\s\-]/) {
+      # Display the appropriate warning:
+      print STDERR NAME . ": Invalid author in the $type with ID $id.\n"
+        if $verbose;
+    }
+  }
+  else {
+    # Display the appropriate warning:
+    print STDERR NAME . ": Missing author in the $type with ID $id.\n"
+      if $verbose;
+  }
+
+  # Check whether the date is specified:
+  if (my $date = $data->{header}->{date}) {
+    # Check whether the format is valid:
+    if ($date !~ /\d{4}-[01]\d-[0-3]\d/) {
+      # Display the appropriate warning:
+      print STDERR NAME . ": Invalid date in the $type with ID $id.\n"
+        if $verbose;
+    }
+  }
+  else {
+    # Display the appropriate warning:
+    print STDERR NAME . ": Missing date in the $type with ID $id.\n"
+      if $verbose;
+  }
+
+  # Check whether the tags are specified:
+  if (my $tags = $data->{header}->{tags}) {
+    # Check whether they contain forbidden characters:
+    if ($tags =~ /:/) {
+      # Display the appropriate warning:
+      print STDERR NAME . ": Invalid tags in the $type with ID $id.\n"
+        if $verbose;
+    }
+  }
+
+  # Check whether the URL is specified:
+  if (my $url = $data->{header}->{url}) {
+    # Check whether it contains forbidden characters:
+    if ($url =~ /[^\w\-]/) {
+      # Display the appropriate warning:
+      print STDERR NAME . ": Invalid URL in the $type with ID $id.\n"
+        if $verbose;
+    }
+  }
+
+  # Return success:
+  return 1;
+}
+
 # Create a record from the single file:
 sub save_record {
   my $file = shift || die "Missing argument";
@@ -135,7 +202,8 @@ sub save_record {
     }
   }
 
-  # TODO: Add data checks.
+  # Check the header for the erroneous or missing data:
+  check_header($data, $id, $type);
 
   # Write the record header:
   WriteINI($head, $data) or return 0;
