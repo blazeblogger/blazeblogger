@@ -184,17 +184,15 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 ##   subtitle - The blog subtitle, supposedly a brief, single-line descrip-
 ##              tion of what should the occasional visitor  expect to find.
 ##   theme    - The blog theme;  the value should point to an existing file
-##              in the .blaze/theme directory, although the .html extension
-##              can be safely omitted.
+##              in the .blaze/theme directory.
 ##   style    - The blog style;  the value should point to an existing file
-##              in the .blaze/theme directory,  although the .css extension
-##              can be safely omitted.
+##              in the .blaze/theme directory.
 ##
 [blog]
 #title=My Blog
 #subtitle=yet another blog
-#theme=default
-#style=default
+#theme=default.html
+#style=default.css
 
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
@@ -224,8 +222,64 @@ END_CONFIG
 
 # Create the default theme file:
 write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
-              << "END_THEME");
-TODO: Write default theme.
+              << 'END_THEME');
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+                      "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <!-- content-type -->
+  <!-- generator -->
+  <!-- date -->
+  <!-- stylesheet -->
+  <title><!-- title --></title>
+</head>
+
+<body>
+
+<!-- Page Wrapper: -->
+<div id="wrapper">
+
+  <!-- Page Header: -->
+  <div id="header">
+    <div class="title"><!-- title --></div>
+    <div class="subtitle"><!-- subtitle --></div>
+  </div>
+
+  <!-- Page Content: -->
+  <div id="content">
+    <!-- content -->
+  </div>
+
+  <!-- Page Sidebar: -->
+  <div id="sidebar">
+    <!-- List of Pages: -->
+    <h2 class="sidebar">Pages:</h2>
+    <ul>
+      <!-- pages -->
+    </ul>
+
+    <!-- List of Tags: -->
+    <h2 class="sidebar">Tags:</h2>
+    <ul>
+      <!-- tags -->
+    </ul>
+
+    <!-- List of Months: -->
+    <h2 class="sidebar">Archive:</h2>
+    <ul>
+      <!-- archive -->
+    </ul>
+  </div>
+
+  <!-- Page Footer -->
+  <div id="footer">
+    Copyright &copy; <!-- year --> <!-- name -->.
+    Powered by <a href="http://blaze.blackened.cz/">BlazeBlogger</a>.
+  </div>
+</div>
+
+</body>
+</html>
 END_THEME
 
 # Create the default stylesheet:
