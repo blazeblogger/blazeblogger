@@ -35,8 +35,8 @@ our %options = (
   # Blog related settings:
   'blog.title'     => "Blog title.",
   'blog.subtitle'  => "Blog subtitle.",
-  'blog.theme'     => "Blog theme; the .html suffix can be omitted.",
-  'blog.style'     => "Blog stylesheet; the .css suffix can be omitted.",
+  'blog.theme'     => "Blog theme.",
+  'blog.style'     => "Blog stylesheet.",
 
   # Core settings:
   'core.editor'    => "Text editor to be used for editing purposes.",
@@ -228,12 +228,12 @@ an occasional visitor expect to find.
 =item B<blog.theme>
 
 Blog theme; the value should point to an existing file in the .blaze/theme
-directory, although the .html extension can be safely omitted.
+directory.
 
 =item B<blog.style>
 
 Blog stylesheet; the value should point to an existing file in the
-.blaze/style directory, although the .css extension can be safely omitted.
+.blaze/style directory.
 
 =item B<core.editor>
 
