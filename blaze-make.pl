@@ -21,6 +21,7 @@ use File::Basename;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;
+use POSIX qw(strftime);
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -31,9 +32,8 @@ our $blogdir = '.';                                 # Repository location.
 our $destdir = '.';                                 # HTML pages location.
 our $verbose = 1;                                   # Verbosity level.
 
-# Other global variables:
-our $conf    = {};                                  # Blog configuration.
-our $stats   = {};                                  # Blog statistics.
+# Global variables:
+our $conf    = {};                                  # The configuration.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
@@ -109,6 +109,24 @@ sub make_directories {
   return 1;
 }
 
+# Write string to the given file:
+sub write_to_file {
+  my $file = shift || die "Missing argument";
+  my $text = shift || '';
+
+  # Open the file for writing:
+  open(FILE, ">$file") or return 0;
+
+  # Write given string to the file::
+  print FILE $text;
+
+  # Close the file:
+  close(FILE);
+
+  # Return success:
+  return 1;
+}
+
 # Fix the erroneous or missing header data:
 sub fix_header {
   my $data = shift || die "Missing argument";
@@ -170,14 +188,15 @@ sub fix_header {
   # Check whether the tags are specified:
   if (my $tags = $data->{header}->{tags}) {
     # Check whether they contain forbidden characters:
-    if ($tags =~ /[^\w\s\-,]/) {
+    if ($tags =~ /:/) {
       # Display the appropriate warning:
       print STDERR NAME . ": Invalid tags in the $type with ID $id.\n"
         if $verbose;
 
       # Strip forbidden characters:
-      $tags =~ s/[^\w\s\-,]//g;
+      $tags =~ s/://g;
       $tags =~ s/,+/,/;
+      $tags =~ s/\s{2,}/ /;
       ($data->{header}->{tags} = $tags) =~ s/^,|,$//g;
     }
   }
@@ -219,7 +238,7 @@ sub collect_headers {
   my @records = ();
 
   # Open the headers directory:
-  opendir(HEAD, $head) or return ();
+  opendir(HEAD, $head) or return @records;
 
   # Process each file:
   while (my $id = readdir(HEAD)) {
@@ -245,6 +264,256 @@ sub collect_headers {
 
   # Return the result:
   return @records;
+}
+
+# Collect the necessary metadata:
+sub collect_metadata {
+  my $tags   = {};
+  my $months = {};
+
+  # Prepare the list of month names:
+  my @month  = qw( January February March April May June July
+                   August September October November December );
+
+  # Collect the pages headers:
+  my @pages  = collect_headers('page');
+
+  # Collect the posts headers:
+  my @posts  = collect_headers('post');
+
+  # Process each post header:
+  foreach(@posts) {
+    # Decompose the post record:
+    $_ =~ /^([^:]*):[^:]*:([^:]*):[^:]*:[^:]*:.*$/;
+
+    # Prepare the information:
+    my $date = substr($1, 0, 7);
+    my $name = $month[int(substr($1, 5, 2)) - 1] . " " . substr($1, 0, 4);
+    my @tags = split(/,\s*/, $2);
+
+    # Check whether the month is already present:
+    if ($months->{$name}) {
+      # Increase the counter:
+      $months->{$name}->{count}++;
+    }
+    else {
+      # Prepare the URL:
+      (my $url = $date) =~ s/-/\//;
+
+      # Set up the URL:
+      $months->{$name}->{url}   = "$url/";
+
+      # Set up the counter:
+      $months->{$name}->{count} = 1;
+    }
+
+    # Process each tag separately:
+    foreach my $tag (@tags) {
+      # Check whether the tag is already present:
+      if ($tags->{$tag}) {
+        # Increase the counter:
+        $tags->{$tag}->{count}++;
+      }
+      else {
+        # Prepare an URL:
+        (my $url = $tag) =~ s/[^\w\s\-]//g; $url =~ s/\s/-/g;
+
+        # Set up the URL:
+        $tags->{$tag}->{url}   = "$url/";
+
+        # Set up the counter:
+        $tags->{$tag}->{count} = 1;
+      }
+    }
+  }
+
+  # Return the result:
+  return {
+    'posts'  => \@posts,
+    'pages'  => \@pages,
+    'tags'   => $tags,
+    'months' => $months,
+  };
+}
+
+# Return the theme file with most of the placeholders substituted:
+sub read_theme {
+  my $data     = shift || return 0;
+  my $root     = shift || '/';
+  my $result   = '';
+
+  # Read required data from the configuration:
+  my $theme    = $conf->{blog}->{theme}    || 'default.html';
+  my $style    = $conf->{blog}->{style}    || 'default.css';
+  my $title    = $conf->{blog}->{title}    || 'My Blog';
+  my $subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
+  my $encoding = $conf->{core}->{encoding} || 'UTF-8';
+  my $name     = $conf->{user}->{name}     || 'admin';
+
+  # Get the current year:
+  my $year     = substr(date_to_string(time), 0, 4);
+
+  # Prepare the meta and link elements:
+  my $content_type = '<meta http-equiv="Content-Type" content="text/html;'.
+                     ' charset=' . $encoding . '">';
+  my $generator    = '<meta name="Generator" content="' . NAME . ' ' .
+                     VERSION . '">';
+  my $date         = '<meta name="Date" content="' . 
+                     strftime("%a %b %e %H:%M:%S %Y", localtime) . '">';
+  my $stylesheet   = '<link rel="stylesheet" href="' . $root . 'style/' .
+                     $style . '" type="text/css">';
+
+  # Prepare the list of tags:
+  my $tags     = $data->{tags}
+                 ? join("\n", map {
+                     '<li><a href="' . $root . 'tags/' .
+                     $data->{tags}->{$_}->{url} . '">' . $_ . '</a> (' .
+                     $data->{tags}->{$_}->{count} . ')</li>'
+                   } sort(keys(%{$data->{tags}})))
+                 : '';
+
+  # Prepare the archive list::
+  my $archive  = $data->{months}
+                 ? join("\n", map {
+                     '<li><a href="' . $root . $data->{months}->{$_}->{url}.
+                     '">' . $_ . '</a> (' . $data->{months}->{$_}->{count} .
+                     ')</li>'
+                   } sort(keys(%{$data->{months}})))
+                 : '';
+
+  # TODO: Prepare the list of pages:
+  my $pages    = '';
+
+  # Open the file for reading:
+  open(FILE, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
+
+  # Process each line:
+  while (my $line = <FILE>) {
+    # Substitute header placeholders:
+    $line =~ s/<!--\s*content-type\s*-->/$content_type/i;
+    $line =~ s/<!--\s*generator\s*-->/$generator/i;
+    $line =~ s/<!--\s*date\s*-->/$date/i;
+    $line =~ s/<!--\s*stylesheet\s*-->/$stylesheet/i;
+
+    # Substitute sidebar placeholders:
+    $line =~ s/<!--\s*pages\s*-->/$pages/i;
+    $line =~ s/<!--\s*tags\s*-->/$tags/i;
+    $line =~ s/<!--\s*archive\s*-->/$archive/i;
+
+    # Substitute body placeholders:
+    $line =~ s/<!--\s*title\s*-->/$title/ig;
+    $line =~ s/<!--\s*subtitle\s*-->/$subtitle/ig;
+    $line =~ s/<!--\s*name\s*-->/$name/ig;
+    $line =~ s/<!--\s*year\s*-->/$year/ig;
+
+    # Add the line to the result:
+    $result .= $line;
+  }
+
+  # Close the file:
+  close(FILE);
+
+  # Return the result:
+  return $result;
+}
+
+# Generate posts:
+sub generate_posts {
+  my $data  = shift || die "Missing argument";
+  my $ext   = $conf->{core}->{extension} || 'html';
+  my $body  = '';
+
+  # Prepare the template:
+  my $theme = read_theme($data, '../../../');
+
+  # Process each record:
+  foreach my $record (sort { $b cmp $a } @{$data->{posts}}) {
+    my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+    my ($year, $month) = split(/-/, $date);
+
+    # Prepare the post heading:
+    my $heading = << "END_HEADING";
+<div class="heading">
+  <h2>$title</h2>
+  <span class="date">$date</span> |
+  posted by: <span class="author">$author</span> |
+  tagged as: <span class="tags">$tags</span>
+</div>
+END_HEADING
+
+    # Open the body file for reading:
+    open(FILE, catfile($blogdir, '.blaze', 'posts', 'body', $id))
+      or return 0;
+
+    # Read the content of the file:
+    $body = do { local $/; <FILE> };
+
+    # Close the file:
+    close(FILE);
+
+    # Substitute the placeholder in the template:
+    (my $page = $theme) =~ s/<!--\s*content\s*-->/$heading$body/ig;
+
+    # Create the directories:
+    make_directories [
+      catdir($destdir, $year),                      # Year directory.
+      catdir($destdir, $year, $month),              # Month directory.
+      catdir($destdir, $year, $month, "$id-$url"),  # Post directory.
+    ];
+
+    # Write the index file:
+    write_to_file(catfile($destdir, $year, $month, "$id-$url",
+                          "index.$ext"), $page) or return 0;
+  }
+
+  # Return success:
+  return 1;
+}
+
+# Generate pages:
+sub generate_pages {
+  my $data  = shift || die "Missing argument";
+  my $ext   = $conf->{core}->{extension} || 'html';
+  my $body  = '';
+
+  # Prepare the template:
+  my $theme = read_theme($data, '../');
+
+  # Process each record:
+  foreach my $record (sort { $b cmp $a } @{$data->{pages}}) {
+    my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+    my ($year, $month) = split(/-/, $date);
+
+    # Prepare the post heading:
+    my $heading = << "END_HEADING";
+<div class="heading">
+  <h2>$title</h2>
+</div>
+END_HEADING
+
+    # Open the body file for reading:
+    open(FILE, catfile($blogdir, '.blaze', 'pages', 'body', $id))
+      or return 0;
+
+    # Read the content of the file:
+    $body = do { local $/; <FILE> };
+
+    # Close the file:
+    close(FILE);
+
+    # Substitute the placeholder in the template:
+    (my $page = $theme) =~ s/<!--\s*content\s*-->/$heading$body/ig;
+
+    # Create the directories:
+    make_directories [ catdir($destdir, $url) ];    # Page directory.
+
+    # Write the index file:
+    write_to_file(catfile($destdir, $url, "index.$ext"), $page)
+      or return 0;
+  }
+
+  # Return success:
+  return 1;
 }
 
 # Translate given date to YYYY-MM-DD string:
@@ -273,25 +542,24 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
+# Prepare the file name:
+my $temp = catfile($blogdir, '.blaze', 'config');
+
 # Read the configuration file:
-my $temp  = catfile($blogdir, '.blaze', 'config');
-my $conf  = ReadINI($temp)
-            or exit_with_error("Unable to read `$temp'.", 13);
+$conf    = ReadINI($temp)
+           or exit_with_error("Unable to read `$temp'.", 13);
 
-# Collect the posts headers:
-my @posts = collect_headers('post');
-
-# Collect the pages headers:
-my @pages = collect_headers('page');
+# Collect the necessary metadata:
+my $data = collect_metadata();
 
 # Generate pages:
 # ...
 
 # Generate posts:
-# ...
+generate_posts($data);
 
 # Generate archives:
-# ...
+generate_pages($data);
 
 # Generate tags:
 # ...
