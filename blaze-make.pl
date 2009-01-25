@@ -109,24 +109,6 @@ sub make_directories {
   return 1;
 }
 
-# Write string to the given file:
-sub write_to_file {
-  my $file = shift || die "Missing argument";
-  my $text = shift || '';
-
-  # Open the file for writing:
-  open(FILE, ">$file") or return 0;
-
-  # Write given string to the file::
-  print FILE $text;
-
-  # Close the file:
-  close(FILE);
-
-  # Return success:
-  return 1;
-}
-
 # Fix the erroneous or missing header data:
 sub fix_header {
   my $data = shift || die "Missing argument";
@@ -309,6 +291,9 @@ sub collect_metadata {
 
     # Process each tag separately:
     foreach my $tag (@tags) {
+      # Make the tag lower case:
+      $tag = lc($tag);
+
       # Check whether the tag is already present:
       if ($tags->{$tag}) {
         # Increase the counter:
@@ -336,11 +321,13 @@ sub collect_metadata {
   };
 }
 
-# Return the theme file with most of the placeholders substituted:
-sub read_theme {
+# Write a single page:
+sub write_page {
+  # generate_html($file, $data, $content, $root)
+  my $file     = shift || die "Missing argument";
   my $data     = shift || return 0;
+  my $content  = shift || '';
   my $root     = shift || '/';
-  my $result   = '';
 
   # Read required data from the configuration:
   my $theme    = $conf->{blog}->{theme}    || 'default.html';
@@ -384,11 +371,14 @@ sub read_theme {
   # TODO: Prepare the list of pages:
   my $pages    = '';
 
-  # Open the file for reading:
-  open(FILE, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
+  # Open the theme file for reading:
+  open(THEME, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
+
+  # Open the file for writing:
+  open(FILE, ">$file") or return 0;
 
   # Process each line:
-  while (my $line = <FILE>) {
+  while (my $line = <THEME>) {
     # Substitute header placeholders:
     $line =~ s/<!--\s*content-type\s*-->/$content_type/i;
     $line =~ s/<!--\s*generator\s*-->/$generator/i;
@@ -406,15 +396,19 @@ sub read_theme {
     $line =~ s/<!--\s*name\s*-->/$name/ig;
     $line =~ s/<!--\s*year\s*-->/$year/ig;
 
-    # Add the line to the result:
-    $result .= $line;
+    # Substitute the content:
+    $line =~ s/<!--\s*content\s*-->/$content/ig;
+
+    # Write the line to the file:
+    print FILE $line;
   }
 
-  # Close the file:
+  # Close the files:
+  close(THEME);
   close(FILE);
 
-  # Return the result:
-  return $result;
+  # Return success:
+  return 1;
 }
 
 # Generate posts:
@@ -423,23 +417,10 @@ sub generate_posts {
   my $ext   = $conf->{core}->{extension} || 'html';
   my $body  = '';
 
-  # Prepare the template:
-  my $theme = read_theme($data, '../../../');
-
   # Process each record:
   foreach my $record (sort { $b cmp $a } @{$data->{posts}}) {
     my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
     my ($year, $month) = split(/-/, $date);
-
-    # Prepare the post heading:
-    my $heading = << "END_HEADING";
-<div class="heading">
-  <h2>$title</h2>
-  <span class="date">$date</span> |
-  posted by: <span class="author">$author</span> |
-  tagged as: <span class="tags">$tags</span>
-</div>
-END_HEADING
 
     # Open the body file for reading:
     open(FILE, catfile($blogdir, '.blaze', 'posts', 'body', $id))
@@ -451,8 +432,7 @@ END_HEADING
     # Close the file:
     close(FILE);
 
-    # Substitute the placeholder in the template:
-    (my $page = $theme) =~ s/<!--\s*content\s*-->/$heading$body/ig;
+    # TODO: Add post header.
 
     # Create the directories:
     make_directories [
@@ -462,8 +442,8 @@ END_HEADING
     ];
 
     # Write the index file:
-    write_to_file(catfile($destdir, $year, $month, "$id-$url",
-                          "index.$ext"), $page) or return 0;
+    my $file = catfile($destdir, $year, $month, "$id-$url", "index.$ext");
+    write_page($file, $data, $body, '../../../') or return 0;
   }
 
   # Return success:
@@ -476,20 +456,10 @@ sub generate_pages {
   my $ext   = $conf->{core}->{extension} || 'html';
   my $body  = '';
 
-  # Prepare the template:
-  my $theme = read_theme($data, '../');
-
   # Process each record:
   foreach my $record (sort { $b cmp $a } @{$data->{pages}}) {
     my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
     my ($year, $month) = split(/-/, $date);
-
-    # Prepare the post heading:
-    my $heading = << "END_HEADING";
-<div class="heading">
-  <h2>$title</h2>
-</div>
-END_HEADING
 
     # Open the body file for reading:
     open(FILE, catfile($blogdir, '.blaze', 'pages', 'body', $id))
@@ -501,15 +471,14 @@ END_HEADING
     # Close the file:
     close(FILE);
 
-    # Substitute the placeholder in the template:
-    (my $page = $theme) =~ s/<!--\s*content\s*-->/$heading$body/ig;
+    # TODO: Add page header.
 
     # Create the directories:
     make_directories [ catdir($destdir, $url) ];    # Page directory.
 
     # Write the index file:
-    write_to_file(catfile($destdir, $url, "index.$ext"), $page)
-      or return 0;
+    my $file = catfile($destdir, $url, "index.$ext");
+    write_page($file, $data, $body, '../') or return 0;
   }
 
   # Return success:
