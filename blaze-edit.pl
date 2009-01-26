@@ -22,7 +22,6 @@ use File::Basename;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;
-use POSIX qw(strftime);
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -275,7 +274,7 @@ sub add_to_log {
   open(LOG, ">>$file") or return 0;
 
   # Write to the log file: 
-  print LOG "Date: ".strftime("%a %b %e %H:%M:%S %Y", localtime)."\n\n";
+  print LOG "Date: " . localtime(time) . "\n\n";
   print LOG wrap('    ', '    ', $text);
   print LOG "\n\n";
 
