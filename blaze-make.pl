@@ -182,10 +182,12 @@ sub fix_header {
 
       # Strip forbidden characters:
       $tags =~ s/://g;
-      $tags =~ s/,+/,/;
-      $tags =~ s/\s{2,}/ /;
-      ($data->{header}->{tags} = $tags) =~ s/^,|,$//g;
     }
+
+    # Strip superfluous spaces and commas:
+    $tags =~ s/,+/,/g;
+    $tags =~ s/\s{2,}/ /g;
+    ($data->{header}->{tags} = $tags) =~ s/^,|,$//g;
   }
   else {
     # Assign the default value:
@@ -559,14 +561,15 @@ $conf    = ReadINI($temp)
 # Collect the necessary metadata:
 my $data = collect_metadata();
 
-# Generate pages:
-# ...
 
 # Generate posts:
 generate_posts($data);
 
-# Generate archives:
+# Generate pages:
 generate_pages($data);
+
+# Generate archives:
+# ...
 
 # Generate tags:
 # ...
