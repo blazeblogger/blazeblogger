@@ -21,7 +21,6 @@ use File::Basename;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;
-use POSIX qw(strftime);
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -89,6 +88,12 @@ END_VERSION
 
   # Return success:
   return 1;
+}
+
+# Translate given date to YYYY-MM-DD string:
+sub date_to_string {
+  my @date = localtime(shift);
+  return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
 }
 
 # Create given directories:
@@ -321,55 +326,94 @@ sub collect_metadata {
   };
 }
 
+# Return the list of pages:
+sub list_of_pages {
+  my $data = shift || die "Missing argument";
+  my $root = shift || '/';
+  my $list = '';
+
+  # Process each page separately:
+  foreach (sort @{$data->{pages}}) {
+    # Decompose the page record:
+    $_ =~ /^[^:]*:[^:]*:[^:]*:[^:]*:([^:]*):(.*)$/;
+
+    # Add the page link to the list:
+    $list .= "<li><a href=\"$root$1\">$2</a></li>\n" 
+  }
+
+  # Return the list of pages:
+  return $list;
+}
+
+# Return the list of tags:
+sub list_of_tags {
+  my $data = shift || die "Missing argument";
+  my $root = shift || '/';
+
+  # Check whether the list is not empty:
+  if (my %tags = %{$data->{tags}}) {
+    # Return the list of tags:
+    return join("\n", map {
+      "<li><a href=\"${root}tags/" . $tags{$_}->{url} . "\">$_</a> (" .
+      $tags{$_}->{count} . ")</li>"
+    } sort(keys(%tags)));
+  }
+  else {
+    # Return an empty string:
+    return '';
+  }
+}
+
+# Return the list of months:
+sub list_of_months {
+  my $data = shift || die "Missing argument";
+  my $root = shift || '/';
+
+  # Check whether the list is not empty:
+  if (my %months = %{$data->{months}}) {
+    # Return the list of months:
+    return join("\n", sort(map {
+      "<li><a href=\"${root}" . $months{$_}->{url} . "\">$_</a> (" .
+      $months{$_}->{count} . ")</li>"
+    } keys(%months)));
+  }
+  else {
+    # Return an empty string:
+    return '';
+  }
+}
+
 # Write a single page:
 sub write_page {
-  # generate_html($file, $data, $content, $root)
   my $file     = shift || die "Missing argument";
   my $data     = shift || return 0;
   my $content  = shift || '';
   my $root     = shift || '/';
 
   # Read required data from the configuration:
-  my $theme    = $conf->{blog}->{theme}    || 'default.html';
-  my $style    = $conf->{blog}->{style}    || 'default.css';
-  my $title    = $conf->{blog}->{title}    || 'My Blog';
-  my $subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
   my $encoding = $conf->{core}->{encoding} || 'UTF-8';
   my $name     = $conf->{user}->{name}     || 'admin';
+  my $style    = $conf->{blog}->{style}    || 'default.css';
+  my $subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
+  my $theme    = $conf->{blog}->{theme}    || 'default.html';
+  my $title    = $conf->{blog}->{title}    || 'My Blog';
+
+  # Prepare the pages, tags and months lists:
+  my $archive  = list_of_months($data, $root);
+  my $pages    = list_of_pages($data, $root);
+  my $tags     = list_of_tags($data, $root);
 
   # Get the current year:
   my $year     = substr(date_to_string(time), 0, 4);
 
-  # Prepare the meta and link elements:
+  # Prepare the meta and link elements for the page header:
+  my $date         = '<meta name="Date" content="' . localtime() . '">';
   my $content_type = '<meta http-equiv="Content-Type" content="text/html;'.
                      ' charset=' . $encoding . '">';
-  my $generator    = '<meta name="Generator" content="' . NAME . ' ' .
+  my $generator    = '<meta name="Generator" content="BlazeBlogger ' .
                      VERSION . '">';
-  my $date         = '<meta name="Date" content="' . 
-                     strftime("%a %b %e %H:%M:%S %Y", localtime) . '">';
   my $stylesheet   = '<link rel="stylesheet" href="' . $root . 'style/' .
                      $style . '" type="text/css">';
-
-  # Prepare the list of tags:
-  my $tags     = $data->{tags}
-                 ? join("\n", map {
-                     '<li><a href="' . $root . 'tags/' .
-                     $data->{tags}->{$_}->{url} . '">' . $_ . '</a> (' .
-                     $data->{tags}->{$_}->{count} . ')</li>'
-                   } sort(keys(%{$data->{tags}})))
-                 : '';
-
-  # Prepare the archive list::
-  my $archive  = $data->{months}
-                 ? join("\n", map {
-                     '<li><a href="' . $root . $data->{months}->{$_}->{url}.
-                     '">' . $_ . '</a> (' . $data->{months}->{$_}->{count} .
-                     ')</li>'
-                   } sort(keys(%{$data->{months}})))
-                 : '';
-
-  # TODO: Prepare the list of pages:
-  my $pages    = '';
 
   # Open the theme file for reading:
   open(THEME, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
@@ -379,21 +423,21 @@ sub write_page {
 
   # Process each line:
   while (my $line = <THEME>) {
+    # Substitute lists placeholders:
+    $line =~ s/<!--\s*archive\s*-->/$archive/i if $archive;
+    $line =~ s/<!--\s*pages\s*-->/$pages/i     if $pages;
+    $line =~ s/<!--\s*tags\s*-->/$tags/i       if $tags;
+
     # Substitute header placeholders:
     $line =~ s/<!--\s*content-type\s*-->/$content_type/i;
-    $line =~ s/<!--\s*generator\s*-->/$generator/i;
     $line =~ s/<!--\s*date\s*-->/$date/i;
+    $line =~ s/<!--\s*generator\s*-->/$generator/i;
     $line =~ s/<!--\s*stylesheet\s*-->/$stylesheet/i;
 
-    # Substitute sidebar placeholders:
-    $line =~ s/<!--\s*pages\s*-->/$pages/i;
-    $line =~ s/<!--\s*tags\s*-->/$tags/i;
-    $line =~ s/<!--\s*archive\s*-->/$archive/i;
-
     # Substitute body placeholders:
-    $line =~ s/<!--\s*title\s*-->/$title/ig;
-    $line =~ s/<!--\s*subtitle\s*-->/$subtitle/ig;
     $line =~ s/<!--\s*name\s*-->/$name/ig;
+    $line =~ s/<!--\s*subtitle\s*-->/$subtitle/ig;
+    $line =~ s/<!--\s*title\s*-->/$title/ig;
     $line =~ s/<!--\s*year\s*-->/$year/ig;
 
     # Substitute the content:
@@ -483,12 +527,6 @@ sub generate_pages {
 
   # Return success:
   return 1;
-}
-
-# Translate given date to YYYY-MM-DD string:
-sub date_to_string {
-  my @date = localtime(shift);
-  return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
 }
 
 # Set up the options parser:
