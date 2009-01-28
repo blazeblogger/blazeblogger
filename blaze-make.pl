@@ -27,21 +27,25 @@ use constant NAME    => basename($0, '.pl');        # Script name.
 use constant VERSION => '0.0.1';                    # Script version.
 
 # General script settings:
-our $blogdir = '.';                                 # Repository location.
-our $destdir = '.';                                 # HTML pages location.
-our $verbose = 1;                                   # Verbosity level.
+our $blogdir    = '.';                              # Repository location.
+our $destdir    = '.';                              # HTML pages location.
+our $verbose    = 1;                                # Verbosity level.
+our $with_posts = 1;                                # Generate posts?
+our $with_pages = 1;                                # Genetate pages?
+our $with_tags  = 1;                                # Generate tags?
+our $with_rss   = 1;                                # Generate RSS feed?
 
 # Global variables:
-our $conf    = {};                                  # The configuration.
+our $conf       = {};                               # The configuration.
 
 # Set up the __WARN__ signal handler:
-$SIG{__WARN__} = sub {
+$SIG{__WARN__}  = sub {
   print STDERR NAME . ": " . (shift);
 };
 
 # Display given message and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occured.';
+  my $message      = shift || 'An unspecified error has occurred.';
   my $return_value = shift || 1;
 
   print STDERR NAME . ": $message\n";
@@ -63,6 +67,12 @@ Usage: $NAME [-qV] [-b directory] [-d directory]
                               static content is to be placed 
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
+
+  --no-posts                  disable posts creation
+  --no-pages                  disable static pages creation
+  --no-tags                   disable support for tags
+  --no-rss                    disable RSS feed creation
+
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -333,6 +343,9 @@ sub list_of_months {
   my $data = shift || die "Missing argument";
   my $root = shift || '/';
 
+  # Check whether the posts generation is enabled:
+  return '' unless $with_posts;
+
   # Check whether the list is not empty:
   if (my %months = %{$data->{months}}) {
     # Return the list of months:
@@ -353,6 +366,9 @@ sub list_of_pages {
   my $root = shift || '/';
   my $list = '';
 
+  # Check whether the pages generation is enabled:
+  return '' unless $with_pages;
+
   # Process each page separately:
   foreach (sort @{$data->{pages}}) {
     # Decompose the page record:
@@ -370,6 +386,9 @@ sub list_of_pages {
 sub list_of_tags {
   my $data = shift || die "Missing argument";
   my $root = shift || '/';
+
+  # Check whether the tags generation is eneabled:
+  return '' unless $with_tags;
 
   # Check whether the list is not empty:
   if (my %tags = %{$data->{tags}}) {
@@ -457,11 +476,12 @@ sub write_page {
   return 1;
 }
 
-# Read the post body or excerpt:
-sub read_post {
+# Read the post/page body/excerpt:
+sub read_body {
   my $id      = shift || die "Missing argument";
+  my $type    = shift || 'post';
   my $excerpt = shift || 0;
-  my $file    = catfile($blogdir, '.blaze', 'posts', 'body', $id);
+  my $file    = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
   my $result  = '';
 
   # Open the body file for reading:
@@ -483,6 +503,23 @@ sub read_post {
   return $result;
 }
 
+# Return the formatted post heading:
+sub format_heading {
+  my $title  = shift || die "Missing argument";
+  my $date   = shift || die "Missing argument";
+  my $author = shift || die "Missing argument";
+  my $tags   = shift;
+
+  # Return the formatted post heading:
+  return "<h2>$title</h2>\n\n<p style=\"foo\">\n" .
+         "<span style=\"date\">$date</span> " .
+         "by <span style=\"author\">$author</span>" .
+         (($with_tags && $tags)
+           ? ", tagged as <span style=\"tags\">$tags</span>.\n"
+           : ".\n"
+         ) . "</p>\n\n";
+}
+
 # Generate posts:
 sub generate_posts {
   my $data         = shift || die "Missing argument";
@@ -492,12 +529,12 @@ sub generate_posts {
   my $max_posts    = $conf->{blog}->{posts}     || 20;
 
   # Initialize necessary variables:
-  my $post_body    = '';                            # Post body.
-  my $month_body   = '';                            # Monthly listing body.
-  my $month_curr   = '';                            # Month from this loop.
-  my $month_last   = '';                            # Month from last loop.
-  my $month_count  = 0;                             # List items counter.
-  my $month_page   = 0;                             # List pages counter.
+  my $post_body    = '';
+  my $month_body   = '';
+  my $month_curr   = '';
+  my $month_last   = '';
+  my $month_count  = 0;
+  my $month_page   = 0;
   my ($date, $id, $tags, $author, $url, $title, $year, $month, $file);
 
   # Process each record:
@@ -507,11 +544,8 @@ sub generate_posts {
     ($year, $month) = split(/-/, $date);
 
     # Prepare the post body:
-    $post_body  = "<h2>$title</h2>\n\n<p style=\"info\">\n" .
-                  "<span style=\"date\">$date</span> " .
-                  "by <span style=\"author\">$author</span>";
-    $post_body .= ", tagged as <span style=\"tags\">$tags</span>" if $tags;
-    $post_body .= ".\n</p>\n\n" . read_post($id);
+    $post_body  = format_heading($title, $date, $author, $tags) .
+                  read_body($id, 'post', 0);
 
     # Create the directory tree:
     make_directories [
@@ -527,7 +561,7 @@ sub generate_posts {
     write_page($file, $data, $post_body, '../../../') or return 0;
 
     # Report success:
-    print "Created $file\n" if $verbose;
+    print "Created $file\n" if $verbose > 1;
 
     # If this is the first loop, fake the previous month as the current:
     $month_last = "$year/$month" unless $month_last;
@@ -546,10 +580,20 @@ sub generate_posts {
       # Get information about the last processed month:
       ($year, $month) = split(/\//, $month_last);
 
-      # Prepare the page heading and navigation:
+      # Add heading:
       $month_body  = "<p>$year/$month</p>\n\n$month_body";
-      $month_body .= "<a href=\"index$prev.$ext\">prev</a>\n" if $month_curr eq $month_last;
-      $month_body .= "<a href=\"index$next.$ext\">next</a>\n" if $month_page;
+
+      # Add navigation:
+      $month_body .= "<a href=\"index$prev.$ext\">prev</a>\n"
+        if $month_curr eq $month_last;
+      $month_body .= "<a href=\"index$next.$ext\">next</a>\n"
+        if $month_page;
+
+      # Prepare the page file name:
+      $file = catfile($destdir, $year, $month, "index$index.$ext");
+
+      # Write the page:
+      write_page($file, $data, $month_body, '../../') or return 0;
 
       # Check whether the month has changed:
       if ($month_curr ne $month_last) {
@@ -561,33 +605,25 @@ sub generate_posts {
         $month_page++;
       }
 
-      # Reset the item counter:
-      $month_count = 0;
-
-      # Prepare the page file name:
-      $file = catfile($destdir, $year, $month, "index$index.$ext");
-
-      # Write the page:
-      write_page($file, $data, $month_body, '../../') or return 0;
-
       # Make the previous month be the current one:
       $month_last = $month_curr;
 
       # Clear the listing body:
       $month_body = '';
 
+      # Reset the item counter:
+      $month_count = 0;
+
       # Report success:
-      print "Created $file\n" if $verbose;
+      print "Created $file\n" if $verbose > 1;
     }
 
-    # Prepare the post heading with excerpt:
-    $month_body .= "<h2><a href=\"$id-$url\">$title</a></h2>\n" .
-                   "<span style=\"date\">$date</span> " .
-                   "by <span style=\"author\">$author</span>";
-    $month_body .= ", tagged as <span style=\"tags\">$tags</span>" if $tags;
-    $month_body .= ".\n</p>\n\n" . read_post($id, 1);
+    # Add the post heading with excerpt:
+    $month_body .= format_heading("<a href=\"$id-$url\">$title</a></h2>",
+                                  $date, $author, $tags) .
+                   read_body($id, 'post', 1);
 
-    # Increase the number of listed months:
+    # Increase the number of listed items:
     $month_count++;
   }
 
@@ -600,8 +636,10 @@ sub generate_posts {
     # Get information about the last processed month:
     ($year, $month) = split(/\//, $month_curr);
 
-    # Prepare the page heading and navigation:
+    # Add heading:
     $month_body  = "<p>$year/$month</p>\n\n$month_body";
+
+    # Add navigation:
     $month_body .= "<a href=\"index$next.$ext\">next</a>\n" if $month_page;
 
     # Prepare the page file name:
@@ -611,7 +649,7 @@ sub generate_posts {
     write_page($file, $data, $month_body, '../../') or return 0;
 
     # Report success:
-    print "Created $file\n" if $verbose;
+    print "Created $file\n" if $verbose > 1;
   }
 
   # TODO: Generate year listings.
@@ -620,39 +658,139 @@ sub generate_posts {
   return 1;
 }
 
+# Generate tags:
+sub generate_tags {
+  my $data = shift || die "Missing argument";
+
+  # Read required data from the configuration:
+  my $ext       = $conf->{core}->{extension} || 'html';
+  my $max_posts = $conf->{blog}->{posts}     || 20;
+
+  # Process each tag separately:
+  foreach my $tag (keys %{$data->{tags}}) {
+    # Initialize necessary variables:
+    my $tag_body  = '';
+    my $tag_count = 0;
+    my $tag_page  = 0;
+    my ($date, $id, $tags, $author, $url, $title, $year, $month, $file);
+
+    # Process each record:
+    foreach my $record (@{$data->{posts}}) {
+      # Decompose the record:
+      ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+      ($year, $month) = split(/-/, $date);
+
+      # Check whether the post contains the current tag:
+      next unless $tags =~ /(^|,\s*)$tag(,\s*|$)/;
+
+      # Check whether the number of listed posts reached the limit:
+      if ($tag_count == $max_posts) {
+        # Prepare information for the page navigation:
+        my $index = $tag_page     || '';
+        my $next  = $tag_page - 1 || '';
+        my $prev  = $tag_page + 1;
+
+        # Add heading:
+        $tag_body  = "<p>$tag</p>\n\n$tag_body";
+
+        # Add navigation:
+        $tag_body .= "<a href=\"index$prev.$ext\">prev</a>\n";
+        $tag_body .= "<a href=\"index$next.$ext\">next</a>\n" if $tag_page;
+
+        # Create the directory tree:
+        make_directories [
+          catdir($destdir, 'tags'),
+          catdir($destdir, 'tags', $data->{tags}->{$tag}->{url}),
+        ];
+
+        # Prepare the page file name:
+        $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
+                        "index$index.$ext");
+
+        # Write the page:
+        write_page($file, $data, $tag_body, '../../') or return 0;
+
+        # Clear the body:
+        $tag_body  = '';
+
+        # Reset the item counter:
+        $tag_count = 0;
+
+        # Increase the page counter:
+        $tag_page++;
+
+        # Report success:
+        print "Created $file\n" if $verbose > 1;
+      }
+
+      # Add the post heading with excerpt:
+      $tag_body .= format_heading("<a href=\"../../$year/$month/$id-$url" .
+                                  "\">$title</a>", $date, $author, $tags) .
+                   read_body($id, 'post', 1);
+
+      # Increase the number of listed items:
+      $tag_count++;
+    }
+
+    # Check whether there are unwritten data:
+    if ($tag_body) {
+      # Prepare information for the page navigation:
+      my $index = $tag_page     || '';
+      my $next  = $tag_page - 1 || '';
+
+      # Add heading:
+      $tag_body  = "<p>$tag</p>\n\n$tag_body";
+
+      # Add navigation:
+      $tag_body .= "<a href=\"index$next.$ext\">next</a>\n" if $tag_page;
+
+      # Create the directory tree:
+      make_directories [
+        catdir($destdir, 'tags'),
+        catdir($destdir, 'tags', $data->{tags}->{$tag}->{url}),
+      ];
+
+      # Prepare the page file name:
+      $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
+                      "index$index.$ext");
+
+      # Write the page:
+      write_page($file, $data, $tag_body, '../../') or return 0;
+
+      # Report success:
+      print "Created $file\n" if $verbose > 1;
+    }
+  }
+
+  # Return success:
+  return 1;
+}
+
 # Generate pages:
 sub generate_pages {
-  my $data  = shift || die "Missing argument";
-  my $ext   = $conf->{core}->{extension} || 'html';
-  my $body  = '';
+  my $data = shift || die "Missing argument";
+  my $body = '';
+
+  # Read required data from the configuration:
+  my $ext  = $conf->{core}->{extension} || 'html';
 
   # Process each record:
   foreach my $record (@{$data->{pages}}) {
     my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
     my ($year, $month) = split(/-/, $date);
 
-    # Open the body file for reading:
-    open(FILE, catfile($blogdir, '.blaze', 'pages', 'body', $id))
-      or return 0;
-
-    # Read the content of the file:
-    $body = do { local $/; <FILE> };
-
-    # Close the file:
-    close(FILE);
-
-    # Add page heading:
-    $body = "<h2>$title</h2>\n\n$body";
+    # Prepare the page body:
+    $body = "<h2>$title</h2>\n\n" . read_body($id, 'page', 0);
 
     # Create the directories:
-    make_directories [ catdir($destdir, $url) ];    # Page directory.
+    make_directories [ catdir($destdir, $url) ];
 
     # Write the index file:
     my $file = catfile($destdir, $url, "index.$ext");
     write_page($file, $data, $body, '../') or return 0;
 
     # Report success:
-    print "Created $file\n" if $verbose;
+    print "Created $file\n" if $verbose > 1;
   }
 
   # Return success:
@@ -666,10 +804,18 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
-  'quiet|q'       => sub { $verbose = 0;     },
-  'verbose|V'     => sub { $verbose = 1;     },
-  'blogdir|b=s'   => sub { $blogdir = $_[1]; },
-  'destdir|d=s'   => sub { $destdir = $_[1]; },
+  'quiet|q'       => sub { $verbose    = 0;     },
+  'verbose|V'     => sub { $verbose    = 2;     },
+  'blogdir|b=s'   => sub { $blogdir    = $_[1]; },
+  'destdir|d=s'   => sub { $destdir    = $_[1]; },
+  'with-posts'    => sub { $with_posts = 1 },
+  'no-posts'      => sub { $with_posts = 0 },
+  'with-pages'    => sub { $with_pages = 1 },
+  'no-pages'      => sub { $with_pages = 0 },
+  'with-tags'     => sub { $with_tags  = 1 },
+  'no-tags'       => sub { $with_tags  = 0 },
+  'with-rss'      => sub { $with_rss   = 1 },
+  'no-rss'        => sub { $with_rss   = 0 },
 );
 
 # Check superfluous options:
@@ -678,6 +824,21 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 # Check the repository is present (however naive this method is):
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
+
+# When posts are disabled, disable RSS and tags as well:
+unless ($with_posts) {
+  $with_tags = 0;
+  $with_rss  = 0;
+}
+
+# Check whether there is anything to do:
+unless ($with_posts || $with_pages) {
+  # Report success:
+  print "Nothing to do.\n" if $verbose;
+
+  # Return success:
+  exit 0;
+}
 
 # Prepare the file name:
 my $temp = catfile($blogdir, '.blaze', 'config');
@@ -689,23 +850,29 @@ $conf    = ReadINI($temp)
 # Collect the necessary metadata:
 my $data = collect_metadata();
 
-
 # Generate posts:
 generate_posts($data)
-  or exit_with_error("An error has occured while creating posts.", 1);
+  or exit_with_error("An error has occurred while creating posts.", 1)
+  if $with_posts;
 
 # Generate tags:
-# ...
+generate_tags($data)
+  or exit_with_error("An error has occurred while creating tags.", 1)
+  if $with_tags;
 
 # Generate pages:
 generate_pages($data)
-  or exit_with_error("An error has occured while creating pages.", 1);
+  or exit_with_error("An error has occurred while creating pages.", 1)
+  if $with_pages;
 
 # Generate index page:
 # ...
 
 # Generate RSS feed:
 # ...
+
+# Report success:
+print "Done.\n" if $verbose;
 
 # Return success:
 exit 0;
