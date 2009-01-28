@@ -614,7 +614,7 @@ sub generate_posts {
       # Prepare the page file name:
       $file = catfile($destdir, $year, $month, "index$index.$ext");
 
-      # Write the page:
+      # Write the file:
       write_page($file, $data, $month_body, '../../') or return 0;
 
       # Check whether the month has changed:
@@ -641,7 +641,7 @@ sub generate_posts {
     }
 
     # Add the post heading with excerpt:
-    $month_body .= format_heading("<a href=\"$id-$url\">$title</a></h2>",
+    $month_body .= format_heading("<a href=\"$id-$url\">$title</a>",
                                   $date, $author, $tags) .
                    read_body($id, 'post', 1);
 
@@ -672,7 +672,7 @@ sub generate_posts {
     # Prepare the page file name:
     $file = catfile($destdir, $year, $month, "index$index.$ext");
 
-    # Write the page:
+    # Write the file:
     write_page($file, $data, $month_body, '../../') or return 0;
 
     # Report success:
@@ -741,7 +741,7 @@ sub generate_tags {
         $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
                         "index$index.$ext");
 
-        # Write the page:
+        # Write the file:
         write_page($file, $data, $tag_body, '../../') or return 0;
 
         # Clear the body:
@@ -789,7 +789,7 @@ sub generate_tags {
       $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
                       "index$index.$ext");
 
-      # Write the page:
+      # Write the file:
       write_page($file, $data, $tag_body, '../../') or return 0;
 
       # Report success:
@@ -827,6 +827,52 @@ sub generate_pages {
     # Report success:
     print "Created $file\n" if $verbose > 1;
   }
+
+  # Return success:
+  return 1;
+}
+
+# Generate index page:
+sub generate_index {
+  my $data = shift || die "Missing argument";
+  my $body = '';
+
+  # Read required data from the configuration:
+  my $ext       = $conf->{core}->{extension} || 'html';
+  my $max_posts = $conf->{blog}->{posts}     || 10;
+
+  # Initialize necessary variables:
+  my $count     = 0;
+
+  # Check whether the posts are enabled:
+  if ($with_posts) {
+    # Process the required number of posts:
+    foreach my $record (@{$data->{posts}}) {
+      # Stop when the post count reaches the limit:
+      last if $count == $max_posts;
+
+      # Decompose the record:
+      my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+      my ($year, $month) = split(/-/, $date);
+
+      # Add the post heading with excerpt:
+      $body .= format_heading("<a href=\"$year/$month/$id-$url\">$title</a>",
+                              $date, $author, $tags) .
+               read_body($id, 'post', 1);
+
+      # Increase the number of listed items:
+      $count++;
+    }
+  }
+
+  # Prepare the index file name:
+  my $file = catfile($destdir, "index.$ext");
+
+  # Write the index file:
+  write_page($file, $data, $body, '') or return 0;
+
+  # Report success:
+  print "Created $file\n" if $verbose > 1;
 
   # Return success:
   return 1;
@@ -904,11 +950,12 @@ generate_pages($data)
   or exit_with_error("An error has occurred while creating pages.", 1)
   if $with_pages;
 
-# Generate index page:
-# ...
-
 # Generate RSS feed:
 # ...
+
+# Generate index page:
+generate_index($data)
+  or exit_with_error("An error has occured while creating index page.", 1);
 
 # Report success:
 print "Done.\n" if $verbose;
