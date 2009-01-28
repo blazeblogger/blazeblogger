@@ -18,6 +18,7 @@
 use strict;
 use warnings;
 use File::Basename;
+use File::Copy;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;
@@ -436,8 +437,8 @@ sub write_page {
                      ' charset=' . $encoding . '">';
   my $generator    = '<meta name="Generator" content="BlazeBlogger ' .
                      VERSION . '">';
-  my $stylesheet   = '<link rel="stylesheet" href="' . $root . 'style/' .
-                     $style . '" type="text/css">';
+  my $stylesheet   = '<link rel="stylesheet" href="' . $root . $style .
+                     '" type="text/css">';
   my $rss          = '<link rel="alternate" href="' . $root . 'index.rss' .
                      '" title="RSS Feed" type="application/rss+xml">';
 
@@ -1010,10 +1011,10 @@ $conf    = ReadINI($temp)
            or exit_with_error("Unable to read `$temp'.", 13);
 
 # Read the language file:
-my $lang = catfile($blogdir, '.blaze', 'lang',
+$temp    = catfile($blogdir, '.blaze', 'lang',
                    ($conf->{blog}->{lang} || 'en_GB'));
-$locale  = ReadINI($lang)
-           or exit_with_error("Unable to read `$lang'.", 13);
+$locale  = ReadINI($temp)
+           or exit_with_error("Unable to read `$temp'.", 13);
 
 # Collect the necessary metadata:
 my $data = collect_metadata();
@@ -1042,7 +1043,17 @@ generate_pages($data)
   or exit_with_error("An error has occurred while creating pages.", 1)
   if $with_pages;
 
+# Prepare the file names:
+$temp    = $conf->{blog}->{style} || 'default.css';
+my $from = catfile($blogdir, '.blaze', 'style', $temp);
+my $to   = catfile($destdir, $temp);
+
+# Copy the stylesheet:
+copy($from, $to)
+  or exit_with_error("Unable to copy the stylesheet.", 13);
+
 # Report success:
+print "Created $to\n" if $verbose > 1;
 print "Done.\n" if $verbose;
 
 # Return success:
