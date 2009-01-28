@@ -39,6 +39,7 @@ our %options = (
   'blog.style'     => "Blog stylesheet.",
   'blog.lang'      => "Blog language.",
   'blog.posts'     => "Number of posts to be listed on a single page.",
+  'blog.url'       => "Blog base url.",
 
   # Core settings:
   'core.editor'    => "Text editor to be used for editing purposes.",
@@ -245,6 +246,10 @@ Blog language; the value should point to an existing file in the
 =item B<blog.posts>
 
 Number of posts to be listed on a single page; the default value is 10.
+
+=item B<blog.url>
+
+Blog base url; required for RSS feeds only.
 
 =item B<core.editor>
 

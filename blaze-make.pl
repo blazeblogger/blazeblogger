@@ -134,7 +134,7 @@ sub fix_header {
   # Check whether the title is specified:
   unless ($data->{header}->{title}) {
     # Display the appropriate warning:
-    print STDERR NAME . ": Missing title in the $type with ID $id.\n"
+    print STDERR "Missing title in the $type with ID $id.\n"
       if $verbose;
 
     # Assign the default value:
@@ -146,7 +146,7 @@ sub fix_header {
     # Check whether it contains forbidden characters:
     if ($author =~ /[^\w\s\-]/) {
       # Display the appropriate warning:
-      print STDERR NAME . ": Invalid author in the $type with ID $id.\n"
+      print STDERR "Invalid author in the $type with ID $id.\n"
         if $verbose;
 
       # Strip forbidden characters:
@@ -155,7 +155,7 @@ sub fix_header {
   }
   else {
     # Display the appropriate warning:
-    print STDERR NAME . ": Missing author in the $type with ID $id.\n"
+    print STDERR "Missing author in the $type with ID $id.\n"
       if $verbose;
 
     # Assign the default value:
@@ -167,7 +167,7 @@ sub fix_header {
     # Check whether the format is valid:
     if ($date !~ /\d{4}-[01]\d-[0-3]\d/) {
       # Display the appropriate warning:
-      print STDERR NAME . ": Invalid date in the $type with ID $id.\n"
+      print STDERR "Invalid date in the $type with ID $id.\n"
         if $verbose;
 
       # Use the current date instead:
@@ -176,7 +176,7 @@ sub fix_header {
   }
   else {
     # Display the appropriate warning:
-    print STDERR NAME . ": Missing date in the $type with ID $id.\n"
+    print STDERR "Missing date in the $type with ID $id.\n"
       if $verbose;
 
     # Assign the default value:
@@ -188,7 +188,7 @@ sub fix_header {
     # Check whether they contain forbidden characters:
     if ($tags =~ /:/) {
       # Display the appropriate warning:
-      print STDERR NAME . ": Invalid tags in the $type with ID $id.\n"
+      print STDERR "Invalid tags in the $type with ID $id.\n"
         if $verbose;
 
       # Strip forbidden characters:
@@ -210,7 +210,7 @@ sub fix_header {
     # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
       # Display the appropriate warning:
-      print STDERR NAME . ": Invalid URL in the $type with ID $id.\n"
+      print STDERR "Invalid URL in the $type with ID $id.\n"
         if $verbose;
 
       # Strip forbidden characters and substitute spaces:
@@ -438,6 +438,8 @@ sub write_page {
                      VERSION . '">';
   my $stylesheet   = '<link rel="stylesheet" href="' . $root . 'style/' .
                      $style . '" type="text/css">';
+  my $rss          = '<link rel="alternate" href="' . $root . 'index.rss' .
+                     '" title="RSS Feed" type="application/rss+xml">';
 
   # Open the theme file for reading:
   open(THEME, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
@@ -457,6 +459,7 @@ sub write_page {
     $line =~ s/<!--\s*date\s*-->/$date/i;
     $line =~ s/<!--\s*generator\s*-->/$generator/i;
     $line =~ s/<!--\s*stylesheet\s*-->/$stylesheet/i;
+    $line =~ s/<!--\s*rss\s*-->/$rss/i if $with_rss;
 
     # Substitute body placeholders:
     $line =~ s/<!--\s*e-mail\s*-->/$email/ig;
@@ -527,6 +530,132 @@ sub format_heading {
            : ".\n"
          ) . "</p>\n\n";
 }
+
+# Generate RSS feed:
+sub generate_rss {
+  my $data          = shift || die "Missing argument";
+  my $body          = '';
+
+  # Read required data from the configuration:
+  my $ext           = $conf->{core}->{extension} || 'html';
+  my $max_posts     = $conf->{blog}->{posts}     || 10;
+  my $blog_title    = $conf->{blog}->{title}     || 'My Blog';
+  my $blog_subtitle = $conf->{blog}->{title}     || 'yet another blog';
+  my $base          = $conf->{blog}->{url};
+
+  # Check whether the base URL is specified:
+  unless ($base) {
+    # Display the warning:
+    print STDERR "Missing blog.url option. Skipping the RSS feed.\n"
+      if $verbose;
+
+    # Disable the RSS:
+    $with_rss = 0;
+
+    # Return success:
+    return 1;
+  }
+
+  # Initialize necessary variables:
+  my $count         = 0;
+
+  # Prepare the RSS file name:
+  my $file = catfile($destdir, 'index.rss');
+
+  # Open the file for writing:
+  open(RSS, ">$file") or return 0;
+
+  # Write the RSS header:
+  print RSS "<?xml version=\"1.0\"?>\n<rss version=\"2.0\">\n<channel>\n" .
+            "  <title>$blog_title</title>\n" .
+            "  <link>$base/</link>\n" .
+            "  <description>$blog_subtitle</description>\n" .
+            "  <generator>BlazeBlogger " . VERSION . "</generator>\n";
+
+  # Process the requested number of posts:
+  foreach my $record (@{$data->{posts}}) {
+    # Stop when the post count reaches the limit:
+    last if $count == $max_posts;
+
+    # Decompose the record:
+    my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+    my ($year, $month) = split(/-/, $date);
+
+    # Read post excerpt:
+    my $description =  substr(read_body($id, 'post', 1), 0, 500);
+
+    # Strip HTML elements:
+    $description    =~ s/<[^>]*>//g;
+
+    # Add the post item:
+    print RSS "  <item>\n    <title>$title</title>\n  " .
+              "  <link>$base/$year/$month/$id-$url/index.$ext</link>\n  " .
+              "  <description>$description    </description>\n" .
+              "  </item>\n";
+
+    # Increase the number of listed items:
+    $count++;
+  }
+
+  # Write the RSS footer:
+  print RSS "</channel>\n</rss>";
+
+  # Close the file:
+  close(RSS);
+
+  # Report success:
+  print "Created $file\n" if $verbose > 1;
+
+  # Return success:
+  return 1;
+}
+
+# Generate index page:
+sub generate_index {
+  my $data      = shift || die "Missing argument";
+  my $body      = '';
+
+  # Read required data from the configuration:
+  my $ext       = $conf->{core}->{extension} || 'html';
+  my $max_posts = $conf->{blog}->{posts}     || 10;
+
+  # Initialize necessary variables:
+  my $count     = 0;
+
+  # Check whether the posts are enabled:
+  if ($with_posts) {
+    # Process the requested number of posts:
+    foreach my $record (@{$data->{posts}}) {
+      # Stop when the post count reaches the limit:
+      last if $count == $max_posts;
+
+      # Decompose the record:
+      my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+      my ($year, $month) = split(/-/, $date);
+
+      # Add the post heading with excerpt:
+      $body .= format_heading("<a href=\"$year/$month/$id-$url\">$title</a>",
+                              $date, $author, $tags) .
+               read_body($id, 'post', 1);
+
+      # Increase the number of listed items:
+      $count++;
+    }
+  }
+
+  # Prepare the index file name:
+  my $file = catfile($destdir, "index.$ext");
+
+  # Write the index file:
+  write_page($file, $data, $body, './') or return 0;
+
+  # Report success:
+  print "Created $file\n" if $verbose > 1;
+
+  # Return success:
+  return 1;
+}
+
 
 # Generate posts:
 sub generate_posts {
@@ -687,11 +816,11 @@ sub generate_posts {
 
 # Generate tags:
 sub generate_tags {
-  my $data = shift || die "Missing argument";
+  my $data         = shift || die "Missing argument";
 
   # Read required data from the configuration:
-  my $ext       = $conf->{core}->{extension} || 'html';
-  my $max_posts = $conf->{blog}->{posts}     || 10;
+  my $ext          = $conf->{core}->{extension} || 'html';
+  my $max_posts    = $conf->{blog}->{posts}     || 10;
 
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{tags}     || 'Posts tagged as';
@@ -832,52 +961,6 @@ sub generate_pages {
   return 1;
 }
 
-# Generate index page:
-sub generate_index {
-  my $data = shift || die "Missing argument";
-  my $body = '';
-
-  # Read required data from the configuration:
-  my $ext       = $conf->{core}->{extension} || 'html';
-  my $max_posts = $conf->{blog}->{posts}     || 10;
-
-  # Initialize necessary variables:
-  my $count     = 0;
-
-  # Check whether the posts are enabled:
-  if ($with_posts) {
-    # Process the required number of posts:
-    foreach my $record (@{$data->{posts}}) {
-      # Stop when the post count reaches the limit:
-      last if $count == $max_posts;
-
-      # Decompose the record:
-      my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
-      my ($year, $month) = split(/-/, $date);
-
-      # Add the post heading with excerpt:
-      $body .= format_heading("<a href=\"$year/$month/$id-$url\">$title</a>",
-                              $date, $author, $tags) .
-               read_body($id, 'post', 1);
-
-      # Increase the number of listed items:
-      $count++;
-    }
-  }
-
-  # Prepare the index file name:
-  my $file = catfile($destdir, "index.$ext");
-
-  # Write the index file:
-  write_page($file, $data, $body, '') or return 0;
-
-  # Report success:
-  print "Created $file\n" if $verbose > 1;
-
-  # Return success:
-  return 1;
-}
-
 # Set up the options parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
@@ -935,6 +1018,15 @@ $locale  = ReadINI($lang)
 # Collect the necessary metadata:
 my $data = collect_metadata();
 
+# Generate RSS feed:
+generate_rss($data)
+  or exit_with_error("An error has occured while creating RSS feed.", 1)
+  if $with_rss;
+
+# Generate index page:
+generate_index($data)
+  or exit_with_error("An error has occured while creating index page.", 1);
+
 # Generate posts:
 generate_posts($data)
   or exit_with_error("An error has occurred while creating posts.", 1)
@@ -949,13 +1041,6 @@ generate_tags($data)
 generate_pages($data)
   or exit_with_error("An error has occurred while creating pages.", 1)
   if $with_pages;
-
-# Generate RSS feed:
-# ...
-
-# Generate index page:
-generate_index($data)
-  or exit_with_error("An error has occured while creating index page.", 1);
 
 # Report success:
 print "Done.\n" if $verbose;

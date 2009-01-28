@@ -191,6 +191,7 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 ##              file in the .blaze/lang directory.
 ##   posts    - Number of posts to be listed on a single page;  the default
 ##              value is 10.
+##   url      - The blog base url; required for RSS feed only.
 ##
 [blog]
 #title=My Blog
@@ -199,6 +200,7 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 #style=default.css
 #lang=en_GB
 #posts=10
+#url=http://127.0.0.1/
 
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
@@ -237,6 +239,7 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
   <!-- generator -->
   <!-- date -->
   <!-- stylesheet -->
+  <!-- rss -->
   <title><!-- title --></title>
 </head>
 
