@@ -37,6 +37,8 @@ our %options = (
   'blog.subtitle'  => "Blog subtitle.",
   'blog.theme'     => "Blog theme.",
   'blog.style'     => "Blog stylesheet.",
+  'blog.lang'      => "Blog language.",
+  'blog.posts'     => "Number of posts to be listed on a single page.",
 
   # Core settings:
   'core.editor'    => "Text editor to be used for editing purposes.",
@@ -45,7 +47,7 @@ our %options = (
 
   # User related settings:
   'user.name'      => "User's name to be used as a default posts' author.",
-  'user.email'     => "User's e-mail; not to be used anywhere so far.",
+  'user.email'     => "User's e-mail.",
 );
 
 # Set up the __WARN__ signal handler:
@@ -235,6 +237,15 @@ directory.
 Blog stylesheet; the value should point to an existing file in the
 .blaze/style directory.
 
+=item B<blog.lang>
+
+Blog language; the value should point to an existing file in the
+.blaze/lang directory.
+
+=item B<blog.posts>
+
+Number of posts to be listed on a single page; the default value is 10.
+
 =item B<core.editor>
 
 Text editor to be used for editing purposes.
@@ -251,12 +262,14 @@ reasonable choice.
 
 =item B<user.name>
 
-User's name to be used as a default posts' author and in the copyright
-notice.
+User's name to be used as a default posts' author and optionally anywhere
+on the page, depending on the theme (e.g. in the copyright notice).
 
 =item B<user.email>
 
-User's e-mail; so far, this option is not actually used anywhere.
+User's e-mail. Depending on the theme, it can be used anywhere on the page
+(e.g. in the copyright notice). However, non of the official themes
+actually use it.
 
 =back
 

@@ -158,6 +158,7 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 # Create the directory tree:
 make_directories [
   catdir($blogdir, '.blaze'),                       # Root directory.
+  catdir($blogdir, '.blaze', 'lang'),               # Translations.
   catdir($blogdir, '.blaze', 'theme'),              # Templates.
   catdir($blogdir, '.blaze', 'style'),              # Stylesheets.
   catdir($blogdir, '.blaze', 'pages'),              # Static pages.
@@ -186,12 +187,18 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 ##              in the .blaze/theme directory.
 ##   style    - The blog style;  the value should point to an existing file
 ##              in the .blaze/theme directory.
+##   lang     - The blog language;  the value  should point to an  existing
+##              file in the .blaze/lang directory.
+##   posts    - Number of posts to be listed on a single page;  the default
+##              value is 10.
 ##
 [blog]
 #title=My Blog
 #subtitle=yet another blog
 #theme=default.html
 #style=default.css
+#lang=en_GB
+#posts=10
 
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
@@ -240,13 +247,13 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
 
   <!-- Page Header: -->
   <div id="header">
-    <div class="title"><!-- title --></div>
+    <h1 class="title"><!-- title --></h1>
     <div class="subtitle"><!-- subtitle --></div>
   </div>
 
   <!-- Page Content: -->
   <div id="content">
-    <!-- content -->
+<!-- content -->
   </div>
 
   <!-- Page Sidebar: -->
@@ -254,19 +261,19 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
     <!-- List of Pages: -->
     <h2 class="sidebar">Pages:</h2>
     <ul>
-      <!-- pages -->
+<!-- pages -->
     </ul>
 
     <!-- List of Tags: -->
     <h2 class="sidebar">Tags:</h2>
     <ul>
-      <!-- tags -->
+<!-- tags -->
     </ul>
 
     <!-- List of Months: -->
     <h2 class="sidebar">Archive:</h2>
     <ul>
-      <!-- archive -->
+<!-- archive -->
     </ul>
   </div>
 
@@ -286,6 +293,30 @@ write_to_file(catfile($blogdir, '.blaze', 'style', 'default.css'),
               << "END_STYLE");
 TODO: Write default stylesheet.
 END_STYLE
+
+# Create the default language file:
+write_to_file(catfile($blogdir, '.blaze', 'lang', 'en_GB'),
+              << "END_LANG");
+[lang]
+archive=Archive for
+tags=Posts tagged as
+previous=&laquo; previous
+next=next &raquo;
+postedby=by
+taggedas=tagged as
+january=January
+february=February
+march=March
+april=April
+may=May
+june=June
+july=July
+august=August
+september=September
+october=October
+november=November
+december=December
+END_LANG
 
 # Get the log file name:
 my $logfile = catfile($blogdir, '.blaze', 'log');

@@ -37,6 +37,7 @@ our $with_rss   = 1;                                # Generate RSS feed?
 
 # Global variables:
 our $conf       = {};                               # The configuration.
+our $locale     = {};                               # The localization.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -271,8 +272,8 @@ sub collect_metadata {
   my $months = {};
 
   # Prepare the list of month names:
-  my @month  = qw( January February March April May June July
-                   August September October November December );
+  my @month  = qw( january february march april may june july
+                   august september october november december );
 
   # Collect the pages headers:
   my @pages  = collect_headers('page');
@@ -286,9 +287,10 @@ sub collect_metadata {
     $_ =~ /^([^:]*):[^:]*:([^:]*):[^:]*:[^:]*:.*$/;
 
     # Prepare the information:
-    my $date = substr($1, 0, 7);
-    my $name = $month[int(substr($1, 5, 2)) - 1] . " " . substr($1, 0, 4);
     my @tags = split(/,\s*/, $2);
+    my $date = substr($1, 0, 7);
+    my $temp = $month[int(substr($1, 5, 2)) - 1];
+    my $name = ($locale->{lang}->{$temp} || $temp). " " . substr($1, 0, 4);
 
     # Check whether the month is already present:
     if ($months->{$name}) {
@@ -414,6 +416,7 @@ sub write_page {
   # Read required data from the configuration:
   my $encoding = $conf->{core}->{encoding} || 'UTF-8';
   my $name     = $conf->{user}->{name}     || 'admin';
+  my $email    = $conf->{user}->{email}    || 'admin@localhost';
   my $style    = $conf->{blog}->{style}    || 'default.css';
   my $subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
   my $theme    = $conf->{blog}->{theme}    || 'default.html';
@@ -456,6 +459,7 @@ sub write_page {
     $line =~ s/<!--\s*stylesheet\s*-->/$stylesheet/i;
 
     # Substitute body placeholders:
+    $line =~ s/<!--\s*e-mail\s*-->/$email/ig;
     $line =~ s/<!--\s*name\s*-->/$name/ig;
     $line =~ s/<!--\s*subtitle\s*-->/$subtitle/ig;
     $line =~ s/<!--\s*title\s*-->/$title/ig;
@@ -510,12 +514,16 @@ sub format_heading {
   my $author = shift || die "Missing argument";
   my $tags   = shift;
 
+  # Read required data from the language file:
+  my $posted_by = $locale->{lang}->{postedby} || 'by';
+  my $tagged_as = $locale->{lang}->{taggedas} || 'tagged as';
+
   # Return the formatted post heading:
-  return "<h2>$title</h2>\n\n<p style=\"foo\">\n" .
+  return "<h2>$title</h2>\n\n<p style=\"information\">\n  " .
          "<span style=\"date\">$date</span> " .
-         "by <span style=\"author\">$author</span>" .
+         "$posted_by <span style=\"author\">$author</span>" .
          (($with_tags && $tags)
-           ? ", tagged as <span style=\"tags\">$tags</span>.\n"
+           ? ", $tagged_as <span style=\"tags\">$tags</span>.\n"
            : ".\n"
          ) . "</p>\n\n";
 }
@@ -525,8 +533,17 @@ sub generate_posts {
   my $data         = shift || die "Missing argument";
 
   # Read required data from the configuration:
-  my $ext          = $conf->{core}->{extension} || 'html';
-  my $max_posts    = $conf->{blog}->{posts}     || 20;
+  my $ext          = $conf->{core}->{extension}  || 'html';
+  my $max_posts    = $conf->{blog}->{posts}      || 10;
+
+  # Read required data from the localization:
+  my $title_string = $locale->{lang}->{archive}  || 'Archive for';
+  my $prev_string  = $locale->{lang}->{previous} || '&laquo; previous';
+  my $next_string  = $locale->{lang}->{next}     || 'next &raquo;';
+
+  # Prepare the list of month names:
+  my @names        = qw( january february march april may june july
+                         august september october november december );
 
   # Initialize necessary variables:
   my $post_body    = '';
@@ -580,13 +597,18 @@ sub generate_posts {
       # Get information about the last processed month:
       ($year, $month) = split(/\//, $month_last);
 
+      # Get information for the heading:
+      my $temp = $names[int($month) - 1];
+      my $name = ($locale->{lang}->{$temp} || $temp) . " $year";
+
       # Add heading:
-      $month_body  = "<p>$year/$month</p>\n\n$month_body";
+      $month_body  = "<p class=\"section\">$title_string $name</p>\n\n" .
+                     "$month_body";
 
       # Add navigation:
-      $month_body .= "<a href=\"index$prev.$ext\">prev</a>\n"
+      $month_body .= "<a href=\"index$prev.$ext\">$prev_string</a>\n"
         if $month_curr eq $month_last;
-      $month_body .= "<a href=\"index$next.$ext\">next</a>\n"
+      $month_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
         if $month_page;
 
       # Prepare the page file name:
@@ -636,11 +658,16 @@ sub generate_posts {
     # Get information about the last processed month:
     ($year, $month) = split(/\//, $month_curr);
 
+    # Get information for the heading:
+    my $temp = $names[int($month) - 1];
+    my $name = ($locale->{lang}->{$temp} || $temp) . " $year";
+
     # Add heading:
-    $month_body  = "<p>$year/$month</p>\n\n$month_body";
+    $month_body  = "<p class=\"section\">$title_string $name</p>\n\n" .
+                   "$month_body";
 
     # Add navigation:
-    $month_body .= "<a href=\"index$next.$ext\">next</a>\n" if $month_page;
+    $month_body .= "<a href=\"index$next.$ext\">$next_string</a>\n" if $month_page;
 
     # Prepare the page file name:
     $file = catfile($destdir, $year, $month, "index$index.$ext");
@@ -664,7 +691,12 @@ sub generate_tags {
 
   # Read required data from the configuration:
   my $ext       = $conf->{core}->{extension} || 'html';
-  my $max_posts = $conf->{blog}->{posts}     || 20;
+  my $max_posts = $conf->{blog}->{posts}     || 10;
+
+  # Read required data from the localization:
+  my $title_string = $locale->{lang}->{tags}     || 'Posts tagged as';
+  my $prev_string  = $locale->{lang}->{previous} || '&laquo; previous';
+  my $next_string  = $locale->{lang}->{next}     || 'next &raquo;';
 
   # Process each tag separately:
   foreach my $tag (keys %{$data->{tags}}) {
@@ -691,11 +723,13 @@ sub generate_tags {
         my $prev  = $tag_page + 1;
 
         # Add heading:
-        $tag_body  = "<p>$tag</p>\n\n$tag_body";
+        $tag_body  = "<p class=\"section\">$title_string $tag</p>\n\n" .
+                     "$tag_body";
 
         # Add navigation:
-        $tag_body .= "<a href=\"index$prev.$ext\">prev</a>\n";
-        $tag_body .= "<a href=\"index$next.$ext\">next</a>\n" if $tag_page;
+        $tag_body .= "<a href=\"index$prev.$ext\">$prev_string</a>\n";
+        $tag_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
+          if $tag_page;
 
         # Create the directory tree:
         make_directories [
@@ -739,10 +773,11 @@ sub generate_tags {
       my $next  = $tag_page - 1 || '';
 
       # Add heading:
-      $tag_body  = "<p>$tag</p>\n\n$tag_body";
+      $tag_body  = "<p class=\"section\">$title_string $tag</p>\n\n" .
+                   "$tag_body";
 
       # Add navigation:
-      $tag_body .= "<a href=\"index$next.$ext\">next</a>\n" if $tag_page;
+      $tag_body .= "<a href=\"index$next.$ext\">$next_string</a>\n" if $tag_page;
 
       # Create the directory tree:
       make_directories [
@@ -840,12 +875,16 @@ unless ($with_posts || $with_pages) {
   exit 0;
 }
 
-# Prepare the file name:
-my $temp = catfile($blogdir, '.blaze', 'config');
-
 # Read the configuration file:
+my $temp = catfile($blogdir, '.blaze', 'config');
 $conf    = ReadINI($temp)
            or exit_with_error("Unable to read `$temp'.", 13);
+
+# Read the language file:
+my $lang = catfile($blogdir, '.blaze', 'lang',
+                   ($conf->{blog}->{lang} || 'en_GB'));
+$locale  = ReadINI($lang)
+           or exit_with_error("Unable to read `$lang'.", 13);
 
 # Collect the necessary metadata:
 my $data = collect_metadata();
