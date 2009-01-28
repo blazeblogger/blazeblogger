@@ -55,7 +55,7 @@ $SIG{__WARN__} = sub {
 
 # Display given message and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occured.';
+  my $message      = shift || 'An unspecified error has occurred.';
   my $return_value = shift || 1;
 
   print STDERR NAME . ": $message\n";
