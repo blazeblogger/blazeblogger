@@ -252,7 +252,7 @@ sub collect_headers {
   closedir(HEAD);
 
   # Return the result:
-  return @records;
+  return sort { $b cmp $a } @records;
 }
 
 # Collect the necessary metadata:
@@ -328,6 +328,25 @@ sub collect_metadata {
   };
 }
 
+# Return the list of months:
+sub list_of_months {
+  my $data = shift || die "Missing argument";
+  my $root = shift || '/';
+
+  # Check whether the list is not empty:
+  if (my %months = %{$data->{months}}) {
+    # Return the list of months:
+    return join("\n", sort { $b cmp $a } (map {
+      "<li><a href=\"${root}" . $months{$_}->{url} . "\">$_</a> (" .
+      $months{$_}->{count} . ")</li>"
+    } keys(%months)));
+  }
+  else {
+    # Return an empty string:
+    return '';
+  }
+}
+
 # Return the list of pages:
 sub list_of_pages {
   my $data = shift || die "Missing argument";
@@ -340,7 +359,7 @@ sub list_of_pages {
     $_ =~ /^[^:]*:[^:]*:[^:]*:[^:]*:([^:]*):(.*)$/;
 
     # Add the page link to the list:
-    $list .= "<li><a href=\"$root$1\">$2</a></li>\n" 
+    $list .= "<li><a href=\"$root$1\">$2</a></li>\n";
   }
 
   # Return the list of pages:
@@ -359,25 +378,6 @@ sub list_of_tags {
       "<li><a href=\"${root}tags/" . $tags{$_}->{url} . "\">$_</a> (" .
       $tags{$_}->{count} . ")</li>"
     } sort(keys(%tags)));
-  }
-  else {
-    # Return an empty string:
-    return '';
-  }
-}
-
-# Return the list of months:
-sub list_of_months {
-  my $data = shift || die "Missing argument";
-  my $root = shift || '/';
-
-  # Check whether the list is not empty:
-  if (my %months = %{$data->{months}}) {
-    # Return the list of months:
-    return join("\n", sort(map {
-      "<li><a href=\"${root}" . $months{$_}->{url} . "\">$_</a> (" .
-      $months{$_}->{count} . ")</li>"
-    } keys(%months)));
   }
   else {
     # Return an empty string:
@@ -443,7 +443,7 @@ sub write_page {
     $line =~ s/<!--\s*year\s*-->/$year/ig;
 
     # Substitute the content:
-    $line =~ s/<!--\s*content\s*-->/$content/ig;
+    $line =~ s/<!--\s*content\s*-->/$content/ig if $content;
 
     # Write the line to the file:
     print FILE $line;
@@ -457,40 +457,164 @@ sub write_page {
   return 1;
 }
 
+# Read the post body or excerpt:
+sub read_post {
+  my $id      = shift || die "Missing argument";
+  my $excerpt = shift || 0;
+  my $file    = catfile($blogdir, '.blaze', 'posts', 'body', $id);
+  my $result  = '';
+
+  # Open the body file for reading:
+  open(FILE, $file) or return '';
+
+  # Read the content of the file:
+  while (my $line = <FILE>) {
+    # When excerpt is requested, look for a break mark to stop reading:
+    last if $line =~ /<!--\s*break\s*-->/ && $excerpt;
+
+    # Add the line to the result:
+    $result .= $line;
+  }
+
+  # Close the file:
+  close(FILE);
+
+  # Return the result:
+  return $result;
+}
+
 # Generate posts:
 sub generate_posts {
-  my $data  = shift || die "Missing argument";
-  my $ext   = $conf->{core}->{extension} || 'html';
-  my $body  = '';
+  my $data         = shift || die "Missing argument";
+
+  # Read required data from the configuration:
+  my $ext          = $conf->{core}->{extension} || 'html';
+  my $max_posts    = $conf->{blog}->{posts}     || 20;
+
+  # Initialize necessary variables:
+  my $post_body    = '';                            # Post body.
+  my $month_body   = '';                            # Monthly listing body.
+  my $month_curr   = '';                            # Month from this loop.
+  my $month_last   = '';                            # Month from last loop.
+  my $month_count  = 0;                             # List items counter.
+  my $month_page   = 0;                             # List pages counter.
+  my ($date, $id, $tags, $author, $url, $title, $year, $month, $file);
 
   # Process each record:
-  foreach my $record (sort { $b cmp $a } @{$data->{posts}}) {
-    my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
-    my ($year, $month) = split(/-/, $date);
+  foreach my $record (@{$data->{posts}}) {
+    # Decompose the record:
+    ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+    ($year, $month) = split(/-/, $date);
 
-    # Open the body file for reading:
-    open(FILE, catfile($blogdir, '.blaze', 'posts', 'body', $id))
-      or return 0;
+    # Prepare the post body:
+    $post_body  = "<h2>$title</h2>\n\n<p style=\"info\">\n" .
+                  "<span style=\"date\">$date</span> " .
+                  "by <span style=\"author\">$author</span>";
+    $post_body .= ", tagged as <span style=\"tags\">$tags</span>" if $tags;
+    $post_body .= ".\n</p>\n\n" . read_post($id);
 
-    # Read the content of the file:
-    $body = do { local $/; <FILE> };
-
-    # Close the file:
-    close(FILE);
-
-    # TODO: Add post header.
-
-    # Create the directories:
+    # Create the directory tree:
     make_directories [
       catdir($destdir, $year),                      # Year directory.
       catdir($destdir, $year, $month),              # Month directory.
       catdir($destdir, $year, $month, "$id-$url"),  # Post directory.
     ];
 
-    # Write the index file:
-    my $file = catfile($destdir, $year, $month, "$id-$url", "index.$ext");
-    write_page($file, $data, $body, '../../../') or return 0;
+    # Prepare the post file name:
+    $file = catfile($destdir, $year, $month, "$id-$url", "index.$ext");
+
+    # Write the post:
+    write_page($file, $data, $post_body, '../../../') or return 0;
+
+    # Report success:
+    print "Created $file\n" if $verbose;
+
+    # If this is the first loop, fake the previous month as the current:
+    $month_last = "$year/$month" unless $month_last;
+
+    # Set the current month:
+    $month_curr = "$year/$month";
+
+    # Check whether the month has changed  or whether the  number of listed
+    # posts reached the limit:
+    if (($month_last ne $month_curr) || ($month_count == $max_posts)) {
+      # Prepare information for the page navigation:
+      my $index = $month_page     || '';
+      my $next  = $month_page - 1 || '';
+      my $prev  = $month_page + 1;
+
+      # Get information about the last processed month:
+      ($year, $month) = split(/\//, $month_last);
+
+      # Prepare the page heading and navigation:
+      $month_body  = "<p>$year/$month</p>\n\n$month_body";
+      $month_body .= "<a href=\"index$prev.$ext\">prev</a>\n" if $month_curr eq $month_last;
+      $month_body .= "<a href=\"index$next.$ext\">next</a>\n" if $month_page;
+
+      # Check whether the month has changed:
+      if ($month_curr ne $month_last) {
+        # Reset the page counter:
+        $month_page = 0;
+      }
+      else {
+        # Increase the page counter:
+        $month_page++;
+      }
+
+      # Reset the item counter:
+      $month_count = 0;
+
+      # Prepare the page file name:
+      $file = catfile($destdir, $year, $month, "index$index.$ext");
+
+      # Write the page:
+      write_page($file, $data, $month_body, '../../') or return 0;
+
+      # Make the previous month be the current one:
+      $month_last = $month_curr;
+
+      # Clear the listing body:
+      $month_body = '';
+
+      # Report success:
+      print "Created $file\n" if $verbose;
+    }
+
+    # Prepare the post heading with excerpt:
+    $month_body .= "<h2><a href=\"$id-$url\">$title</a></h2>\n" .
+                   "<span style=\"date\">$date</span> " .
+                   "by <span style=\"author\">$author</span>";
+    $month_body .= ", tagged as <span style=\"tags\">$tags</span>" if $tags;
+    $month_body .= ".\n</p>\n\n" . read_post($id, 1);
+
+    # Increase the number of listed months:
+    $month_count++;
   }
+
+  # Check whether there are unwritten data:
+  if ($month_body) {
+    # Prepare information for the page navigation:
+    my $index = $month_page     || '';
+    my $next  = $month_page - 1 || '';
+
+    # Get information about the last processed month:
+    ($year, $month) = split(/\//, $month_curr);
+
+    # Prepare the page heading and navigation:
+    $month_body  = "<p>$year/$month</p>\n\n$month_body";
+    $month_body .= "<a href=\"index$next.$ext\">next</a>\n" if $month_page;
+
+    # Prepare the page file name:
+    $file = catfile($destdir, $year, $month, "index$index.$ext");
+
+    # Write the page:
+    write_page($file, $data, $month_body, '../../') or return 0;
+
+    # Report success:
+    print "Created $file\n" if $verbose;
+  }
+
+  # TODO: Generate year listings.
 
   # Return success:
   return 1;
@@ -503,7 +627,7 @@ sub generate_pages {
   my $body  = '';
 
   # Process each record:
-  foreach my $record (sort { $b cmp $a } @{$data->{pages}}) {
+  foreach my $record (@{$data->{pages}}) {
     my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
     my ($year, $month) = split(/-/, $date);
 
@@ -517,7 +641,8 @@ sub generate_pages {
     # Close the file:
     close(FILE);
 
-    # TODO: Add page header.
+    # Add page heading:
+    $body = "<h2>$title</h2>\n\n$body";
 
     # Create the directories:
     make_directories [ catdir($destdir, $url) ];    # Page directory.
@@ -525,6 +650,9 @@ sub generate_pages {
     # Write the index file:
     my $file = catfile($destdir, $url, "index.$ext");
     write_page($file, $data, $body, '../') or return 0;
+
+    # Report success:
+    print "Created $file\n" if $verbose;
   }
 
   # Return success:
@@ -563,16 +691,15 @@ my $data = collect_metadata();
 
 
 # Generate posts:
-generate_posts($data);
-
-# Generate pages:
-generate_pages($data);
-
-# Generate archives:
-# ...
+generate_posts($data)
+  or exit_with_error("An error has occured while creating posts.", 1);
 
 # Generate tags:
 # ...
+
+# Generate pages:
+generate_pages($data)
+  or exit_with_error("An error has occured while creating pages.", 1);
 
 # Generate index page:
 # ...
