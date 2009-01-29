@@ -543,6 +543,17 @@ sub format_heading {
          ) . "</p>\n\n";
 }
 
+# Strip HTML elements:
+sub strip_html {
+  my $string = shift || die "Missing argument";
+
+  # Strip HTML elements and forbidded characters:
+  $string =~ s/(<[^>]*>|&[^;]*;|<|>|&)//g;
+
+  # Return the result:
+  return $string;
+}
+
 # Generate RSS feed:
 sub generate_rss {
   my $data          = shift || die "Missing argument";
@@ -569,7 +580,11 @@ sub generate_rss {
   }
 
   # Initialize necessary variables:
-  my $count         = 0;
+  my $count      = 0;
+
+  # Strip HTML elements:
+  $blog_title    = strip_html($blog_title);
+  $blog_subtitle = strip_html($blog_subtitle);
 
   # Prepare the RSS file name:
   my $file = catfile($destdir, 'index.rss');
@@ -594,15 +609,16 @@ sub generate_rss {
     my ($year, $month) = split(/-/, $date);
 
     # Read post excerpt:
-    my $description =  substr(read_body($id, 'post', 1), 0, 500);
+    my $post_desc  = substr(read_body($id, 'post', 1), 0, 500);
 
     # Strip HTML elements:
-    $description    =~ s/<[^>]*>//g;
+    my $post_title = strip_html($title);
+    my $post_desc  = strip_html(substr(read_body($id, 'post', 1), 0, 500));
 
     # Add the post item:
-    print RSS "  <item>\n    <title>$title</title>\n  " .
+    print RSS "  <item>\n    <title>$post_title</title>\n  " .
               "  <link>$base/$year/$month/$id-$url/index.$ext</link>\n  " .
-              "  <description>$description    </description>\n" .
+              "  <description>$post_desc    </description>\n" .
               "  </item>\n";
 
     # Increase the number of listed items:
