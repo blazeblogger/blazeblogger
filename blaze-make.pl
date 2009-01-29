@@ -70,12 +70,10 @@ Usage: $NAME [-qV] [-b directory] [-d directory]
                               static content is to be placed 
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
-
-  --no-posts                  disable posts creation
-  --no-pages                  disable static pages creation
-  --no-tags                   disable support for tags
-  --no-rss                    disable RSS feed creation
-
+  -p, --no-posts              disable posts creation
+  -P, --no-pages              disable static pages creation
+  -t, --no-tags               disable support for tags
+  -r, --no-rss                disable RSS feed creation
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -200,6 +198,7 @@ sub fix_header {
     # Strip superfluous spaces and commas:
     $tags =~ s/,+/,/g;
     $tags =~ s/\s{2,}/ /g;
+    $tags =~ s/\s+$//;
     ($data->{header}->{tags} = $tags) =~ s/^,|,$//g;
   }
   else {
@@ -1020,13 +1019,13 @@ GetOptions(
   'blogdir|b=s'   => sub { $blogdir    = $_[1]; },
   'destdir|d=s'   => sub { $destdir    = $_[1]; },
   'with-posts'    => sub { $with_posts = 1 },
-  'no-posts'      => sub { $with_posts = 0 },
+  'no-posts|p'    => sub { $with_posts = 0 },
   'with-pages'    => sub { $with_pages = 1 },
-  'no-pages'      => sub { $with_pages = 0 },
+  'no-pages|P'    => sub { $with_pages = 0 },
   'with-tags'     => sub { $with_tags  = 1 },
-  'no-tags'       => sub { $with_tags  = 0 },
+  'no-tags|t'     => sub { $with_tags  = 0 },
   'with-rss'      => sub { $with_rss   = 1 },
-  'no-rss'        => sub { $with_rss   = 0 },
+  'no-rss|r'      => sub { $with_rss   = 0 },
 );
 
 # Check superfluous options:
