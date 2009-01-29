@@ -32,7 +32,7 @@ our $blogdir    = '.';                              # Repository location.
 our $destdir    = '.';                              # HTML pages location.
 our $verbose    = 1;                                # Verbosity level.
 our $with_posts = 1;                                # Generate posts?
-our $with_pages = 1;                                # Genetate pages?
+our $with_pages = 1;                                # Generate pages?
 our $with_tags  = 1;                                # Generate tags?
 our $with_rss   = 1;                                # Generate RSS feed?
 
@@ -687,13 +687,22 @@ sub generate_posts {
   my @names        = qw( january february march april may june july
                          august september october november december );
 
-  # Initialize necessary variables:
-  my $post_body    = '';
-  my $month_body   = '';
-  my $month_curr   = '';
-  my $month_last   = '';
-  my $month_count  = 0;
-  my $month_page   = 0;
+  # Initialize post related variables:
+  my $post_body    = '';                            # Blog post content.
+
+  # Inicialize yearly archive related variables:
+  my $year_body    = '';                            # List of months.
+  my $year_curr    = '';                            # Current year.
+  my $year_last    = '';                            # Last processed year.
+
+  # Initialize monthly archive related variables:
+  my $month_body   = '';                            # List of posts.
+  my $month_curr   = '';                            # Current month.
+  my $month_last   = '';                            # Last processed month.
+  my $month_count  = 0;                             # Post counter.
+  my $month_page   = 0;                             # Page counter.
+
+  # Declare other necessary variables:
   my ($date, $id, $tags, $author, $url, $title, $year, $month, $file);
 
   # Process each record:
@@ -721,6 +730,29 @@ sub generate_posts {
 
     # Report success:
     print "Created $file\n" if $verbose > 1;
+
+    # Set the current year:
+    $year_curr = $year;
+
+    # Check whether the year has changed:
+    if ($year_last ne $year_curr) {
+      # Prepare this year's archive body:
+      $year_body = "<p class=\"section\">$title_string $year</p>\n\n" .
+                   "<ul>\n" . list_of_months($data, '../', $year) .
+                   "</ul>";
+
+      # Prepare this year's archive file name:
+      $file = catfile($destdir, $year, "index.$ext");
+
+      # Write the file:
+      write_page($file, $data, $year_body, '../') or return 0;
+
+      # Make the previous year be the current one:
+      $year_last = $year_curr;
+
+      # Report success:
+      print "Created $file\n" if $verbose > 1;
+    }
 
     # If this is the first loop, fake the previous month as the current:
     $month_last = "$year/$month" unless $month_last;
@@ -753,7 +785,7 @@ sub generate_posts {
       $month_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
         if $month_page;
 
-      # Prepare the page file name:
+      # Prepare the monthly archive file name:
       $file = catfile($destdir, $year, $month, "index$index.$ext");
 
       # Write the file:
@@ -772,10 +804,10 @@ sub generate_posts {
       # Make the previous month be the current one:
       $month_last = $month_curr;
 
-      # Clear the listing body:
+      # Clear the monthly archive body:
       $month_body = '';
 
-      # Reset the item counter:
+      # Reset the post counter:
       $month_count = 0;
 
       # Report success:
@@ -787,11 +819,11 @@ sub generate_posts {
                                   $date, $author, $tags) .
                    read_body($id, 'post', 1);
 
-    # Increase the number of listed items:
+    # Increase the number of listed posts:
     $month_count++;
   }
 
-  # Check whether there are unwritten data:
+  # Check whether there are any unwritten data:
   if ($month_body) {
     # Prepare information for the page navigation:
     my $index = $month_page     || '';
@@ -812,7 +844,7 @@ sub generate_posts {
     $month_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
       if $month_page;
 
-    # Prepare the page file name:
+    # Prepare the monthly archive file name:
     $file = catfile($destdir, $year, $month, "index$index.$ext");
 
     # Write the file:
@@ -821,8 +853,6 @@ sub generate_posts {
     # Report success:
     print "Created $file\n" if $verbose > 1;
   }
-
-  # TODO: Generate year listings.
 
   # Return success:
   return 1;
@@ -843,10 +873,12 @@ sub generate_tags {
 
   # Process each tag separately:
   foreach my $tag (keys %{$data->{tags}}) {
-    # Initialize necessary variables:
-    my $tag_body  = '';
-    my $tag_count = 0;
-    my $tag_page  = 0;
+    # Initialize tag related variables:
+    my $tag_body  = '';                             # List of posts.
+    my $tag_count = 0;                              # Post counter.
+    my $tag_page  = 0;                              # Page counter.
+
+    # Declare other necessary variables:
     my ($date, $id, $tags, $author, $url, $title, $year, $month, $file);
 
     # Process each record:
@@ -880,17 +912,17 @@ sub generate_tags {
           catdir($destdir, 'tags', $data->{tags}->{$tag}->{url}),
         ];
 
-        # Prepare the page file name:
+        # Prepare the tag file name:
         $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
                         "index$index.$ext");
 
         # Write the file:
         write_page($file, $data, $tag_body, '../../') or return 0;
 
-        # Clear the body:
+        # Clear the tag body:
         $tag_body  = '';
 
-        # Reset the item counter:
+        # Reset the post counter:
         $tag_count = 0;
 
         # Increase the page counter:
@@ -905,7 +937,7 @@ sub generate_tags {
                                   "\">$title</a>", $date, $author, $tags) .
                    read_body($id, 'post', 1);
 
-      # Increase the number of listed items:
+      # Increase the number of listed posts:
       $tag_count++;
     }
 
@@ -929,7 +961,7 @@ sub generate_tags {
         catdir($destdir, 'tags', $data->{tags}->{$tag}->{url}),
       ];
 
-      # Prepare the page file name:
+      # Prepare the tag file name:
       $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
                       "index$index.$ext");
 
