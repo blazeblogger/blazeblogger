@@ -39,6 +39,7 @@ our $with_rss   = 1;                                # Generate RSS feed?
 # Global variables:
 our $conf       = {};                               # The configuration.
 our $locale     = {};                               # The localization.
+our $cache      = {};                               # The cache.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -345,6 +346,7 @@ sub collect_metadata {
 sub list_of_months {
   my $data = shift || die "Missing argument";
   my $root = shift || '/';
+  my $year = shift || '';
 
   # Check whether the posts generation is enabled:
   return '' unless $with_posts;
@@ -355,7 +357,7 @@ sub list_of_months {
     return join("\n", sort { $b cmp $a } (map {
       "<li><a href=\"${root}" . $months{$_}->{url} . "\">$_</a> (" .
       $months{$_}->{count} . ")</li>"
-    } keys(%months)));
+    } grep(/$year$/, keys(%months))));
   }
   else {
     # Return an empty string:
@@ -413,71 +415,81 @@ sub write_page {
   my $data     = shift || return 0;
   my $content  = shift || '';
   my $root     = shift || '/';
+  my $template = '';
 
-  # Read required data from the configuration:
-  my $encoding = $conf->{core}->{encoding} || 'UTF-8';
-  my $name     = $conf->{user}->{name}     || 'admin';
-  my $email    = $conf->{user}->{email}    || 'admin@localhost';
-  my $style    = $conf->{blog}->{style}    || 'default.css';
-  my $subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
-  my $theme    = $conf->{blog}->{theme}    || 'default.html';
-  my $title    = $conf->{blog}->{title}    || 'My Blog';
+  # Check whether the theme is not already cached:
+  unless ($cache->{theme}->{$root}) {
+    # Read required data from the configuration:
+    my $encoding = $conf->{core}->{encoding} || 'UTF-8';
+    my $name     = $conf->{user}->{name}     || 'admin';
+    my $email    = $conf->{user}->{email}    || 'admin@localhost';
+    my $style    = $conf->{blog}->{style}    || 'default.css';
+    my $subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
+    my $theme    = $conf->{blog}->{theme}    || 'default.html';
+    my $title    = $conf->{blog}->{title}    || 'My Blog';
 
-  # Prepare the pages, tags and months lists:
-  my $archive  = list_of_months($data, $root);
-  my $pages    = list_of_pages($data, $root);
-  my $tags     = list_of_tags($data, $root);
+    # Prepare the pages, tags and months lists:
+    my $archive  = list_of_months($data, $root);
+    my $pages    = list_of_pages($data, $root);
+    my $tags     = list_of_tags($data, $root);
 
-  # Get the current year:
-  my $year     = substr(date_to_string(time), 0, 4);
+    # Get the current year:
+    my $year     = substr(date_to_string(time), 0, 4);
 
-  # Prepare the meta and link elements for the page header:
-  my $date         = '<meta name="Date" content="' . localtime() . '">';
-  my $content_type = '<meta http-equiv="Content-Type" content="text/html;'.
-                     ' charset=' . $encoding . '">';
-  my $generator    = '<meta name="Generator" content="BlazeBlogger ' .
-                     VERSION . '">';
-  my $stylesheet   = '<link rel="stylesheet" href="' . $root . $style .
-                     '" type="text/css">';
-  my $rss          = '<link rel="alternate" href="' . $root . 'index.rss' .
-                     '" title="RSS Feed" type="application/rss+xml">';
+    # Prepare the meta and link elements for the page header:
+    my $date         = "<meta name=\"Date\" content=\"".localtime()."\">";
+    my $content_type = "<meta http-equiv=\"Content-Type\" content=\"" .
+                       "text/html; charset=$encoding\">";
+    my $generator    = "<meta name=\"Generator\" content=\"BlazeBlogger " .
+                       VERSION . "\">";
+    my $stylesheet   = "<link rel=\"stylesheet\" href=\"$root$style\"" .
+                       " type=\"text/css\">";
+    my $rss          = "<link rel=\"alternate\" href=\"${root}index.rss\"".
+                       " title=\"RSS Feed\" type=\"application/rss+xml\">";
 
-  # Open the theme file for reading:
-  open(THEME, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
+    # Open the theme file for reading:
+    open(THEME, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
+
+    # Read the theme file:
+    $template = do { local $/; <THEME> };
+
+    # Close the theme file:
+    close(THEME);
+
+    # Substitute header placeholders:
+    $template =~ s/<!--\s*rss\s*-->/$rss/ig if $with_rss;
+    $template =~ s/<!--\s*content-type\s*-->/$content_type/ig;
+    $template =~ s/<!--\s*stylesheet\s*-->/$stylesheet/ig;
+    $template =~ s/<!--\s*generator\s*-->/$generator/ig;
+    $template =~ s/<!--\s*date\s*-->/$date/ig;
+
+    # Substitute lists placeholders:
+    $template =~ s/<!--\s*archive\s*-->/$archive/ig;
+    $template =~ s/<!--\s*pages\s*-->/$pages/ig;
+    $template =~ s/<!--\s*tags\s*-->/$tags/ig;
+
+    # Substitute body placeholders:
+    $template =~ s/<!--\s*subtitle\s*-->/$subtitle/ig;
+    $template =~ s/<!--\s*e-mail\s*-->/$email/ig;
+    $template =~ s/<!--\s*title\s*-->/$title/ig;
+    $template =~ s/<!--\s*name\s*-->/$name/ig;
+    $template =~ s/<!--\s*year\s*-->/$year/ig;
+
+    # Store the theme to the cache:
+    $cache->{theme}->{$root} = $template;
+  }
 
   # Open the file for writing:
   open(FILE, ">$file") or return 0;
 
-  # Process each line:
-  while (my $line = <THEME>) {
-    # Substitute lists placeholders:
-    $line =~ s/<!--\s*archive\s*-->/$archive/i if $archive;
-    $line =~ s/<!--\s*pages\s*-->/$pages/i     if $pages;
-    $line =~ s/<!--\s*tags\s*-->/$tags/i       if $tags;
+  # Substitute the content:
+  ($template  = $cache->{theme}->{$root})
+              =~ s/<!--\s*content\s*-->/$content/ig;
 
-    # Substitute header placeholders:
-    $line =~ s/<!--\s*content-type\s*-->/$content_type/i;
-    $line =~ s/<!--\s*date\s*-->/$date/i;
-    $line =~ s/<!--\s*generator\s*-->/$generator/i;
-    $line =~ s/<!--\s*stylesheet\s*-->/$stylesheet/i;
-    $line =~ s/<!--\s*rss\s*-->/$rss/i if $with_rss;
+  # Write the line to the file:
+  print FILE $template;
 
-    # Substitute body placeholders:
-    $line =~ s/<!--\s*e-mail\s*-->/$email/ig;
-    $line =~ s/<!--\s*name\s*-->/$name/ig;
-    $line =~ s/<!--\s*subtitle\s*-->/$subtitle/ig;
-    $line =~ s/<!--\s*title\s*-->/$title/ig;
-    $line =~ s/<!--\s*year\s*-->/$year/ig;
-
-    # Substitute the content:
-    $line =~ s/<!--\s*content\s*-->/$content/ig if $content;
-
-    # Write the line to the file:
-    print FILE $line;
-  }
-
-  # Close the files:
-  close(THEME);
+  # Close the file:
   close(FILE);
 
   # Return success:
@@ -631,13 +643,13 @@ sub generate_index {
       last if $count == $max_posts;
 
       # Decompose the record:
-      my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+      my ($date, $id, $tags, $author, $url, $title) = split(/:/,$record,6);
       my ($year, $month) = split(/-/, $date);
 
       # Add the post heading with excerpt:
-      $body .= format_heading("<a href=\"$year/$month/$id-$url\">$title</a>",
-                              $date, $author, $tags) .
-               read_body($id, 'post', 1);
+      $body.=format_heading("<a href=\"$year/$month/$id-$url\">$title</a>",
+                            $date, $author, $tags) .
+             read_body($id, 'post', 1);
 
       # Increase the number of listed items:
       $count++;
@@ -797,7 +809,8 @@ sub generate_posts {
                    "$month_body";
 
     # Add navigation:
-    $month_body .= "<a href=\"index$next.$ext\">$next_string</a>\n" if $month_page;
+    $month_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
+      if $month_page;
 
     # Prepare the page file name:
     $file = catfile($destdir, $year, $month, "index$index.$ext");
@@ -907,7 +920,8 @@ sub generate_tags {
                    "$tag_body";
 
       # Add navigation:
-      $tag_body .= "<a href=\"index$next.$ext\">$next_string</a>\n" if $tag_page;
+      $tag_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
+        if $tag_page;
 
       # Create the directory tree:
       make_directories [
