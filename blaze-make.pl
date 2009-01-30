@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-make, generate the static content from the BlazeBlogger repository
+# blaze-make, generate static content from the BlazeBlogger repository
 # Copyright (C) 2009 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -61,19 +61,19 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-qV] [-b directory] [-d directory]
+Usage: $NAME [-pqrtPV] [-b directory] [-d directory]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
   -d, --destdir directory     specify the directory where the generated
                               static content is to be placed 
-  -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages; the default option
   -p, --no-posts              disable posts creation
   -P, --no-pages              disable static pages creation
   -t, --no-tags               disable support for tags
   -r, --no-rss                disable RSS feed creation
+  -q, --quiet                 avoid displaying unnecessary messages
+  -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -608,9 +608,6 @@ sub generate_rss {
     my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
     my ($year, $month) = split(/-/, $date);
 
-    # Read post excerpt:
-    my $post_desc  = substr(read_body($id, 'post', 1), 0, 500);
-
     # Strip HTML elements:
     my $post_title = strip_html($title);
     my $post_desc  = strip_html(substr(read_body($id, 'post', 1), 0, 500));
@@ -1119,3 +1116,122 @@ print "Done.\n" if $verbose;
 
 # Return success:
 exit 0;
+
+__END__
+
+=head1 NAME
+
+blaze-make - generate static content from the BlazeBlogger repository
+
+=head1 SYNOPSIS
+
+B<blaze-make> [B<-pqrtPV>] [B<-b> I<directory>] [B<-d> I<directory>]
+
+B<blaze-make> B<-h> | B<-v>
+
+=head1 DESCRIPTION
+
+B<blaze-make> reads the BlazeBlogger repository and generates a complete
+directory tree of static pages, optionally including all blog posts, single
+pages, browsable yearly and monthly archives, tags and even a RSS feed.
+This way, you can benefit from most of the features other CMS usually have,
+but without any additional hosting requirements.
+
+=head1 OPTIONS
+
+=over
+
+=item B<-b>, B<--blogdir> I<directory>
+
+Specify the I<directory> where the BlazeBlogger repository is placed. The
+default option is the current working directory.
+
+=item B<-d>, B<--destdir> I<directory>
+
+Specify the I<directory> where the generated static content is to be
+placed. The default option is the current working directory.
+
+=item B<-p>, B<--no-posts>
+
+Disable creation of posts as well as any related pages, i.e. tags and RSS
+feed. This is especially useful for websites with static content only.
+
+=item B<-P>, B<--no-pages>
+
+Disable creation of static pages.
+
+=item B<-t>, B<--no-tags>
+
+Disable support for tags.
+
+=item B<-r>, B<--no-rss>
+
+Disable creation of RSS feed.
+
+=item B<-q>, B<--quiet>
+
+Avoid displaying messages that are not necessary.
+
+=item B<-V>, B<--verbose>
+
+Display all messages. This is the default option.
+
+=item B<-h>, B<--help>
+
+Display usage information and exit.
+
+=item B<-v>, B<--version>
+
+Display version information and exit.
+
+=back
+
+=head1 FILES
+
+=over
+
+=item I<.blaze/config>
+
+BlazeBlogger configuration file.
+
+=item I<.blaze/theme/>
+
+BlazeBlogger themes directory.
+
+=item I<.blaze/style/>
+
+BlazeBlogger stylesheets directory.
+
+=back
+
+=head1 SEE ALSO
+
+B<blaze-config>(1), B<perl>(1).
+
+=head1 BUGS
+
+To report bugs please visit the appropriate section on the project
+homepage: <http://code.google.com/p/blazeblogger/issues/>.
+
+=head1 AUTHOR
+
+Written by Jaromir Hradilek <jhradilek@gmail.com>.
+
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the GNU Free Documentation License, Version 1.3 or any later
+version published by the Free Software Foundation; with no Invariant
+Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license is included as a file called FDL in the main
+directory of the BlazeBlogger source package.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2009 Jaromir Hradilek
+
+This program is free software; see the source for copying conditions. It is
+distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
+
+=cut
