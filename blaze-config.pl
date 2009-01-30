@@ -292,6 +292,11 @@ BlazeBlogger configuration file.
 
 B<perl>(1).
 
+=head1 BUGS
+
+To report bugs please visit the appropriate section on the project
+homepage: <http://code.google.com/p/blazeblogger/issues/>.
+
 =head1 AUTHOR
 
 Written by Jaromir Hradilek <jhradilek@gmail.com>.

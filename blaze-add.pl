@@ -117,7 +117,7 @@ sub check_header {
   # Check whether the title is specified:
   unless ($data->{header}->{title}) {
     # Display the appropriate warning:
-    print STDERR NAME . ": Missing title in the $type with ID $id.\n"
+    print STDERR "Missing title in the $type with ID $id.\n"
       if $verbose;
   }
 
@@ -126,13 +126,13 @@ sub check_header {
     # Check whether it contains forbidden characters:
     if ($author =~ /[^\w\s\-]/) {
       # Display the appropriate warning:
-      print STDERR NAME . ": Invalid author in the $type with ID $id.\n"
+      print STDERR "Invalid author in the $type with ID $id.\n"
         if $verbose;
     }
   }
   else {
     # Display the appropriate warning:
-    print STDERR NAME . ": Missing author in the $type with ID $id.\n"
+    print STDERR "Missing author in the $type with ID $id.\n"
       if $verbose;
   }
 
@@ -141,13 +141,13 @@ sub check_header {
     # Check whether the format is valid:
     if ($date !~ /\d{4}-[01]\d-[0-3]\d/) {
       # Display the appropriate warning:
-      print STDERR NAME . ": Invalid date in the $type with ID $id.\n"
+      print STDERR "Invalid date in the $type with ID $id.\n"
         if $verbose;
     }
   }
   else {
     # Display the appropriate warning:
-    print STDERR NAME . ": Missing date in the $type with ID $id.\n"
+    print STDERR "Missing date in the $type with ID $id.\n"
       if $verbose;
   }
 
@@ -156,7 +156,7 @@ sub check_header {
     # Check whether they contain forbidden characters:
     if ($tags =~ /:/) {
       # Display the appropriate warning:
-      print STDERR NAME . ": Invalid tags in the $type with ID $id.\n"
+      print STDERR "Invalid tags in the $type with ID $id.\n"
         if $verbose;
     }
   }
@@ -166,7 +166,7 @@ sub check_header {
     # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
       # Display the appropriate warning:
-      print STDERR NAME . ": Invalid URL in the $type with ID $id.\n"
+      print STDERR "Invalid URL in the $type with ID $id.\n"
         if $verbose;
     }
   }
@@ -357,7 +357,7 @@ else {
     # Save the record:
     save_record($file, $id, $type)
       and push(@added, $id)
-      or print STDERR NAME . ": Unable to add $file.\n" if $verbose;
+      or print STDERR "Unable to add $file.\n" if $verbose;
   }
 
   # Prepare the list of successfully added IDs:
@@ -454,6 +454,11 @@ BlazeBlogger configuration file.
 =head1 SEE ALSO
 
 B<blaze-config>(1), B<perl>(1).
+
+=head1 BUGS
+
+To report bugs please visit the appropriate section on the project
+homepage: <http://code.google.com/p/blazeblogger/issues/>.
 
 =head1 AUTHOR
 
