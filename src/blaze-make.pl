@@ -1022,6 +1022,26 @@ sub generate_pages {
   return 1;
 }
 
+# Copy the stylesheet:
+sub copy_stylesheet {
+  # Prepare the file names:
+  my $style = $conf->{blog}->{style} || 'default.css';
+  my $from  = catfile($blogdir, '.blaze', 'style', $style);
+  my $to    = catfile($destdir, $style);
+
+  # Skip existing stylesheet:
+  return 1 if (-e $to);
+
+  # Copy the file:
+  copy($from, $to) or return 0;
+
+  # Report success:
+  print "Created $to\n" if $verbose > 1;
+
+  # Return success:
+  return 1;
+}
+
 # Set up the options parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
@@ -1106,17 +1126,11 @@ generate_pages($data)
   or exit_with_error("An error has occurred while creating pages.", 1)
   if $with_pages;
 
-# Prepare the file names:
-$temp    = $conf->{blog}->{style} || 'default.css';
-my $from = catfile($blogdir, '.blaze', 'style', $temp);
-my $to   = catfile($destdir, $temp);
-
 # Copy the stylesheet:
-copy($from, $to)
+copy_stylesheet()
   or exit_with_error("Unable to copy the stylesheet.", 13);
 
 # Report success:
-print "Created $to\n" if $verbose > 1;
 print "Done.\n" if $verbose;
 
 # Return success:

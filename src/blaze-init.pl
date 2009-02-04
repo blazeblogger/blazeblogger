@@ -185,8 +185,9 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 ##              tion of what should the occasional visitor  expect to find.
 ##   theme    - The blog theme;  the value should point to an existing file
 ##              in the .blaze/theme directory.
-##   style    - The blog style;  the value should point to an existing file
-##              in the .blaze/theme directory.
+##   style    - The blog style; the value should point to an existing file,
+##              either  in  .blaze/style,  or in the  destination directory
+##              where the static content is to be placed.
 ##   lang     - The blog language;  the value  should point to an  existing
 ##              file in the .blaze/lang directory.
 ##   posts    - Number of posts to be listed on a single page;  the default

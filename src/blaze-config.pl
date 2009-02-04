@@ -235,8 +235,9 @@ directory.
 
 =item B<blog.style>
 
-Blog stylesheet; the value should point to an existing file in the
-.blaze/style directory.
+Blog stylesheet; the value should point to an existing file, either in
+.blaze/style (recommended), or in the destination directory where the
+static content is to be placed.
 
 =item B<blog.lang>
 
