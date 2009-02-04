@@ -31,6 +31,7 @@ use constant VERSION => '0.0.1';                    # Script version.
 our $blogdir    = '.';                              # Repository location.
 our $destdir    = '.';                              # HTML pages location.
 our $verbose    = 1;                                # Verbosity level.
+our $with_index = 1;                                # Generate index page?
 our $with_posts = 1;                                # Generate posts?
 our $with_pages = 1;                                # Generate pages?
 our $with_tags  = 1;                                # Generate tags?
@@ -68,6 +69,7 @@ Usage: $NAME [-pqrtPV] [-b directory] [-d directory]
                               repository is placed
   -d, --destdir directory     specify the directory where the generated
                               static content is to be placed 
+  -i, --no-index              disable index page creation
   -p, --no-posts              disable posts creation
   -P, --no-pages              disable static pages creation
   -t, --no-tags               disable support for tags
@@ -1031,6 +1033,8 @@ GetOptions(
   'verbose|V'     => sub { $verbose    = 2;     },
   'blogdir|b=s'   => sub { $blogdir    = $_[1]; },
   'destdir|d=s'   => sub { $destdir    = $_[1]; },
+  'with-index'    => sub { $with_index = 1 },
+  'no-index|i'    => sub { $with_index = 0 },
   'with-posts'    => sub { $with_posts = 1 },
   'no-posts|p'    => sub { $with_posts = 0 },
   'with-pages'    => sub { $with_pages = 1 },
@@ -1084,7 +1088,8 @@ generate_rss($data)
 
 # Generate index page:
 generate_index($data)
-  or exit_with_error("An error has occured while creating index page.", 1);
+  or exit_with_error("An error has occured while creating index page.", 1)
+  if $with_index;
 
 # Generate posts:
 generate_posts($data)
@@ -1150,6 +1155,11 @@ default option is the current working directory.
 
 Specify the I<directory> where the generated static content is to be
 placed. The default option is the current working directory.
+
+=item B<-i>, B<--no-index>
+
+Disable creation of index page. This is especially useful for websites with
+static content only.
 
 =item B<-p>, B<--no-posts>
 
