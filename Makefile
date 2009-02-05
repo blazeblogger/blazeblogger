@@ -18,7 +18,9 @@ SHELL   = /bin/sh
 INSTALL = /usr/bin/install -c
 POD2MAN = /usr/bin/pod2man
 SRCS   := $(wildcard src/*.pl)
-MANS   := $(patsubst %.pl, %.man, $(SRCS))
+DOCS   := $(wildcard docs/*.pod)
+MAN1   := $(patsubst %.pl, %.1, $(SRCS))
+MAN7   := $(patsubst %.pod, %.7, $(DOCS))
 
 # Installation directories; feel free to modify according to your taste and
 # current situation:
@@ -26,17 +28,18 @@ prefix  = /usr/local
 bindir  = $(prefix)/bin
 mandir  = $(prefix)/share/man
 man1dir = $(mandir)/man1
+man7dir = $(mandir)/man7
 
 # Make rules;  please do not edit these unless you really know what you are
 # doing:
 .PHONY: all clean install uninstall
 
-all: $(MANS)
+all: $(MAN1) $(MAN7)
 
 clean:
-	-rm -f $(MANS)
+	-rm -f $(MAN1) $(MAN7)
 
-install: $(MANS)
+install: $(MAN1) $(MAN7)
 	@echo "Copying scripts..."
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -m 755 src/blaze-add.pl $(bindir)/blaze-add
@@ -47,12 +50,15 @@ install: $(MANS)
 	$(INSTALL) -m 755 src/blaze-remove.pl $(bindir)/blaze-remove
 	@echo "Copying man pages..."
 	$(INSTALL) -d $(man1dir)
-	$(INSTALL) -m 644 src/blaze-add.man $(man1dir)/blaze-add.1
-	$(INSTALL) -m 644 src/blaze-edit.man $(man1dir)/blaze-edit.1
-	$(INSTALL) -m 644 src/blaze-init.man $(man1dir)/blaze-init.1
-	$(INSTALL) -m 644 src/blaze-make.man $(man1dir)/blaze-make.1
-	$(INSTALL) -m 644 src/blaze-config.man $(man1dir)/blaze-config.1
-	$(INSTALL) -m 644 src/blaze-remove.man $(man1dir)/blaze-remove.1
+	$(INSTALL) -m 644 src/blaze-add.1 $(man1dir)
+	$(INSTALL) -m 644 src/blaze-edit.1 $(man1dir)
+	$(INSTALL) -m 644 src/blaze-init.1 $(man1dir)
+	$(INSTALL) -m 644 src/blaze-make.1 $(man1dir)
+	$(INSTALL) -m 644 src/blaze-config.1 $(man1dir)
+	$(INSTALL) -m 644 src/blaze-remove.1 $(man1dir)
+	$(INSTALL) -d $(man7dir)
+	$(INSTALL) -m 644 docs/blazeintro.7 $(man7dir)
+	$(INSTALL) -m 644 docs/blazeblogger.7 $(man7dir)
 
 uninstall:
 	@echo "Removing scripts..."
@@ -69,9 +75,14 @@ uninstall:
 	-rm -f $(man1dir)/blaze-make.1
 	-rm -f $(man1dir)/blaze-config.1
 	-rm -f $(man1dir)/blaze-remove.1
+	-rm -f $(man7dir)/blazeintro.7
+	-rm -f $(man7dir)/blazeblogger.7
 	@echo "Removing empty directories..."
-	-rmdir $(bindir) $(man1dir) $(mandir)
+	-rmdir $(bindir) $(man1dir) $(man7dir) $(mandir)
 
-%.man: %.pl
-	$(POD2MAN) $^ $@
+%.1: %.pl
+	$(POD2MAN) --section=1 $^ $@
+
+%.7: %.pod
+	$(POD2MAN) --section=7 $^ $@
 
