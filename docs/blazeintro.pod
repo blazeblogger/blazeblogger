@@ -1,0 +1,141 @@
+=head1 NAME
+
+blazeintro - an introduction to BlazeBlogger
+
+=head1 SYNOPSIS
+
+  $ blaze-init
+  $ blaze-add
+  $ blaze-make
+
+=head1 DESCRIPTION
+
+This document tries to provide a brief introduction on how to create,
+configure, add new content to, and generate a static content from the
+BlazeBlogger repository.
+
+=head2 Creating a New Blog
+
+Assuming you are already in the directory where the blog repository is to
+be placed, you can create a new one typing:
+
+  $ blaze-init
+
+If nothing goes wrong, you should get a response similar to this:
+
+  Created/recovered a BlazeBlogger repository in .blaze.
+
+As the message suggests, you can use the same command any time later to
+return the repository to a consistent state, restoring the default
+configuration, theme and style files to their initial state while leaving
+the rest of your data (i.e. blog posts and static pages) intact. 
+
+=head2 Configuring the Blog
+
+Although the defaults try to be reasonable enough and ready for an
+immediate use, there are few options you might at least want to know about.
+
+The first thing you might want to change is an external text editor to be
+used for writing your posts. Unless this option is set, BlazeBlogger tries
+to use system wide settings by looking at EDITOR environment variable, and
+if neither of these options is supplied, the C<vi> is used as a
+considerably reasonable option. To change it to, lets say, C<pico>, type:
+
+  $ blaze-config core.editor pico
+
+Another thing you might want to change is the heading and subheading of
+your blog, for example:
+
+  $ blaze-config blog.title My Blog
+  $ blaze-config blog.subtitle yet another blog
+
+Finally, to change the default user name, type:
+
+  $ blaze-config user.name Your Name
+
+For the complete list of available options, see B<blaze-config>(1) man
+page. To see the current setting, simply type the option name without the
+value like this:
+
+  $ blaze-config user.name
+
+Note: The configuration file is located in C<.blaze/config> and the
+recommended way to set it up is to leave it intact and use
+B<blaze-config>(1) instead as described above. Nevertheless, if you prefer
+to configure the settings by hand, simply uncomment the desired option
+(i.e. remove the hash sign from the beginning of the line) and replace the
+value next to the equal sign. If you have previously used the configuration
+tool and all the comments are erased, you can return the configuration file
+to its initial state using B<blaze-init>(1) first.
+
+=head2 Managing the Blog Posts
+
+To add a new blog post to the repository, type:
+
+  $ blaze-add
+
+This will open the external editor with a preformatted header and empty
+body for you to write. When you are done, save your changes and close the
+editor; you should get a confirmation message with the ID of the new post.
+
+If you prefer to write your posts in advance (e.g. work with concepts), you
+can also add any number of existing files without opening the text editor
+like this:
+
+  $ blaze-add concept1 concept2
+
+To edit the existing post, e.g. with ID number 3, type:
+
+  $ blaze-edit 3
+
+To completely remove the post with ID 3 from the repository, use the
+following command:
+
+  $ blaze-remove 3
+
+=head2 Managing the Static Pages
+
+Similarly to blog posts, you can manage the static pages as follows:
+
+  $ blaze-add --page
+  $ blaze-edit --page 3
+  $ blaze-remove --page 3
+
+=head2 Generating the Static Content
+
+To generate the static content from your repository in the current working
+directory, with all posts, static pages, monthly and yearly archives, tags
+and RSS feed included, type:
+
+  $ blaze-make
+
+or if you want to see a list of files as they are created:
+
+  $ blaze-make --verbose
+
+You can now check the appearance of your web presentation in the browser
+and/or copy the files to the hosting. Furthermore, if the public web
+directory is located on the same server, you can create the content
+directly in that location like this:
+
+  $ blaze-make --destdir ~/public_html
+
+For the complete list of all command line options, see
+B<blaze-make>(1) man page.
+
+=head1 SEE ALSO
+
+B<blaze-init>(1), B<blaze-config>(1), B<blaze-add>(1), B<blaze-edit>(1),
+B<blaze-remove>(1), B<blaze-make>(1).
+
+=head1 AUTHOR
+
+Written by Jaromir Hradilek <jhradilek@gmail.com>
+
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the GNU Free Documentation License, Version 1.3 or any later
+version published by the Free Software Foundation; with no Invariant
+Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license is included as a file called FDL in the main
+directory of the BlazeBlogger source package.
