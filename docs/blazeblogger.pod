@@ -1,0 +1,92 @@
+=head1 NAME
+
+blazeblogger - a CMS without boundaries
+
+=head1 SYNOPSIS
+
+B<blaze-init> [B<-qV>] [B<-b> I<directory>]
+
+B<blaze-config> [B<-qV>] [B<-b> I<directory>] I<name> [I<value>...]
+
+B<blaze-add> [B<-pqPV>] [B<-b> I<directory>] [I<file>...]
+
+B<blaze-edit> [B<-pqPV>] [B<-b> I<directory>] I<id>
+
+B<blaze-remove> [B<-pqPV>] [B<-b> I<directory>] I<id>
+
+B<blaze-make> [B<-pqrtPV>] [B<-b> I<directory>] [B<-d> I<directory>]
+
+=head1 DESCRIPTION
+
+B<BlazeBlogger> is a simple to use but capable CMS for the command line.
+Being written in Perl as a cross-platform application and producing the
+static content without the need of database servers or server side
+scripting, it is literally a CMS without boundaries suitable for a wide
+variety of web presentations, from personal weblog to a project page or
+even a company presentation.
+
+Using BlazeBlogger is really easy. Strongly inspired by Git in its design
+and in the best spirit of Unix philosophy, it comes as a set of smaller
+utilities that do one thing and do it well rather than the monolithic
+program for everything. Keeping the default configuration you can have a
+full-featured blog with the first post in only three steps! 
+
+=head1 SEE ALSO
+
+=over
+
+=item B<blazeintro>(7)
+
+An introduction to BlazeBlogger.
+
+=item B<blaze-init>(1)
+
+Create or recover a BlazeBlogger repository.
+
+=item B<blaze-config>(1)
+
+Display or set the BlazeBlogger repository options.
+
+=item B<blaze-add>(1)
+
+Add a blog post or a page to the BlazeBlogger repository.
+
+=item B<blaze-edit>(1)
+
+Edit a blog post or a page in the BlazeBlogger repository.
+
+=item B<blaze-remove>(1)
+
+Remove a blog post or a page from the BlazeBlogger repository.
+
+=item B<blaze-make>(1)
+
+Generate static content from the BlazeBlogger repository.
+
+=back
+
+=head1 BUGS
+
+To report bugs please visit the appropriate section on the project
+homepage: <http://code.google.com/p/blazeblogger/issues/>.
+
+=head1 AUTHOR
+
+Written by Jaromir Hradilek <jhradilek@gmail.com>
+
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the GNU Free Documentation License, Version 1.3 or any later
+version published by the Free Software Foundation; with no Invariant
+Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license is included as a file called FDL in the main
+directory of the BlazeBlogger source package.
+
+=head1 COPYRIGHT
+
+Copyright (C) 2008, 2009 Jaromir Hradilek
+
+This program is free software; see the source for copying conditions. It is
+distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.
