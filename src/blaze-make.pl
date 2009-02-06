@@ -524,6 +524,18 @@ sub read_body {
   return $result;
 }
 
+# Return the tag links:
+sub format_tags {
+  my $data = shift || die "Missing argument";
+  my $root = shift || die "Missing argument";
+  my $tags = shift || return '';
+
+  # Return the list of tag links:
+  return join(', ', map {
+    "<a href=\"${root}tags/" . $data->{tags}->{$_}->{url} . "\">$_</a>"
+  } split(/,\s*/, lc($tags)));
+}
+
 # Return the formatted post heading:
 sub format_heading {
   my $title  = shift || die "Missing argument";
@@ -662,7 +674,8 @@ sub generate_index {
 
       # Add the post heading with excerpt:
       $body.=format_heading("<a href=\"$year/$month/$id-$url\">$title</a>",
-                            $date, $author, $tags) .
+                            $date, $author,
+                            format_tags($data, './', $tags)) .
              read_body($id, 'post', 1);
 
       # Increase the number of listed items:
@@ -726,7 +739,8 @@ sub generate_posts {
     ($year, $month) = split(/-/, $date);
 
     # Prepare the post body:
-    $post_body  = format_heading($title, $date, $author, $tags) .
+    $post_body  = format_heading($title, $date, $author,
+                                 format_tags($data, '../../../', $tags)) .
                   read_body($id, 'post', 0);
 
     # Create the directory tree:
@@ -830,7 +844,8 @@ sub generate_posts {
 
     # Add the post heading with excerpt:
     $month_body .= format_heading("<a href=\"$id-$url\">$title</a>",
-                                  $date, $author, $tags) .
+                                  $date, $author,
+                                  format_tags($data, '../../', $tags)) .
                    read_body($id, 'post', 1);
 
     # Increase the number of listed posts:
@@ -948,7 +963,8 @@ sub generate_tags {
 
       # Add the post heading with excerpt:
       $tag_body .= format_heading("<a href=\"../../$year/$month/$id-$url" .
-                                  "\">$title</a>", $date, $author, $tags) .
+                                  "\">$title</a>", $date, $author,
+                                  format_tags($data, '../../', $tags)) .
                    read_body($id, 'post', 1);
 
       # Increase the number of listed posts:
