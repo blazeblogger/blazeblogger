@@ -39,6 +39,10 @@ full-featured blog with the first post in only three steps!
 
 An introduction to BlazeBlogger.
 
+=item B<blazetheme>(7)
+
+An introduction to BlazeBlogger theme creation.
+
 =item B<blaze-init>(1)
 
 Create or recover a BlazeBlogger repository.
