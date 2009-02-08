@@ -45,6 +45,7 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 755 src/blaze-add.pl $(bindir)/blaze-add
 	$(INSTALL) -m 755 src/blaze-edit.pl $(bindir)/blaze-edit
 	$(INSTALL) -m 755 src/blaze-init.pl $(bindir)/blaze-init
+	$(INSTALL) -m 755 src/blaze-list.pl $(bindir)/blaze-list
 	$(INSTALL) -m 755 src/blaze-make.pl $(bindir)/blaze-make
 	$(INSTALL) -m 755 src/blaze-config.pl $(bindir)/blaze-config
 	$(INSTALL) -m 755 src/blaze-remove.pl $(bindir)/blaze-remove
@@ -53,6 +54,7 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 644 src/blaze-add.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-edit.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-init.1 $(man1dir)
+	$(INSTALL) -m 644 src/blaze-list.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-make.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-config.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-remove.1 $(man1dir)
@@ -66,6 +68,7 @@ uninstall:
 	-rm -f $(bindir)/blaze-add
 	-rm -f $(bindir)/blaze-edit
 	-rm -f $(bindir)/blaze-init
+	-rm -f $(bindir)/blaze-list
 	-rm -f $(bindir)/blaze-make
 	-rm -f $(bindir)/blaze-config
 	-rm -f $(bindir)/blaze-remove
@@ -73,6 +76,7 @@ uninstall:
 	-rm -f $(man1dir)/blaze-add.1
 	-rm -f $(man1dir)/blaze-edit.1
 	-rm -f $(man1dir)/blaze-init.1
+	-rm -f $(man1dir)/blaze-list.1
 	-rm -f $(man1dir)/blaze-make.1
 	-rm -f $(man1dir)/blaze-config.1
 	-rm -f $(man1dir)/blaze-remove.1
