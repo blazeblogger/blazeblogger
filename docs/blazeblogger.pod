@@ -14,6 +14,9 @@ B<blaze-edit> [B<-pqPV>] [B<-b> I<directory>] I<id>
 
 B<blaze-remove> [B<-pqPV>] [B<-b> I<directory>] I<id>
 
+B<blaze-list> [B<-pqPV>] [B<-b> I<directory>] [B<-i> I<id>]
+[B<-a> I<author>] [B<-d> I<day>] [B<-m> I<month>] [B<-y> I<year>]
+
 B<blaze-make> [B<-pqrtPV>] [B<-b> I<directory>] [B<-d> I<directory>]
 
 =head1 DESCRIPTION
@@ -62,6 +65,10 @@ Edit a blog post or a page in the BlazeBlogger repository.
 =item B<blaze-remove>(1)
 
 Remove a blog post or a page from the BlazeBlogger repository.
+
+=item B<blaze-list>(1)
+
+Browse the content of the BlazeBlogger repository.
 
 =item B<blaze-make>(1)
 
