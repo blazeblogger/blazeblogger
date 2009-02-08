@@ -131,7 +131,7 @@ sub display_records {
     # Replace missing header data with defaults:
     my $title  = $data->{header}->{title}  || $file;
     my $author = $data->{header}->{author} || 'admin';
-    my $date   = $data->{header}->{date}   || date_to_string(time);
+    my $date   = $data->{header}->{date}   || '-';
     my $tags   = $data->{header}->{tags}   || '';
 
     # Check whether the record matches the pattern:
@@ -144,8 +144,8 @@ sub display_records {
 
     # Display the record:
     print "ID: $file | $date | $author\n\n";
-    print wrap('    ', '    ', "Title: $title\n");
-    print wrap('    ', '    ', "Tags:  $tags\n");
+    print wrap('    ', ' ' x 11, "Title: $title\n");
+    print wrap('    ', ' ' x 11, "Tags:  $tags\n") if ($type eq 'post');
     print "\n";
   }
 
