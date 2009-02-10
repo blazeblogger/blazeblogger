@@ -316,7 +316,7 @@ if (scalar(@ARGV) == 0) {
 # take your time and replace these options with desired values. Just remem-
 # ber that the date has to be in an  YYYY-MM-DD  form,  the tags is a comma
 # separated list of categories the post (pages ignore these) belong and the
-# URL, if provided, should consist of alphaanumeric characters, hyphens and
+# URL, if provided, should consist of alphanumeric characters,  hyphens and
 # underscores only.
 #
 #   title:
@@ -325,7 +325,8 @@ if (scalar(@ARGV) == 0) {
 #   tags:
 #   url:
 #
-# The header ends here. The rest is the content of your $type.
+# The header ends here.  The rest is the content of your $type. You can use
+# <!-- break --> to mark the end of the part to be displayed on index page.
 
 END_TEMP
 

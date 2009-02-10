@@ -186,7 +186,7 @@ sub read_record {
 # take your time and replace these options with desired values. Just remem-
 # ber that the date has to be in an  YYYY-MM-DD  form,  the tags is a comma
 # separated list of categories the post (pages ignore these) belong and the
-# url, if provided, should consist of alphaanumeric characters, hyphens and
+# url, if provided, should consist of alphanumeric characters,  hyphens and
 # underscores only.
 #
 #   title:  $title
@@ -195,7 +195,8 @@ sub read_record {
 #   tags:   $tags
 #   url:    $url
 #
-# The header ends here. The rest is the content of your $type.
+# The header ends here.  The rest is the content of your $type. You can use
+# <!-- break --> to mark the end of the part to be displayed on index page.
 END_HEADER
 
   # Open the record body for the reading:
