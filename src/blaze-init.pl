@@ -438,6 +438,7 @@ archive=Archive for
 tags=Posts tagged as
 previous=&laquo; previous
 next=next &raquo;
+more=more &raquo;
 postedby=by
 taggedas=tagged as
 january=January

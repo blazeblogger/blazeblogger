@@ -503,6 +503,7 @@ sub read_body {
   my $id      = shift || die 'Missing argument';
   my $type    = shift || 'post';
   my $excerpt = shift || 0;
+  my $link    = shift || '';
   my $file    = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
   my $result  = '';
 
@@ -512,7 +513,19 @@ sub read_body {
   # Read the content of the file:
   while (my $line = <FILE>) {
     # When excerpt is requested, look for a break mark to stop reading:
-    last if $line =~ /<!--\s*break\s*-->/ && $excerpt;
+    if ($line =~ /<!--\s*break\s*-->/ && $excerpt) {
+      # Check whether the link is provided:
+      if ($link) {
+        # Read required data from the language file:
+        my $more = $locale->{lang}->{more} || 'more &raquo;';
+
+        # Add the `read more' link:
+        $result .= "<p><a href=\"$link\">$more</a></p>\n";
+      }
+
+      # Exit the loop:
+      last;
+    }
 
     # Add the line to the result:
     $result .= $line;
@@ -572,11 +585,10 @@ sub strip_html {
 # Generate RSS feed:
 sub generate_rss {
   my $data          = shift || die 'Missing argument';
-  my $body          = '';
+  my $max_posts     = 10;
 
   # Read required data from the configuration:
   my $ext           = $conf->{core}->{extension} || 'html';
-  my $max_posts     = $conf->{blog}->{posts}     || 10;
   my $blog_title    = $conf->{blog}->{title}     || 'My Blog';
   my $blog_subtitle = $conf->{blog}->{title}     || 'yet another blog';
   my $base          = $conf->{blog}->{url};
@@ -680,7 +692,7 @@ sub generate_index {
       $body.=format_heading("<a href=\"$year/$month/$id-$url\">$title</a>",
                             $date, $author,
                             format_tags($data, './', $tags)) .
-             read_body($id, 'post', 1);
+             read_body($id, 'post', 1, "$year/$month/$id-$url");
 
       # Increase the number of listed items:
       $count++;
@@ -852,7 +864,7 @@ sub generate_posts {
     $month_body .= format_heading("<a href=\"$id-$url\">$title</a>",
                                   $date, $author,
                                   format_tags($data, '../../', $tags)) .
-                   read_body($id, 'post', 1);
+                   read_body($id, 'post', 1, "$id-$url");
 
     # Increase the number of listed posts:
     $month_count++;
@@ -975,7 +987,7 @@ sub generate_tags {
       $tag_body .= format_heading("<a href=\"../../$year/$month/$id-$url" .
                                   "\">$title</a>", $date, $author,
                                   format_tags($data, '../../', $tags)) .
-                   read_body($id, 'post', 1);
+                   read_body($id, 'post', 1,"../../$year/$month/$id-$url");
 
       # Increase the number of listed posts:
       $tag_count++;
