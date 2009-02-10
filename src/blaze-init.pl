@@ -302,7 +302,7 @@ write_to_file(catfile($blogdir, '.blaze', 'style', 'graylines.css'),
  * Released under the GNU GPL, <http://www.gnu.org/licenses/gpl.html>.
  */
 
-body, h1, h2, h3, h4, h5, h6, blockquote, p, form {
+body, h1, h2 {
 	margin: 0;
 	padding: 0;
 }
