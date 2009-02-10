@@ -84,6 +84,10 @@ List of tags.
 
 List of months.
 
+=item B<<!-- root -->>
+
+Relative path to the root directory of the blog.
+
 =item B<<!-- content -->>
 
 Main content (e.g. post or page body, posts listing etc.).

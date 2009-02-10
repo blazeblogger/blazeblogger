@@ -475,6 +475,7 @@ sub write_page {
     $template =~ s/<!--\s*title\s*-->/$title/ig;
     $template =~ s/<!--\s*name\s*-->/$name/ig;
     $template =~ s/<!--\s*year\s*-->/$year/ig;
+    $template =~ s/<!--\s*root\s*-->/$root/ig;
 
     # Store the theme to the cache:
     $cache->{theme}->{$root} = $template;

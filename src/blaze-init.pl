@@ -248,7 +248,7 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'graylines.html'),
 
 <div id="wrapper">
   <div id="header">
-    <h1><a href="#"><!-- title --></a></h1>
+    <h1><a href="<!-- root -->"><!-- title --></a></h1>
     <!-- subtitle -->
   </div>
 
@@ -302,7 +302,7 @@ write_to_file(catfile($blogdir, '.blaze', 'style', 'graylines.css'),
  * Released under the GNU GPL, <http://www.gnu.org/licenses/gpl.html>.
  */
 
-body, h1, h2 {
+body, h1, h2, p {
 	margin: 0;
 	padding: 0;
 }
