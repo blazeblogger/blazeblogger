@@ -86,7 +86,7 @@ END_VERSION
 
 # Create given directories:
 sub make_directories {
-  my $dirs = shift || die "Missing argument";
+  my $dirs = shift || die 'Missing argument';
   my $mask = shift || 0777;
 
   # Process each directory:
@@ -104,7 +104,7 @@ sub make_directories {
 
 # Write string to the given file:
 sub write_to_file {
-  my $file = shift || die "Missing argument";
+  my $file = shift || die 'Missing argument';
   my $text = shift || '';
 
   # Open the file for writing:
@@ -197,8 +197,8 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 [blog]
 #title=My Blog
 #subtitle=yet another blog
-#theme=default.html
-#style=default.css
+#theme=graylines.html
+#style=graylines.css
 #lang=en_GB
 #posts=10
 #url=http://127.0.0.1/
@@ -230,7 +230,7 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 END_CONFIG
 
 # Create the default theme file:
-write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
+write_to_file(catfile($blogdir, '.blaze', 'theme', 'graylines.html'),
               << 'END_THEME');
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
                       "http://www.w3.org/TR/html4/strict.dtd">
@@ -246,45 +246,46 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
 
 <body>
 
-<!-- Page Wrapper: -->
 <div id="wrapper">
-
-  <!-- Page Header: -->
   <div id="header">
-    <h1 class="title"><!-- title --></h1>
-    <div class="subtitle"><!-- subtitle --></div>
+    <h1><a href="#"><!-- title --></a></h1>
+    <!-- subtitle -->
   </div>
 
-  <!-- Page Content: -->
-  <div id="content">
+  <div id="container">
 <!-- content -->
   </div>
 
-  <!-- Page Sidebar: -->
-  <div id="sidebar">
-    <!-- List of Pages: -->
-    <h2 class="sidebar">Pages:</h2>
+  <div class="sidebar">
     <ul>
+      <li>
+        <h2>Pages</h2>
+        <ul>
 <!-- pages -->
-    </ul>
+        </ul>
+      </li>
 
-    <!-- List of Tags: -->
-    <h2 class="sidebar">Tags:</h2>
-    <ul>
+      <li>
+        <h2>Tags</h2>
+        <ul>
 <!-- tags -->
-    </ul>
+        </ul>
+      </li>
 
-    <!-- List of Months: -->
-    <h2 class="sidebar">Archive:</h2>
-    <ul>
+      <li>
+        <h2>Archive</h2>
+        <ul>
 <!-- archive -->
+        </ul>
+      </li>
     </ul>
   </div>
 
-  <!-- Page Footer -->
   <div id="footer">
     Copyright &copy; <!-- year --> <!-- name -->.
-    Powered by <a href="http://blaze.blackened.cz/">BlazeBlogger</a>.
+    Powered by <a href="http://blaze.blackened.cz/">BlazeBlogger</a> using
+    the <a href="http://zacklive.com/my-first-wordpress-theme-gray-lines/">
+    Gray Lines</a> theme.
   </div>
 </div>
 
@@ -293,9 +294,140 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
 END_THEME
 
 # Create the default stylesheet:
-write_to_file(catfile($blogdir, '.blaze', 'style', 'default.css'),
+write_to_file(catfile($blogdir, '.blaze', 'style', 'graylines.css'),
               << "END_STYLE");
-TODO: Write default stylesheet.
+/* Gray Lines design (C) 2008 Zack, <http://zacklive.com>
+ * BlazeBlogger port (C) 2009 Jaromir Hradilek, <http://blackened.cz/>
+ *
+ * Released under the GNU GPL, <http://www.gnu.org/licenses/gpl.html>.
+ */
+
+body, h1, h2, h3, h4, h5, h6, blockquote, p, form {
+	margin: 0;
+	padding: 0;
+}
+
+body {
+	margin: 0;
+	font-family: Arial, helvetica, Georgia, Sans-serif;
+	font-size: 12px;
+	text-align: center;
+	vertical-align: top;
+	background: #ffffff;
+	color: #000000;	
+}
+
+h1 {
+font-family: Georgia, Sans-serif;
+font-size: 32px;
+padding-bottom: 5px;
+}
+
+a:link, a:visited {
+	text-decoration: none;
+	color: #336699;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: #ff0000;
+}
+
+p {
+	padding: 10px 0 0 0;
+}
+
+#wrapper {
+	margin: 0 auto 0 auto;
+	width: 750px;
+	text-align: left;
+	padding-top: 30px;
+	border-top: 5px solid #EEE;
+}
+
+#header {
+	float: left;
+	width: 750px;
+	height: 80px;
+	border-bottom: 2px solid #EEE;
+}
+
+#container {
+	float: left;
+	width: 500px;
+}
+
+h2.post {
+  padding-top: 10px;
+	font-family: Georgia, Sans-serif;
+	font-size: 18px;
+}
+
+.information {
+	border-top: 1px solid #EEE;
+	margin: 5px 0 0 0;
+	color: #AAA;
+}
+
+.information a {
+	color: #AAA;
+	text-decoration: underline;
+}
+.information a:hover {
+	text-decoration: none;
+}
+
+.section {
+  color: #AAA;
+  text-align: right;
+}
+
+.navigation {
+	padding: 10px 0 0 0;
+	font-size: 14px;
+	font-weight: bold;
+	line-height: 18px;
+}
+
+.sidebar {
+	float: left;
+	width: 239px;
+	margin: 0 0 0 10px;
+	display: inline;
+	border-left: 1px solid #EEE;
+}
+
+.sidebar ul {
+	list-style-type: none;
+	margin: 0;
+	padding: 0 10px 0 10px;
+}
+
+.sidebar ul li {
+	padding: 10px 0 10px 0;
+}
+
+.sidebar ul li h2 {
+	font-family: Georgia, Sans-serif;
+	font-size: 14px;
+	padding: 0 0 3px 3px;
+	border-bottom: 1px solid #EEE;
+}
+
+.sidebar ul ul li {
+	padding: 0;
+	line-height: 24px;
+}
+
+#footer {
+	clear: both;
+	float: left;
+	width: 750px;
+	line-height: 18px;
+	padding: 7px 10px;
+	margin: 15px 0;
+	background: #EEE;
+}
 END_STYLE
 
 # Create the default language file:

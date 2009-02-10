@@ -19,7 +19,6 @@ use strict;
 use warnings;
 use Text::Wrap;
 use File::Basename;
-use File::Copy;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;

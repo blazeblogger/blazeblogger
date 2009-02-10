@@ -111,7 +111,7 @@ sub date_to_string {
 
 # Create given directories:
 sub make_directories {
-  my $dirs = shift || die "Missing argument";
+  my $dirs = shift || die 'Missing argument';
   my $mask = shift || 0777;
 
   # Process each directory:
@@ -129,9 +129,9 @@ sub make_directories {
 
 # Fix the erroneous or missing header data:
 sub fix_header {
-  my $data = shift || die "Missing argument";
-  my $id   = shift || die "Missing argument";
-  my $type = shift || die "Missing argument";
+  my $data = shift || die 'Missing argument';
+  my $id   = shift || die 'Missing argument';
+  my $type = shift || die 'Missing argument';
 
   # Check whether the title is specified:
   unless ($data->{header}->{title}) {
@@ -146,13 +146,13 @@ sub fix_header {
   # Check whether the author is specified:
   if (my $author = $data->{header}->{author}) {
     # Check whether it contains forbidden characters:
-    if ($author =~ /[^\w\s\-]/) {
+    if ($author =~ /:/) {
       # Display the appropriate warning:
       print STDERR "Invalid author in the $type with ID $id.\n"
         if $verbose;
 
       # Strip forbidden characters:
-      $data->{header}->{author} = s/[^\w\s\-]//g;
+      $data->{header}->{author} = s/://g;
     }
   }
   else {
@@ -345,7 +345,7 @@ sub collect_metadata {
 
 # Return the list of months:
 sub list_of_months {
-  my $data = shift || die "Missing argument";
+  my $data = shift || die 'Missing argument';
   my $root = shift || '/';
   my $year = shift || '';
 
@@ -368,7 +368,7 @@ sub list_of_months {
 
 # Return the list of pages:
 sub list_of_pages {
-  my $data = shift || die "Missing argument";
+  my $data = shift || die 'Missing argument';
   my $root = shift || '/';
   my $list = '';
 
@@ -390,7 +390,7 @@ sub list_of_pages {
 
 # Return the list of tags:
 sub list_of_tags {
-  my $data = shift || die "Missing argument";
+  my $data = shift || die 'Missing argument';
   my $root = shift || '/';
 
   # Check whether the tags generation is eneabled:
@@ -412,7 +412,7 @@ sub list_of_tags {
 
 # Write a single page:
 sub write_page {
-  my $file     = shift || die "Missing argument";
+  my $file     = shift || die 'Missing argument';
   my $data     = shift || return 0;
   my $content  = shift || '';
   my $root     = shift || '/';
@@ -424,9 +424,9 @@ sub write_page {
     my $encoding = $conf->{core}->{encoding} || 'UTF-8';
     my $name     = $conf->{user}->{name}     || 'admin';
     my $email    = $conf->{user}->{email}    || 'admin@localhost';
-    my $style    = $conf->{blog}->{style}    || 'default.css';
+    my $style    = $conf->{blog}->{style}    || 'graylines.css';
     my $subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
-    my $theme    = $conf->{blog}->{theme}    || 'default.html';
+    my $theme    = $conf->{blog}->{theme}    || 'graylines.html';
     my $title    = $conf->{blog}->{title}    || 'My Blog';
 
     # Prepare the pages, tags and months lists:
@@ -499,7 +499,7 @@ sub write_page {
 
 # Read the post/page body/excerpt:
 sub read_body {
-  my $id      = shift || die "Missing argument";
+  my $id      = shift || die 'Missing argument';
   my $type    = shift || 'post';
   my $excerpt = shift || 0;
   my $file    = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
@@ -526,8 +526,8 @@ sub read_body {
 
 # Return the tag links:
 sub format_tags {
-  my $data = shift || die "Missing argument";
-  my $root = shift || die "Missing argument";
+  my $data = shift || die 'Missing argument';
+  my $root = shift || die 'Missing argument';
   my $tags = shift || return '';
 
   # Return the list of tag links:
@@ -538,9 +538,9 @@ sub format_tags {
 
 # Return the formatted post heading:
 sub format_heading {
-  my $title  = shift || die "Missing argument";
-  my $date   = shift || die "Missing argument";
-  my $author = shift || die "Missing argument";
+  my $title  = shift || die 'Missing argument';
+  my $date   = shift || die 'Missing argument';
+  my $author = shift || die 'Missing argument';
   my $tags   = shift;
 
   # Read required data from the language file:
@@ -548,18 +548,18 @@ sub format_heading {
   my $tagged_as = $locale->{lang}->{taggedas} || 'tagged as';
 
   # Return the formatted post heading:
-  return "<h2>$title</h2>\n\n<p style=\"information\">\n  " .
-         "<span style=\"date\">$date</span> " .
-         "$posted_by <span style=\"author\">$author</span>" .
+  return "<h2 class=\"post\">$title</h2>\n\n<p class=\"information\">\n  ".
+         "<span class=\"date\">$date</span> " .
+         "$posted_by <span class=\"author\">$author</span>" .
          (($with_tags && $tags)
-           ? ", $tagged_as <span style=\"tags\">$tags</span>.\n"
+           ? ", $tagged_as <span class=\"tags\">$tags</span>.\n"
            : ".\n"
          ) . "</p>\n\n";
 }
 
 # Strip HTML elements:
 sub strip_html {
-  my $string = shift || die "Missing argument";
+  my $string = shift || die 'Missing argument';
 
   # Strip HTML elements and forbidded characters:
   $string =~ s/(<[^>]*>|&[^;]*;|<|>|&)//g;
@@ -570,7 +570,7 @@ sub strip_html {
 
 # Generate RSS feed:
 sub generate_rss {
-  my $data          = shift || die "Missing argument";
+  my $data          = shift || die 'Missing argument';
   my $body          = '';
 
   # Read required data from the configuration:
@@ -651,7 +651,7 @@ sub generate_rss {
 
 # Generate index page:
 sub generate_index {
-  my $data      = shift || die "Missing argument";
+  my $data      = shift || die 'Missing argument';
   my $body      = '';
 
   # Read required data from the configuration:
@@ -699,7 +699,7 @@ sub generate_index {
 
 # Generate posts:
 sub generate_posts {
-  my $data         = shift || die "Missing argument";
+  my $data         = shift || die 'Missing argument';
 
   # Read required data from the configuration:
   my $ext          = $conf->{core}->{extension}  || 'html';
@@ -765,7 +765,7 @@ sub generate_posts {
     # Check whether the year has changed:
     if ($year_last ne $year_curr) {
       # Prepare this year's archive body:
-      $year_body = "<p class=\"section\">$title_string $year</p>\n\n" .
+      $year_body = "<div class=\"section\">$title_string $year</div>\n\n" .
                    "<ul>\n" . list_of_months($data, '../', $year) .
                    "</ul>";
 
@@ -804,14 +804,16 @@ sub generate_posts {
       my $name = ($locale->{lang}->{$temp} || $temp) . " $year";
 
       # Add heading:
-      $month_body  = "<p class=\"section\">$title_string $name</p>\n\n" .
+      $month_body  ="<div class=\"section\">$title_string $name</div>\n\n".
                      "$month_body";
 
       # Add navigation:
-      $month_body .= "<a href=\"index$prev.$ext\">$prev_string</a>\n"
+      $month_body .= "<div class=\"navigation\">\n";
+      $month_body .= "  <a href=\"index$prev.$ext\">$prev_string</a>\n"
         if $month_curr eq $month_last;
-      $month_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
+      $month_body .= "  <a href=\"index$next.$ext\">$next_string</a>\n"
         if $month_page;
+      $month_body .= "</div>\n";
 
       # Prepare the monthly archive file name:
       $file = catfile($destdir, $year, $month, "index$index.$ext");
@@ -866,12 +868,14 @@ sub generate_posts {
     my $name = ($locale->{lang}->{$temp} || $temp) . " $year";
 
     # Add heading:
-    $month_body  = "<p class=\"section\">$title_string $name</p>\n\n" .
+    $month_body  = "<div class=\"section\">$title_string $name</div>\n\n" .
                    "$month_body";
 
     # Add navigation:
-    $month_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
+    $month_body .= "<div class=\"navigation\">\n";
+    $month_body .= "  <a href=\"index$next.$ext\">$next_string</a>\n"
       if $month_page;
+    $month_body .= "</div>\n";
 
     # Prepare the monthly archive file name:
     $file = catfile($destdir, $year, $month, "index$index.$ext");
@@ -889,7 +893,7 @@ sub generate_posts {
 
 # Generate tags:
 sub generate_tags {
-  my $data         = shift || die "Missing argument";
+  my $data         = shift || die 'Missing argument';
 
   # Read required data from the configuration:
   my $ext          = $conf->{core}->{extension} || 'html';
@@ -927,13 +931,15 @@ sub generate_tags {
         my $prev  = $tag_page + 1;
 
         # Add heading:
-        $tag_body  = "<p class=\"section\">$title_string $tag</p>\n\n" .
+        $tag_body  = "<div class=\"section\">$title_string $tag</div>\n\n".
                      "$tag_body";
 
         # Add navigation:
-        $tag_body .= "<a href=\"index$prev.$ext\">$prev_string</a>\n";
-        $tag_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
+        $tag_body .= "<div class=\"navigation\">\n";
+        $tag_body .= "  <a href=\"index$prev.$ext\">$prev_string</a>\n";
+        $tag_body .= "  <a href=\"index$next.$ext\">$next_string</a>\n"
           if $tag_page;
+        $tag_body .= "</div>\n";
 
         # Create the directory tree:
         make_directories [
@@ -978,12 +984,14 @@ sub generate_tags {
       my $next  = $tag_page - 1 || '';
 
       # Add heading:
-      $tag_body  = "<p class=\"section\">$title_string $tag</p>\n\n" .
+      $tag_body  = "<div class=\"section\">$title_string $tag</div>\n\n" .
                    "$tag_body";
 
       # Add navigation:
-      $tag_body .= "<a href=\"index$next.$ext\">$next_string</a>\n"
+      $tag_body .= "<div class=\"navigation\">\n";
+      $tag_body .= "  <a href=\"index$next.$ext\">$next_string</a>\n"
         if $tag_page;
+      $tag_body .= "</div>\n";
 
       # Create the directory tree:
       make_directories [
@@ -1009,7 +1017,7 @@ sub generate_tags {
 
 # Generate pages:
 sub generate_pages {
-  my $data = shift || die "Missing argument";
+  my $data = shift || die 'Missing argument';
   my $body = '';
 
   # Read required data from the configuration:
@@ -1041,7 +1049,7 @@ sub generate_pages {
 # Copy the stylesheet:
 sub copy_stylesheet {
   # Prepare the file names:
-  my $style = $conf->{blog}->{style} || 'default.css';
+  my $style = $conf->{blog}->{style} || 'graylines.css';
   my $from  = catfile($blogdir, '.blaze', 'style', $style);
   my $to    = catfile($destdir, $style);
 

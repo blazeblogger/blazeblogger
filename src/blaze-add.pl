@@ -92,7 +92,7 @@ END_VERSION
 
 # Write string to the given file:
 sub write_to_file {
-  my $file = shift || die "Missing argument";
+  my $file = shift || die 'Missing argument';
   my $text = shift || '';
 
   # Open the file for writing:
@@ -110,9 +110,9 @@ sub write_to_file {
 
 # Check the header for the erroneous or missing data:
 sub check_header {
-  my $data = shift || die "Missing argument";
-  my $id   = shift || die "Missing argument";
-  my $type = shift || die "Missing argument";
+  my $data = shift || die 'Missing argument';
+  my $id   = shift || die 'Missing argument';
+  my $type = shift || die 'Missing argument';
 
   # Check whether the title is specified:
   unless ($data->{header}->{title}) {
@@ -124,7 +124,7 @@ sub check_header {
   # Check whether the author is specified:
   if (my $author = $data->{header}->{author}) {
     # Check whether it contains forbidden characters:
-    if ($author =~ /[^\w\s\-]/) {
+    if ($author =~ /:/) {
       # Display the appropriate warning:
       print STDERR "Invalid author in the $type with ID $id.\n"
         if $verbose;
@@ -177,8 +177,8 @@ sub check_header {
 
 # Create a record from the single file:
 sub save_record {
-  my $file = shift || die "Missing argument";
-  my $id   = shift || die "Missing argument";
+  my $file = shift || die 'Missing argument';
+  my $id   = shift || die 'Missing argument';
   my $type = shift || 'post';
   my $data = {};
   my $line = '';
