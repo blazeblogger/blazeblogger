@@ -25,7 +25,7 @@ use Getopt::Long;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
-use constant VERSION => '0.0.1';                    # Script version.
+use constant VERSION => '0.7.0';                    # Script version.
 
 # General script settings:
 our $blogdir    = '.';                              # Repository location.
@@ -599,6 +599,9 @@ sub generate_rss {
   # Strip HTML elements:
   $blog_title    = strip_html($blog_title);
   $blog_subtitle = strip_html($blog_subtitle);
+
+  # Strip trailing / from the base URL:
+  $base =~ s/\/$//;
 
   # Prepare the RSS file name:
   my $file = catfile($destdir, 'index.rss');
