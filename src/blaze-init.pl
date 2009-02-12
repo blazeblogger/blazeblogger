@@ -309,7 +309,7 @@ body, h1, h2, p {
 
 body {
 	margin: 0;
-	font-family: Arial, helvetica, Georgia, Sans-serif;
+	font-family: Arial, Helvetica, Sans-serif;
 	font-size: 12px;
 	text-align: center;
 	vertical-align: top;
@@ -318,7 +318,7 @@ body {
 }
 
 h1 {
-font-family: Georgia, Sans-serif;
+font-family: Georgia, Serif;
 font-size: 32px;
 padding-bottom: 5px;
 }
@@ -339,7 +339,7 @@ p {
 
 #wrapper {
 	margin: 0 auto 0 auto;
-	width: 750px;
+	width: 760px;
 	text-align: left;
 	padding-top: 30px;
 	border-top: 5px solid #EEE;
@@ -347,7 +347,7 @@ p {
 
 #header {
 	float: left;
-	width: 750px;
+	width: 760px;
 	height: 80px;
 	border-bottom: 2px solid #EEE;
 }
@@ -359,7 +359,7 @@ p {
 
 h2.post {
   padding-top: 10px;
-	font-family: Georgia, Sans-serif;
+	font-family: Georgia, Serif;
 	font-size: 18px;
 }
 
@@ -390,7 +390,7 @@ h2.post {
 }
 
 .sidebar {
-	float: left;
+	float: right;
 	width: 239px;
 	margin: 0 0 0 10px;
 	display: inline;
@@ -408,7 +408,7 @@ h2.post {
 }
 
 .sidebar ul li h2 {
-	font-family: Georgia, Sans-serif;
+	font-family: Georgia, Serif;
 	font-size: 14px;
 	padding: 0 0 3px 3px;
 	border-bottom: 1px solid #EEE;
@@ -422,7 +422,7 @@ h2.post {
 #footer {
 	clear: both;
 	float: left;
-	width: 750px;
+	width: 760px;
 	line-height: 18px;
 	padding: 7px 10px;
 	margin: 15px 0;
