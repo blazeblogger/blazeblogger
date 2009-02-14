@@ -134,9 +134,9 @@ sub display_records {
     my $tags   = $data->{header}->{tags}   || '';
 
     # Check whether the record matches the pattern:
-    unless ($data->{header}->{date}   =~ /^$year-$month-$day$/ &&
-            $data->{header}->{author} =~ /^$name$/ &&
-            $file =~ /^$id$/) {
+    unless ($date   =~ /^$year-$month-$day$/ &&
+            $author =~ /^$name$/ &&
+            $file   =~ /^$id$/) {
       # Skip the record:
       next;
     }
