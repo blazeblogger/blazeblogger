@@ -290,7 +290,7 @@ sub add_new {
   # Read the configuration file:
   my $file = catfile($blogdir, '.blaze', 'config');
   my $conf = ReadINI($file)
-             or print STDERR "Unable to read configuration.";
+             or print STDERR "Unable to read configuration.\n";
 
   # Prepare the data for the temporary file header:
   my $name = $conf->{user}->{name} || 'admin';
