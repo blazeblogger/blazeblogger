@@ -22,6 +22,7 @@ use File::Basename;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;
+use Digest::MD5;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -100,8 +101,7 @@ sub check_header {
   # Check whether the title is specified:
   unless ($data->{header}->{title}) {
     # Display the appropriate warning:
-    print STDERR "Missing title in the $type with ID $id.\n"
-      if $verbose;
+    print STDERR "Missing title in the $type with ID $id.\n";
   }
 
   # Check whether the author is specified:
@@ -109,14 +109,12 @@ sub check_header {
     # Check whether it contains forbidden characters:
     if ($author =~ /:/) {
       # Display the appropriate warning:
-      print STDERR "Invalid author in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid author in the $type with ID $id.\n";
     }
   }
   else {
     # Display the appropriate warning:
-    print STDERR "Missing author in the $type with ID $id.\n"
-      if $verbose;
+    print STDERR "Missing author in the $type with ID $id.\n";
   }
 
   # Check whether the date is specified:
@@ -124,14 +122,12 @@ sub check_header {
     # Check whether the format is valid:
     if ($date !~ /\d{4}-[01]\d-[0-3]\d/) {
       # Display the appropriate warning:
-      print STDERR "Invalid date in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid date in the $type with ID $id.\n";
     }
   }
   else {
     # Display the appropriate warning:
-    print STDERR "Missing date in the $type with ID $id.\n"
-      if $verbose;
+    print STDERR "Missing date in the $type with ID $id.\n";
   }
 
   # Check whether the tags are specified:
@@ -139,8 +135,7 @@ sub check_header {
     # Check whether they contain forbidden characters:
     if ($tags =~ /:/) {
       # Display the appropriate warning:
-      print STDERR "Invalid tags in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid tags in the $type with ID $id.\n";
     }
   }
 
@@ -149,8 +144,7 @@ sub check_header {
     # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
       # Display the appropriate warning:
-      print STDERR "Invalid URL in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid URL in the $type with ID $id.\n";
     }
   }
 
@@ -273,7 +267,7 @@ sub add_files {
     # Save the record:
     save_record($file, $id, $type)
       and push(@list, $id)
-      or print STDERR "Unable to add $file.\n" if $verbose;
+      or print STDERR "Unable to add $file.\n";
   }
 
   # Return the list of added IDs:
@@ -292,19 +286,15 @@ sub add_new {
   my $conf = ReadINI($file)
              or print STDERR "Unable to read configuration.\n";
 
+  # Decide which editor to use:
+  my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
+
   # Prepare the data for the temporary file header:
   my $name = $conf->{user}->{name} || 'admin';
   my $date = date_to_string(time);
 
-  # Decide which editor to use:
-  my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
-
-  # Open the file for writing:
-  open(FILE, ">$temp")
-    or exit_with_error("Unable to write the temporary file.");
-
-  # Write the temporary file:
-  print FILE << "END_TEMP";
+  # Prepare the temporary file header:
+  my $head = << "END_HEAD";
 # This and following lines beginning with  `#' are the $type header.  Please
 # take your time and replace these options with desired values. Just remem-
 # ber that the date has to be in an  YYYY-MM-DD  form,  the tags is a comma
@@ -318,16 +308,45 @@ sub add_new {
 #   tags:
 #   url:
 #
-# The header ends here.  The rest is the content of your $type. You can use
+# The header ends here.  The rest is the content of your $type.  You can use
 # <!-- break --> to mark the end of the part to be displayed on index page.
 
-END_TEMP
+END_HEAD
+
+  # Open the file for writing:
+  open(FILE, ">$temp")
+    or exit_with_error("Unable to write the temporary file.");
+
+  # Write the temporary file:
+  print FILE $head;
 
   # Close the file:
   close(FILE);
 
   # Open the temporary file in the external editor:
   system($edit, $temp) == 0 or exit_with_error("Unable to run `$edit'.",1);
+
+  # Opent the file for reading:
+  if (open(FILE, "$temp")) {
+    # Set the IO handler to binmode:
+    binmode(FILE);
+
+    # Count checksums:
+    my $before = Digest::MD5->new->add($head)->hexdigest;
+    my $after  = Digest::MD5->new->addfile(*FILE)->hexdigest;
+
+    # Close the file:
+    close(FILE);
+
+    #Digest::MD5->new->addfile(*FILE)->hexdigest
+    if ($before eq $after) {
+      # Report failure:
+      print STDERR "File have not been changed: aborting.\n";
+
+      # Return failure:
+      return 0;
+    }
+  }
 
   # Add file to the repository:
   my @list = add_files($type, [ $temp ]);
