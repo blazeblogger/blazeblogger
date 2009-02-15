@@ -459,7 +459,8 @@ END_LANG
 my $logfile = catfile($blogdir, '.blaze', 'log');
 
 # Write to / create the log file:
-add_to_log("Created/recovered a BlazeBlogger repository.");
+add_to_log("Created/recovered a BlazeBlogger repository.")
+  or print STDERR "Unable to log the event.\n";
 
 # Report success:
 print "Created/recovered a BlazeBlogger repository in " .

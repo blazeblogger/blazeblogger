@@ -311,30 +311,30 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 my $id   = $ARGV[0];
 
 # Prepare the file names:
-my $file = catfile($blogdir, '.blaze', 'temp');
-my $temp = catfile($blogdir, '.blaze', 'config');
+my $temp = catfile($blogdir, '.blaze', 'temp');
+my $file = catfile($blogdir, '.blaze', 'config');
 
 # Read the configuration file:
-my $conf = ReadINI($temp)
-           or exit_with_error("Unable to read `$temp'.", 13);
+my $conf = ReadINI($file)
+           or print STDERR "Unable to read configuration.\n";
 
 # Decide which editor to use:
 my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
 # Create the temporary file:
-read_record($file, $id, $type)
+read_record($temp, $id, $type)
   or exit_with_error("Unable to read record with ID $id.", 13);
 
 # Open the temporary file in the external editor:
-system($edit, $file) == 0 or exit_with_error("Unable to run `$edit'.", 1);
+system($edit, $temp) == 0 or exit_with_error("Unable to run `$edit'.", 1);
 
 # Save the record:
-save_record($file, $id, $type)
+save_record($temp, $id, $type)
   or exit_with_error("Unable to write the record with ID $id.", 13);
 
 # Log the record editing:
 add_to_log("Edited the $type with ID $id.")
-  or exit_with_error("Unable to log the event.");
+  or print STDERR "Unable to log the event.\n";
 
 # Report success:
 print "Your changes have been successfully saved.\n" if $verbose;

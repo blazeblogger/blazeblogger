@@ -1130,13 +1130,13 @@ unless ($with_posts || $with_pages) {
 # Read the configuration file:
 my $temp = catfile($blogdir, '.blaze', 'config');
 $conf    = ReadINI($temp)
-           or exit_with_error("Unable to read `$temp'.", 13);
+           or print STDERR "Unable to read configuration.\n";
 
 # Read the language file:
 $temp    = catfile($blogdir, '.blaze', 'lang',
                    ($conf->{blog}->{lang} || 'en_GB'));
 $locale  = ReadINI($temp)
-           or exit_with_error("Unable to read `$temp'.", 13);
+           or print STDERR "Unable to read language file `$temp'.", 13);
 
 # Collect the necessary metadata:
 my $data = collect_metadata();

@@ -141,7 +141,7 @@ unlink($head) and unlink($body)
 
 # Log the record deletion:
 add_to_log("Removed the $type with ID $ARGV[0].")
-  or exit_with_error("Unable to log the event.");
+  or print STDERR "Unable to log the event.\n";
 
 # Report success:
 print "The $type has been successfully removed.\n" if $verbose;

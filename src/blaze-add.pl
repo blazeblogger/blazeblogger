@@ -32,7 +32,8 @@ our $blogdir = '.';                                 # Repository location.
 our $verbose = 1;                                   # Verbosity level.
 
 # Command-line options:
-my  $type = 'post';                                 # Type: post or page.
+my  $type    = 'post';                              # Type: post or page.
+my  $added   = '';                                  # List of added IDs.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
@@ -85,24 +86,6 @@ distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
 TICULAR PURPOSE.
 END_VERSION
-
-  # Return success:
-  return 1;
-}
-
-# Write string to the given file:
-sub write_to_file {
-  my $file = shift || die 'Missing argument';
-  my $text = shift || '';
-
-  # Open the file for writing:
-  open(FILE, ">$file") or return 0;
-
-  # Write given string to the file::
-  print FILE $text;
-
-  # Close the file:
-  close(FILE);
 
   # Return success:
   return 1;
@@ -276,32 +259,38 @@ sub choose_id {
   return $chosen;
 }
 
-# Set up the options parser:
-Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
+# Add given files to the repository:
+sub add_files {
+  my $type  = shift || 'post';
+  my $files = shift || die 'Missing argument';
+  my @list  = ();
 
-# Process command-line options:
-GetOptions(
-  'help|h'        => sub { display_help();    exit 0; },
-  'version|v'     => sub { display_version(); exit 0; },
-  'page|p'        => sub { $type    = 'page'; },
-  'post|P'        => sub { $type    = 'post'; },
-  'quiet|q'       => sub { $verbose = 0;      },
-  'verbose|V'     => sub { $verbose = 1;      },
-  'blogdir|b=s'   => sub { $blogdir = $_[1];  },
-);
+  # Process each file:
+  foreach my $file (@{$files}) {
+    # Get the first available ID:
+    my $id = choose_id($type);
 
-# Check the repository is present (however naive this method is):
-exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
-  unless (-d catdir($blogdir, '.blaze'));
+    # Save the record:
+    save_record($file, $id, $type)
+      and push(@list, $id)
+      or print STDERR "Unable to add $file.\n" if $verbose;
+  }
 
-# Check whether the file is supplied:
-if (scalar(@ARGV) == 0) {
-  my $file = catfile($blogdir, '.blaze', 'temp');
+  # Return the list of added IDs:
+  return @list;
+}
+
+# Add new record to the repository:
+sub add_new {
+  my $type = shift || 'post';
+
+  # Prepare the temporary file name:
+  my $temp = catfile($blogdir, '.blaze', 'temp');
 
   # Read the configuration file:
-  my $temp = catfile($blogdir, '.blaze', 'config');
-  my $conf = ReadINI($temp)
-             or exit_with_error("Unable to read `$temp'.", 13);
+  my $file = catfile($blogdir, '.blaze', 'config');
+  my $conf = ReadINI($file)
+             or print STDERR "Unable to read configuration.";
 
   # Prepare the data for the temporary file header:
   my $name = $conf->{user}->{name} || 'admin';
@@ -310,8 +299,12 @@ if (scalar(@ARGV) == 0) {
   # Decide which editor to use:
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
+  # Open the file for writing:
+  open(FILE, ">$temp")
+    or exit_with_error("Unable to write the temporary file.");
+
   # Write the temporary file:
-  write_to_file($file, << "END_TEMP");
+  print FILE << "END_TEMP";
 # This and following lines beginning with  `#' are the $type header.  Please
 # take your time and replace these options with desired values. Just remem-
 # ber that the date has to be in an  YYYY-MM-DD  form,  the tags is a comma
@@ -330,48 +323,57 @@ if (scalar(@ARGV) == 0) {
 
 END_TEMP
 
+  # Close the file:
+  close(FILE);
+
   # Open the temporary file in the external editor:
-  system($edit, $file) == 0 or exit_with_error("Unable to run `$edit'.",1);
+  system($edit, $temp) == 0 or exit_with_error("Unable to run `$edit'.",1);
 
-  # Get the first unused ID:
-  my $id = choose_id($type);
+  # Add file to the repository:
+  my @list = add_files($type, [ $temp ]);
 
-  # Save the record:
-  save_record($file, $id, $type)
-    or exit_with_error("Unable to write the record.", 13);
+  # Return the record ID:
+  return shift(@list);
+}
 
-  # Log the record addition:
-  add_to_log("Added the $type with ID $id.")
-    or exit_with_error("Unable to log the event.");
+# Set up the options parser:
+Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
-  # Report success:
-  print "The $type has been successfully added with ID $id.\n" if $verbose;
+# Process command-line options:
+GetOptions(
+  'help|h'        => sub { display_help();    exit 0; },
+  'version|v'     => sub { display_version(); exit 0; },
+  'page|p'        => sub { $type    = 'page'; },
+  'post|P'        => sub { $type    = 'post'; },
+  'quiet|q'       => sub { $verbose = 0;      },
+  'verbose|V'     => sub { $verbose = 1;      },
+  'blogdir|b=s'   => sub { $blogdir = $_[1];  },
+);
+
+# Check the repository is present (however naive this method is):
+exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
+  unless (-d catdir($blogdir, '.blaze'));
+
+# Check whether any file is supplied:
+if (scalar(@ARGV) == 0) {
+  # Add new record to the repository:
+  $added   = add_new($type) or exit 1;
 }
 else {
-  my @added = ();
-
-  # Process each file:
-  foreach my $file (@ARGV) {
-    # Get the first unused ID:
-    my $id = choose_id($type);
-
-    # Save the record:
-    save_record($file, $id, $type)
-      and push(@added, $id)
-      or print STDERR "Unable to add $file.\n" if $verbose;
-  }
+  # Add given files to the repository:
+  my @list = add_files($type, \@ARGV) or exit 1;
 
   # Prepare the list of successfully added IDs:
-  my $list = join(', ', sort(@added));
-
-  # Log the record addition:
-  add_to_log("Added the $type with ID $list.")
-    or exit_with_error("Unable to log the event.") if $list;
-
-  # Report success:
-  print "Successfully added the $type with ID $list.\n"
-    if ($verbose && $list);
+  $added   =  join(', ', sort(@list));
+  $added   =~ s/, ([^,]+)$/ and \1/;
 }
+
+# Log the event:
+add_to_log("Added the $type with ID $added.")
+  or print STDERR "Unable to log the event.\n";
+
+# Report success:
+print "Successfully added the $type with ID $added.\n" if $verbose;
 
 # Return success:
 exit 0;
