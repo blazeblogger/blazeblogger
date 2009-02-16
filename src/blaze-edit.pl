@@ -22,6 +22,7 @@ use File::Basename;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;
+use Digest::MD5;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -99,8 +100,7 @@ sub check_header {
   # Check whether the title is specified:
   unless ($data->{header}->{title}) {
     # Display the appropriate warning:
-    print STDERR "Missing title in the $type with ID $id.\n"
-      if $verbose;
+    print STDERR "Missing title in the $type with ID $id.\n";
   }
 
   # Check whether the author is specified:
@@ -108,14 +108,12 @@ sub check_header {
     # Check whether it contains forbidden characters:
     if ($author =~ /:/) {
       # Display the appropriate warning:
-      print STDERR "Invalid author in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid author in the $type with ID $id.\n";
     }
   }
   else {
     # Display the appropriate warning:
-    print STDERR "Missing author in the $type with ID $id.\n"
-      if $verbose;
+    print STDERR "Missing author in the $type with ID $id.\n";
   }
 
   # Check whether the date is specified:
@@ -123,14 +121,12 @@ sub check_header {
     # Check whether the format is valid:
     if ($date !~ /\d{4}-[01]\d-[0-3]\d/) {
       # Display the appropriate warning:
-      print STDERR "Invalid date in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid date in the $type with ID $id.\n";
     }
   }
   else {
     # Display the appropriate warning:
-    print STDERR "Missing date in the $type with ID $id.\n"
-      if $verbose;
+    print STDERR "Missing date in the $type with ID $id.\n";
   }
 
   # Check whether the tags are specified:
@@ -138,8 +134,7 @@ sub check_header {
     # Check whether they contain forbidden characters:
     if ($tags =~ /:/) {
       # Display the appropriate warning:
-      print STDERR "Invalid tags in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid tags in the $type with ID $id.\n";
     }
   }
 
@@ -148,8 +143,7 @@ sub check_header {
     # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
       # Display the appropriate warning:
-      print STDERR "Invalid URL in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid URL in the $type with ID $id.\n";
     }
   }
 
@@ -178,7 +172,8 @@ sub read_record {
   my $url    = $data->{header}->{url}    || '';
 
   # Open the file for writing:
-  open(FILE, ">$file") or return 0;
+  open(FILE, ">$file")
+    or exit_with_error("Unable to write the temporary file.");
 
   # Write the header:
   print FILE << "END_HEADER";
@@ -266,6 +261,71 @@ sub save_record {
   return 1;
 }
 
+# Edit record in the repository:
+sub edit_record {
+  my $id   = shift || die 'Missing argument';
+  my $type = shift || 'post';
+  my ($before, $after);
+
+  # Prepare the temporary file name:
+  my $temp = catfile($blogdir, '.blaze', 'temp');
+
+  # Read the configuration file:
+  my $file = catfile($blogdir, '.blaze', 'config');
+  my $conf = ReadINI($file)
+             or print STDERR "Unable to read configuration.\n";
+
+  # Decide which editor to use:
+  my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
+
+  # Create the temporary file:
+  read_record($temp, $id, $type)
+    or exit_with_error("Unable to read record with ID $id.", 13);
+
+  # Open the file for reading:
+  if (open(FILE, "$temp")) {
+    # Set the IO handler to binmode:
+    binmode(FILE);
+
+    # Count checksum:
+    $before = Digest::MD5->new->addfile(*FILE)->hexdigest;
+
+    # Close the file:
+    close(FILE);
+  }
+
+  # Open the temporary file in the external editor:
+  system($edit, $temp) == 0 or exit_with_error("Unable to run `$edit'.",1);
+
+  # Open the file for reading:
+  if (open(FILE, "$temp")) {
+    # Set the IO handler to binmode:
+    binmode(FILE);
+
+    # Count checksum:
+    $after = Digest::MD5->new->addfile(*FILE)->hexdigest;
+
+    # Close the file:
+    close(FILE);
+
+    # Compare the checksums:
+    if ($before eq $after) {
+      # Report failure:
+      print STDERR "File have not been changed: aborting.\n";
+
+      # Return failure:
+      return 0;
+    }
+  }
+
+  # Save the record:
+  save_record($temp, $id, $type)
+    or exit_with_error("Unable to write the record with ID $id.", 13);
+
+  # Return success:
+  return 1;
+}
+
 # Add given string to the log file
 sub add_to_log {
   my $text = shift || 'Something miraculous has just happened!';
@@ -307,33 +367,11 @@ exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 1);
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# Get the record ID:
-my $id   = $ARGV[0];
+# Edit given record:
+edit_record($ARGV[0], $type) or exit 1;
 
-# Prepare the file names:
-my $temp = catfile($blogdir, '.blaze', 'temp');
-my $file = catfile($blogdir, '.blaze', 'config');
-
-# Read the configuration file:
-my $conf = ReadINI($file)
-           or print STDERR "Unable to read configuration.\n";
-
-# Decide which editor to use:
-my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
-
-# Create the temporary file:
-read_record($temp, $id, $type)
-  or exit_with_error("Unable to read record with ID $id.", 13);
-
-# Open the temporary file in the external editor:
-system($edit, $temp) == 0 or exit_with_error("Unable to run `$edit'.", 1);
-
-# Save the record:
-save_record($temp, $id, $type)
-  or exit_with_error("Unable to write the record with ID $id.", 13);
-
-# Log the record editing:
-add_to_log("Edited the $type with ID $id.")
+# Log the event:
+add_to_log("Edited the $type with ID $ARGV[0].")
   or print STDERR "Unable to log the event.\n";
 
 # Report success:
