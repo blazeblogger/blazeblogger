@@ -61,6 +61,7 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -d $(man7dir)
 	$(INSTALL) -m 644 docs/blazeintro.7 $(man7dir)
 	$(INSTALL) -m 644 docs/blazetheme.7 $(man7dir)
+	$(INSTALL) -m 644 docs/blazestyle.7 $(man7dir)
 	$(INSTALL) -m 644 docs/blazeblogger.7 $(man7dir)
 
 uninstall:
@@ -82,6 +83,7 @@ uninstall:
 	-rm -f $(man1dir)/blaze-remove.1
 	-rm -f $(man7dir)/blazeintro.7
 	-rm -f $(man7dir)/blazetheme.7
+	-rm -f $(man7dir)/blazestyle.7
 	-rm -f $(man7dir)/blazeblogger.7
 	@echo "Removing empty directories..."
 	-rmdir $(bindir) $(man1dir) $(man7dir) $(mandir)
