@@ -338,7 +338,7 @@ END_HEAD
     # Close the file:
     close(FILE);
 
-    #Digest::MD5->new->addfile(*FILE)->hexdigest
+    # Compare the checksums:
     if ($before eq $after) {
       # Report failure:
       print STDERR "File have not been changed: aborting.\n";

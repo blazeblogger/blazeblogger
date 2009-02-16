@@ -190,7 +190,7 @@ sub read_record {
 #   tags:   $tags
 #   url:    $url
 #
-# The header ends here.  The rest is the content of your $type. You can use
+# The header ends here.  The rest is the content of your $type.  You can use
 # <!-- break --> to mark the end of the part to be displayed on index page.
 END_HEADER
 
