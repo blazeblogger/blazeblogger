@@ -136,8 +136,7 @@ sub fix_header {
   # Check whether the title is specified:
   unless ($data->{header}->{title}) {
     # Display the appropriate warning:
-    print STDERR "Missing title in the $type with ID $id.\n"
-      if $verbose;
+    print STDERR "Missing title in the $type with ID $id.\n";
 
     # Assign the default value:
     $data->{header}->{title} = $id;
@@ -148,8 +147,7 @@ sub fix_header {
     # Check whether it contains forbidden characters:
     if ($author =~ /:/) {
       # Display the appropriate warning:
-      print STDERR "Invalid author in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid author in the $type with ID $id.\n";
 
       # Strip forbidden characters:
       $data->{header}->{author} = s/://g;
@@ -157,8 +155,7 @@ sub fix_header {
   }
   else {
     # Display the appropriate warning:
-    print STDERR "Missing author in the $type with ID $id.\n"
-      if $verbose;
+    print STDERR "Missing author in the $type with ID $id.\n";
 
     # Assign the default value:
     $data->{header}->{author} = 'admin';
@@ -169,8 +166,7 @@ sub fix_header {
     # Check whether the format is valid:
     if ($date !~ /\d{4}-[01]\d-[0-3]\d/) {
       # Display the appropriate warning:
-      print STDERR "Invalid date in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid date in the $type with ID $id.\n";
 
       # Use the current date instead:
       $data->{header}->{date} = date_to_string(time);
@@ -178,8 +174,7 @@ sub fix_header {
   }
   else {
     # Display the appropriate warning:
-    print STDERR "Missing date in the $type with ID $id.\n"
-      if $verbose;
+    print STDERR "Missing date in the $type with ID $id.\n";
 
     # Assign the default value:
     $data->{header}->{date} = date_to_string(time);
@@ -190,8 +185,7 @@ sub fix_header {
     # Check whether they contain forbidden characters:
     if ($tags =~ /:/) {
       # Display the appropriate warning:
-      print STDERR "Invalid tags in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid tags in the $type with ID $id.\n";
 
       # Strip forbidden characters:
       $tags =~ s/://g;
@@ -213,8 +207,7 @@ sub fix_header {
     # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
       # Display the appropriate warning:
-      print STDERR "Invalid URL in the $type with ID $id.\n"
-        if $verbose;
+      print STDERR "Invalid URL in the $type with ID $id.\n";
 
       # Strip forbidden characters and substitute spaces:
       $url =~ s/[^\w\s\-]//g;
@@ -596,8 +589,7 @@ sub generate_rss {
   # Check whether the base URL is specified:
   unless ($base) {
     # Display the warning:
-    print STDERR "Missing blog.url option. Skipping the RSS feed.\n"
-      if $verbose;
+    print STDERR "Missing blog.url option. Skipping the RSS feed.\n";
 
     # Disable the RSS:
     $with_rss = 0;
