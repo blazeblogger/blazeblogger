@@ -7,8 +7,6 @@ blazetheme - an introduction to BlazeBlogger theme creation
 This document tries to provide a brief introduction on how to create new or
 modify existing theme for your BlazeBlogger web presentation.
 
-=head2 The Theme Structure
-
 To make it as easy to alter as possible, BlazeBlogger theme consists of two
 parts: the template file located in the C<.blaze/theme/> and corresponding
 style sheet in the C<.blaze/style/> directory. This way, you can easily
@@ -102,15 +100,11 @@ Main content (e.g. post or page body, posts listing etc.).
 
 BlazeBlogger themes directory.
 
-=item I<.blaze/style/>
-
-BlazeBlogger stylesheets directory.
-
 =back
 
 =head1 SEE ALSO
 
-B<blaze-config>(1), B<blaze-make>(1).
+B<blazestyle>(7), B<blaze-config>(1), B<blaze-make>(1).
 
 =head1 AUTHOR
 

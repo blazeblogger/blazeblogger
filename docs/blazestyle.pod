@@ -1,0 +1,82 @@
+=head1 NAME
+
+blazestyle - an introduction to BlazeBlogger stylesheet creation
+
+=head1 DESCRIPTION
+
+This document tries to provide a brief introduction on how to create new or
+modify existing stylesheet for your BlazeBlogger web presentation.
+
+To make it as easy to alter as possible, BlazeBlogger theme consists of two
+parts: the template file located in the C<.blaze/theme/> and corresponding
+style sheet in the C<.blaze/style/> directory. This way, you can easily
+switch between different styles (e.g. bright and dark one) without even
+touching the template file, which generally does not tend to vary much.
+
+The style file itself is just a plain CSS file (CSS 2.1 is recommended,
+although not required) with most of its parts dependent on elements,
+classes and IDs introduced in the theme file. Those few that are produced
+by the B<blaze-make>(1) are described below.
+
+=head2 List of Classes
+
+=over
+
+=item B<post>
+
+C<H2> element containing the page/post title.
+
+=item B<section>
+
+C<DIV> element containing the name of the current section (e.g. monthly
+archive, tag listing etc.).
+
+=item B<navigation>
+
+C<DIV> element containing the navigation for the listing browsing (i.e.
+previous and next page links).
+
+=item B<information>
+
+C<DIV> element containing the additional information about the post, i.e.
+the date of publishing, the post author and the list of attached tags.
+
+=item B<date>
+
+C<SPAN> element containing the date of publishing.
+
+=item B<author>
+
+C<SPAN> element containing the post author.
+
+=item B<tags>
+
+C<SPAN> element containing the list of attached tags.
+
+=back
+
+=head1 FILES
+
+=over
+
+=item I<.blaze/style/>
+
+BlazeBlogger stylesheets directory.
+
+=back
+
+=head1 SEE ALSO
+
+B<blazetheme>(7), B<blaze-config>(1), B<blaze-make>(1).
+
+=head1 AUTHOR
+
+Written by Jaromir Hradilek <jhradilek@gmail.com>
+
+Permission is granted to copy, distribute and/or modify this document under
+the terms of the GNU Free Documentation License, Version 1.3 or any later
+version published by the Free Software Foundation; with no Invariant
+Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license is included as a file called FDL in the main
+directory of the BlazeBlogger source package.
