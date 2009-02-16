@@ -1128,7 +1128,7 @@ $conf    = ReadINI($temp)
 $temp    = catfile($blogdir, '.blaze', 'lang',
                    ($conf->{blog}->{lang} || 'en_GB'));
 $locale  = ReadINI($temp)
-           or print STDERR "Unable to read language file `$temp'.", 13);
+           or print STDERR "Unable to read language file `$temp'.", 13;
 
 # Collect the necessary metadata:
 my $data = collect_metadata();
