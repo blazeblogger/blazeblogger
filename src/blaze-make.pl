@@ -555,13 +555,14 @@ sub format_heading {
   my $tagged_as = $locale->{lang}->{taggedas} || 'tagged as';
 
   # Return the formatted post heading:
-  return "<h2 class=\"post\">$title</h2>\n\n<p class=\"information\">\n  ".
+  return "<h2 class=\"post\">$title</h2>\n\n" .
+         "<div class=\"information\">\n  " .
          "<span class=\"date\">$date</span> " .
          "$posted_by <span class=\"author\">$author</span>" .
          (($with_tags && $tags)
            ? ", $tagged_as <span class=\"tags\">$tags</span>.\n"
            : ".\n"
-         ) . "</p>\n\n";
+         ) . "</div>\n\n";
 }
 
 # Strip HTML elements:
@@ -1037,7 +1038,7 @@ sub generate_pages {
     my ($year, $month) = split(/-/, $date);
 
     # Prepare the page body:
-    $body = "<h2>$title</h2>\n\n" . read_body($id, 'page', 0);
+    $body = "<h2 class=\"post\">$title</h2>\n\n".read_body($id, 'page', 0);
 
     # Create the directories:
     make_directories [ catdir($destdir, $url) ];
@@ -1262,7 +1263,7 @@ BlazeBlogger stylesheets directory.
 
 =head1 SEE ALSO
 
-B<blaze-config>(1), B<perl>(1).
+B<blazetheme>(7), B<blazestyle>(7), B<blaze-config>(1), B<perl>(1).
 
 =head1 BUGS
 
