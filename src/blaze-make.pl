@@ -75,7 +75,8 @@ Usage: $NAME [-pqrtPV] [-b directory] [-d directory]
   -t, --no-tags               disable support for tags
   -r, --no-rss                disable RSS feed creation
   -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages; the default option
+  -V, --verbose               display all messages including the list of
+                              created files
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -1231,7 +1232,7 @@ Avoid displaying messages that are not necessary.
 
 =item B<-V>, B<--verbose>
 
-Display all messages. This is the default option.
+Display all messages including the list of created files.
 
 =item B<-h>, B<--help>
 
