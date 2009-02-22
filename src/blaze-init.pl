@@ -303,78 +303,78 @@ write_to_file(catfile($blogdir, '.blaze', 'style', 'graylines.css'),
  */
 
 body, h1, h2, p {
-	margin: 0;
-	padding: 0;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-	margin: 0;
-	font-family: Arial, Helvetica, Sans-serif;
-	font-size: 12px;
-	text-align: center;
-	vertical-align: top;
-	background: #ffffff;
-	color: #000000;	
+  margin: 0;
+  font-family: Arial, Helvetica, Sans-serif;
+  font-size: 12px;
+  text-align: center;
+  vertical-align: top;
+  background: #ffffff;
+  color: #000000;
 }
 
 h1 {
-font-family: Georgia, Serif;
-font-size: 32px;
-padding-bottom: 5px;
+  font-family: Georgia, Serif;
+  font-size: 32px;
+  padding-bottom: 5px;
 }
 
 a:link, a:visited {
-	text-decoration: none;
-	color: #336699;
+  text-decoration: none;
+  color: #336699;
 }
 
 a:hover {
-	text-decoration: underline;
-	color: #ff0000;
+  text-decoration: underline;
+  color: #ff0000;
 }
 
 p {
-	padding: 10px 0 0 0;
+  padding: 10px 0 0 0;
 }
 
 #wrapper {
-	margin: 0 auto 0 auto;
-	width: 760px;
-	text-align: left;
-	padding-top: 30px;
-	border-top: 5px solid #EEE;
+  margin: 0 auto 0 auto;
+  width: 760px;
+  text-align: left;
+  padding-top: 30px;
+  border-top: 5px solid #EEE;
 }
 
 #header {
-	float: left;
-	width: 760px;
-	height: 80px;
-	border-bottom: 2px solid #EEE;
+  float: left;
+  width: 760px;
+  height: 80px;
+  border-bottom: 2px solid #EEE;
 }
 
 #container {
-	float: left;
-	width: 500px;
+  float: left;
+  width: 500px;
 }
 
 h2.post {
   padding-top: 10px;
-	font-family: Georgia, Serif;
-	font-size: 18px;
+  font-family: Georgia, Serif;
+  font-size: 18px;
 }
 
 .information {
-	border-top: 1px solid #EEE;
-	margin: 5px 0 0 0;
-	color: #AAA;
+  border-top: 1px solid #EEE;
+  margin: 5px 0 0 0;
+  color: #AAA;
 }
 
 .information a {
-	color: #AAA;
-	text-decoration: underline;
+  color: #AAA;
+  text-decoration: underline;
 }
 .information a:hover {
-	text-decoration: none;
+  text-decoration: none;
 }
 
 .section {
@@ -383,50 +383,50 @@ h2.post {
 }
 
 .navigation {
-	padding: 10px 0 0 0;
-	font-size: 14px;
-	font-weight: bold;
-	line-height: 18px;
+  padding: 10px 0 0 0;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 18px;
 }
 
 .sidebar {
-	float: right;
-	width: 239px;
-	margin: 0 0 0 10px;
-	display: inline;
-	border-left: 1px solid #EEE;
+  float: right;
+  width: 239px;
+  margin: 0 0 0 10px;
+  display: inline;
+  border-left: 1px solid #EEE;
 }
 
 .sidebar ul {
-	list-style-type: none;
-	margin: 0;
-	padding: 0 10px 0 10px;
+  list-style-type: none;
+  margin: 0;
+  padding: 0 10px 0 10px;
 }
 
 .sidebar ul li {
-	padding: 10px 0 10px 0;
+  padding: 10px 0 10px 0;
 }
 
 .sidebar ul li h2 {
-	font-family: Georgia, Serif;
-	font-size: 14px;
-	padding: 0 0 3px 3px;
-	border-bottom: 1px solid #EEE;
+  font-family: Georgia, Serif;
+  font-size: 14px;
+  padding: 0 0 3px 3px;
+  border-bottom: 1px solid #EEE;
 }
 
 .sidebar ul ul li {
-	padding: 0;
-	line-height: 24px;
+  padding: 0;
+  line-height: 24px;
 }
 
 #footer {
-	clear: both;
-	float: left;
-	width: 760px;
-	line-height: 18px;
-	padding: 7px 10px;
-	margin: 15px 0;
-	background: #EEE;
+  clear: both;
+  float: left;
+  width: 760px;
+  line-height: 18px;
+  padding: 7px 10px;
+  margin: 15px 0;
+  background: #EEE;
 }
 END_STYLE
 
