@@ -418,9 +418,9 @@ sub write_page {
     my $encoding = $conf->{core}->{encoding} || 'UTF-8';
     my $name     = $conf->{user}->{name}     || 'admin';
     my $email    = $conf->{user}->{email}    || 'admin@localhost';
-    my $style    = $conf->{blog}->{style}    || 'graylines.css';
+    my $style    = $conf->{blog}->{style}    || 'default.css';
     my $subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
-    my $theme    = $conf->{blog}->{theme}    || 'graylines.html';
+    my $theme    = $conf->{blog}->{theme}    || 'default.html';
     my $title    = $conf->{blog}->{title}    || 'My Blog';
 
     # Prepare the pages, tags and months lists:
@@ -1059,7 +1059,7 @@ sub generate_pages {
 # Copy the stylesheet:
 sub copy_stylesheet {
   # Prepare the file names:
-  my $style = $conf->{blog}->{style} || 'graylines.css';
+  my $style = $conf->{blog}->{style} || 'default.css';
   my $from  = catfile($blogdir, '.blaze', 'style', $style);
   my $to    = catfile($destdir, $style);
 

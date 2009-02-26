@@ -197,8 +197,8 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 [blog]
 #title=My Blog
 #subtitle=yet another blog
-#theme=graylines.html
-#style=graylines.css
+#theme=default.html
+#style=default.css
 #lang=en_GB
 #posts=10
 #url=http://127.0.0.1/
@@ -230,7 +230,7 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 END_CONFIG
 
 # Create the default theme file:
-write_to_file(catfile($blogdir, '.blaze', 'theme', 'graylines.html'),
+write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
               << 'END_THEME');
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
                       "http://www.w3.org/TR/html4/strict.dtd">
@@ -241,51 +241,50 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'graylines.html'),
   <!-- date -->
   <!-- stylesheet -->
   <!-- rss -->
-  <title><!-- title --></title>
+  <title><!-- title --> - <!-- subtitle --></title>
 </head>
 
 <body>
 
 <div id="wrapper">
-  <div id="header">
-    <h1><a href="<!-- root -->"><!-- title --></a></h1>
-    <!-- subtitle -->
+  <div id="shadow">
+    <div id="heading">
+      <h1><a href="<!-- root -->"><!-- title --></a></h1>
+      <!-- subtitle -->
+    </div>
+
+    <div id="menu">
+      <ul>
+<li><a href="<!-- root -->">Home</a></li>
+<!-- pages -->
+      </ul>
+    </div>
   </div>
 
-  <div id="container">
+  <div id="content">
 <!-- content -->
   </div>
 
-  <div class="sidebar">
+  <div id="sidebar">
+    <h2>Tags</h2>
     <ul>
-      <li>
-        <h2>Pages</h2>
-        <ul>
-<!-- pages -->
-        </ul>
-      </li>
-
-      <li>
-        <h2>Tags</h2>
-        <ul>
 <!-- tags -->
-        </ul>
-      </li>
+    </ul>
 
-      <li>
-        <h2>Archive</h2>
-        <ul>
+    <h2>Archive</h2>
+    <ul>
 <!-- archive -->
-        </ul>
-      </li>
+    </ul>
+
+    <h2>Blogroll</h2>
+    <ul>
+      <li><a href="http://blaze.blackened.cz">BlazeBlogger Homepage</a></li>
     </ul>
   </div>
 
   <div id="footer">
     Copyright &copy; <!-- year --> <!-- name -->.
-    Powered by <a href="http://blaze.blackened.cz/">BlazeBlogger</a> using
-    the <a href="http://zacklive.com/my-first-wordpress-theme-gray-lines/">
-    Gray Lines</a> theme.
+    Powered by <a href="http://blaze.blackened.cz/">BlazeBlogger</a>.
   </div>
 </div>
 
@@ -294,139 +293,205 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'graylines.html'),
 END_THEME
 
 # Create the default stylesheet:
-write_to_file(catfile($blogdir, '.blaze', 'style', 'graylines.css'),
+write_to_file(catfile($blogdir, '.blaze', 'style', 'default.css'),
               << "END_STYLE");
-/* Gray Lines design (C) 2008 Zack, <http://zacklive.com>
- * BlazeBlogger port (C) 2009 Jaromir Hradilek, <http://blackened.cz/>
+/* default.css - the default BlazeBlogger theme
+ * Copyright (C) 2009 Jaromir Hradilek
  *
- * Released under the GNU GPL, <http://www.gnu.org/licenses/gpl.html>.
+ * This program is free software:  you can redistribute it and/or modify it
+ * under  the terms of the  GNU General Public License  as published by the
+ * Free Software Foundation, version 3 of the License.
+ *
+ * This program  is  distributed  in the hope  that it will  be useful, but
+ * WITHOUT  ANY WARRANTY;  without  even the implied warranty of MERCHANTA-
+ * BILITY or  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+ * License for more details.
+ *
+ * You should have received a copy of the  GNU General Public License along
+ * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-body, h1, h2, p {
-  margin: 0;
-  padding: 0;
-}
-
 body {
-  margin: 0;
-  font-family: Arial, Helvetica, Sans-serif;
-  font-size: 12px;
-  text-align: center;
-  vertical-align: top;
-  background: #ffffff;
+  margin: 0px 0px 10px 0px;
+  padding: 0px;
   color: #000000;
-}
-
-h1 {
-  font-family: Georgia, Serif;
-  font-size: 32px;
-  padding-bottom: 5px;
-}
-
-a:link, a:visited {
-  text-decoration: none;
-  color: #336699;
-}
-
-a:hover {
-  text-decoration: underline;
-  color: #ff0000;
-}
-
-p {
-  padding: 10px 0 0 0;
+  background-color: #e7e7e7;
+  font-family: "DejaVu Sans", Arial, sans;
+  font-size: small;
 }
 
 #wrapper {
-  margin: 0 auto 0 auto;
-  width: 760px;
-  text-align: left;
-  padding-top: 30px;
-  border-top: 5px solid #EEE;
+  margin: auto;
+  padding: 0px;
+  width: 768px;
+  border-left: 1px solid #d6d6d6;
+  border-right: 1px solid #d6d6d6;
+  border-bottom: 1px solid #d6d6d6;
+  background-color: #ffffff;
 }
 
-#header {
-  float: left;
-  width: 760px;
-  height: 80px;
-  border-bottom: 2px solid #EEE;
+#shadow {
+  margin: 0px;
+  padding: 0px;
+  border-bottom: 2px solid #e7e7e7;
 }
 
-#container {
-  float: left;
-  width: 500px;
+#heading {
+  width: 728px;
+  padding: 20px;
+  background-color: #2e2e2e;
+  border-bottom: 2px solid #2a2a2a;
+  border-top: 2px solid #323232;
+  color: #d0d0d0;
 }
 
-h2.post {
-  padding-top: 10px;
-  font-family: Georgia, Serif;
-  font-size: 18px;
+#heading a, #heading h1 {
+  margin: 0px;
+  text-decoration: none;
+  color: #ffffff;
 }
 
-.information {
-  border-top: 1px solid #EEE;
-  margin: 5px 0 0 0;
-  color: #AAA;
-}
-
-.information a {
-  color: #AAA;
+#heading a:hover {
   text-decoration: underline;
 }
-.information a:hover {
+
+#menu {
+  width: 768px;
+  border-top: 1px solid #5f5f5f;
+  border-bottom: 1px solid #3d3d3d;
+  background-color: #4e4e4e;
+}
+
+#menu ul {
+  padding: 4px 15px 4px 15px;
+  margin: 0px;
+  list-style-type: none;
+}
+
+#menu li {
+  display: inline;
+  padding: 4px 10px 5px 10px;
+  margin: 0px;
+}
+
+#menu li:hover {
+  background-color: #3d3d3d;
+  border-bottom: 2px solid #dddddd;
+  border-top: 1px solid #4e4e4e;
+}
+
+#menu a {
+  color: #ffffff;
+  font-size: x-small;
   text-decoration: none;
 }
 
-.section {
-  color: #AAA;
+#menu a:hover {
+  text-decoration: underline;
+}
+
+#content {
+  float: left;
+  margin: 0px;
+  padding: 10px 10px 20px 20px;
+  width: 528px;
+  text-align: justify;
+}
+
+#content h2.post {
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+}
+
+#content .post a {
+  text-decoration: none;
+  color: #9acd32;
+}
+
+#content a {
+  text-decoration: none;
+  color: #4e9a06;
+}
+
+#content a:hover {
+  text-decoration: underline;
+}
+
+#content .information {
+  font-size: x-small;
+  color: #4e4e4e;
+}
+
+#content .information a {
+  color: #4e9a06;
+  text-decoration: underline;
+}
+
+#content .information a:hover {
+  text-decoration: none;
+}
+
+#content .section {
   text-align: right;
+  font-size: x-small;
+  color: #808080;
 }
 
-.navigation {
-  padding: 10px 0 0 0;
-  font-size: 14px;
-  font-weight: bold;
-  line-height: 18px;
+#content .navigation {
+  text-align: center;
+  font-size: x-small;
 }
 
-.sidebar {
+#content .navigation a {
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+
+#sidebar {
   float: right;
-  width: 239px;
-  margin: 0 0 0 10px;
-  display: inline;
-  border-left: 1px solid #EEE;
+  margin: 0px;
+  padding: 10px 20px 20px 0px;
+  width: 180px;
 }
 
-.sidebar ul {
+#sidebar h2 {
+  font-size: small;
+}
+
+#sidebar ul {
   list-style-type: none;
-  margin: 0;
-  padding: 0 10px 0 10px;
+  padding-left: 1em;
+  margin-left: 0px;
 }
 
-.sidebar ul li {
-  padding: 10px 0 10px 0;
+#sidebar a {
+  text-decoration: underline;
+  color: #4e9a06;
 }
 
-.sidebar ul li h2 {
-  font-family: Georgia, Serif;
-  font-size: 14px;
-  padding: 0 0 3px 3px;
-  border-bottom: 1px solid #EEE;
-}
-
-.sidebar ul ul li {
-  padding: 0;
-  line-height: 24px;
+#sidebar a:hover {
+  text-decoration: none;
 }
 
 #footer {
   clear: both;
-  float: left;
-  width: 760px;
-  line-height: 18px;
-  padding: 7px 10px;
-  margin: 15px 0;
-  background: #EEE;
+  margin: 0px;
+  padding: 10px 20px 10px 20px;
+  border-top: 2px solid #e7e7e7;
+  border-bottom: 1px solid #3d3d3d;
+  background-color: #4e4e4e;
+  text-align: right;
+  font-size: x-small;
+  color: #d0d0d0;
+}
+
+#footer a {
+  color: #ffffff;
+  text-decoration: none;
+}
+
+#footer a:hover {
+  text-decoration: underline;
 }
 END_STYLE
 
