@@ -29,6 +29,7 @@ use constant VERSION => '0.7.1';                    # Script version.
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
 our $verbose = 1;                                   # Verbosity level.
+our $force   = 0;                                   # Force files rewrite?
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
@@ -50,11 +51,12 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-qV] [-b directory]
+Usage: $NAME [-fqV] [-b directory]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is to be placed
+  -f, --force                 force rewrite of already existing files
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -102,75 +104,18 @@ sub make_directories {
   return 1;
 }
 
-# Write string to the given file:
-sub write_to_file {
-  my $file = shift || die 'Missing argument';
-  my $text = shift || '';
+# Create the default configuration file:
+sub create_config {
+  my $file = catfile($blogdir, '.blaze', 'config');
+
+  # Skip existing file unless forced:
+  return 1 if (-e $file && !$force);
 
   # Open the file for writing:
   open(FILE, ">$file") or return 0;
 
-  # Write given string to the file::
-  print FILE $text;
-
-  # Close the file:
-  close(FILE);
-
-  # Return success:
-  return 1;
-}
-
-# Add given string to the log file
-sub add_to_log {
-  my $text = shift || 'Something miraculous has just happened!';
-  my $file = catfile($blogdir, '.blaze', 'log');
-
-  # Open the log file for appending:
-  open(LOG, ">>$file") or return 0;
-
-  # Write to the log file: 
-  print LOG "Date: " . localtime(time) . "\n\n";
-  print LOG wrap('    ', '    ', $text);
-  print LOG "\n\n";
-
-  # Close the file:
-  close(LOG);
-
-  # Return success:
-  return 1;
-}
-
-# Set up the options parser:
-Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
-
-# Process command-line options:
-GetOptions(
-  'help|h'        => sub { display_help();    exit 0; },
-  'version|v'     => sub { display_version(); exit 0; },
-  'quiet|q'       => sub { $verbose = 0;     },
-  'verbose|V'     => sub { $verbose = 1;     },
-  'blogdir|b=s'   => sub { $blogdir = $_[1]; },
-);
-
-# Detect superfluous options:
-exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
-
-# Create the directory tree:
-make_directories [
-  catdir($blogdir, '.blaze'),                       # Root directory.
-  catdir($blogdir, '.blaze', 'lang'),               # Translations.
-  catdir($blogdir, '.blaze', 'theme'),              # Templates.
-  catdir($blogdir, '.blaze', 'style'),              # Stylesheets.
-  catdir($blogdir, '.blaze', 'pages'),              # Static pages.
-  catdir($blogdir, '.blaze', 'pages', 'head'),      # Pages' headers.
-  catdir($blogdir, '.blaze', 'pages', 'body'),      # Pages' bodies.
-  catdir($blogdir, '.blaze', 'posts'),              # Blog posts.
-  catdir($blogdir, '.blaze', 'posts', 'head'),      # Posts' headers.
-  catdir($blogdir, '.blaze', 'posts', 'body'),      # Posts' bodies.
-];
-
-# Create the default configuration file:
-write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
+  # Write given string to the file:
+  print FILE << 'END_CONFIG';
 ## This is the default BlazeBlogger configuration file. The recommended way
 ## to set up your blog is to leave this file intact and use blaze-config(1)
 ## instead.  Nevertheless, if you prefer to configure the settings by hand,
@@ -229,9 +174,25 @@ write_to_file(catfile($blogdir, '.blaze', 'config'), << 'END_CONFIG');
 
 END_CONFIG
 
+  # Close the file:
+  close(FILE);
+
+  # Return success:
+  return 1;
+}
+
 # Create the default theme file:
-write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
-              << 'END_THEME');
+sub create_theme {
+  my $file = catfile($blogdir, '.blaze', 'theme', 'default.html');
+
+  # Skip existing file unless forced:
+  return 1 if (-e $file && !$force);
+
+  # Open the file for writing:
+  open(FILE, ">$file") or return 0;
+
+  # Write given string to the file:
+  print FILE << 'END_THEME';
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
                       "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -278,7 +239,7 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
 
     <h2>Blogroll</h2>
     <ul>
-      <li><a href="http://blaze.blackened.cz">BlazeBlogger Homepage</a></li>
+<li><a href="http://blaze.blackened.cz">BlazeBlogger Homepage</a></li>
     </ul>
   </div>
 
@@ -292,9 +253,25 @@ write_to_file(catfile($blogdir, '.blaze', 'theme', 'default.html'),
 </html>
 END_THEME
 
-# Create the default stylesheet:
-write_to_file(catfile($blogdir, '.blaze', 'style', 'default.css'),
-              << "END_STYLE");
+  # Close the file:
+  close(FILE);
+
+  # Return success:
+  return 1;
+}
+
+# Create the default style file:
+sub create_style {
+  my $file = catfile($blogdir, '.blaze', 'style', 'default.css');
+
+  # Skip existing file unless forced:
+  return 1 if (-e $file && !$force);
+
+  # Open the file for writing:
+  open(FILE, ">$file") or return 0;
+
+  # Write given string to the file:
+  print FILE << 'END_STYLE';
 /* default.css - the default BlazeBlogger theme
  * Copyright (C) 2009 Jaromir Hradilek
  *
@@ -495,9 +472,25 @@ body {
 }
 END_STYLE
 
+  # Close the file:
+  close(FILE);
+
+  # Return success:
+  return 1;
+}
+
 # Create the default language file:
-write_to_file(catfile($blogdir, '.blaze', 'lang', 'en_GB'),
-              << "END_LANG");
+sub create_lang {
+  my $file = catfile($blogdir, '.blaze', 'lang', 'en_GB');
+
+  # Skip existing file unless forced:
+  return 1 if (-e $file && !$force);
+
+  # Open the file for writing:
+  open(FILE, ">$file") or return 0;
+
+  # Write given string to the file:
+  print FILE << 'END_LANG';
 [lang]
 archive=Archive for
 tags=Posts tagged as
@@ -520,8 +513,78 @@ november=November
 december=December
 END_LANG
 
-# Get the log file name:
-my $logfile = catfile($blogdir, '.blaze', 'log');
+  # Close the file:
+  close(FILE);
+
+  # Return success:
+  return 1;
+}
+
+# Add given string to the log file:
+sub add_to_log {
+  my $text = shift || 'Something miraculous has just happened!';
+  my $file = catfile($blogdir, '.blaze', 'log');
+
+  # Open the log file for appending:
+  open(LOG, ">>$file") or return 0;
+
+  # Write to the log file:
+  print LOG "Date: " . localtime(time) . "\n\n";
+  print LOG wrap('    ', '    ', $text);
+  print LOG "\n\n";
+
+  # Close the file:
+  close(LOG);
+
+  # Return success:
+  return 1;
+}
+
+# Set up the options parser:
+Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
+
+# Process command-line options:
+GetOptions(
+  'help|h'        => sub { display_help();    exit 0; },
+  'version|v'     => sub { display_version(); exit 0; },
+  'force|f'       => sub { $force   = 1;     },
+  'quiet|q'       => sub { $verbose = 0;     },
+  'verbose|V'     => sub { $verbose = 1;     },
+  'blogdir|b=s'   => sub { $blogdir = $_[1]; },
+);
+
+# Detect superfluous options:
+exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
+
+# Create the directory tree:
+make_directories [
+  catdir($blogdir, '.blaze'),                       # Root directory.
+  catdir($blogdir, '.blaze', 'lang'),               # Translations.
+  catdir($blogdir, '.blaze', 'theme'),              # Templates.
+  catdir($blogdir, '.blaze', 'style'),              # Stylesheets.
+  catdir($blogdir, '.blaze', 'pages'),              # Static pages.
+  catdir($blogdir, '.blaze', 'pages', 'head'),      # Pages' headers.
+  catdir($blogdir, '.blaze', 'pages', 'body'),      # Pages' bodies.
+  catdir($blogdir, '.blaze', 'posts'),              # Blog posts.
+  catdir($blogdir, '.blaze', 'posts', 'head'),      # Posts' headers.
+  catdir($blogdir, '.blaze', 'posts', 'body'),      # Posts' bodies.
+];
+
+# Create the default configuration file:
+create_config()
+  or print STDERR "Unable to create the configuration file.\n";
+
+# Create the default theme file:
+create_theme()
+  or print STDERR "Unable to create the default theme file.\n";
+
+# Create the default style file:
+create_style()
+  or print STDERR "Unable to create the default style file.\n";
+
+# Create the default language file:
+create_lang()
+  or print STDERR "Unable to create the default language file.\n";
 
 # Write to / create the log file:
 add_to_log("Created/recovered a BlazeBlogger repository.")
@@ -542,16 +605,16 @@ blaze-init - create or recover a BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-init> [B<-qV>] [B<-b> I<directory>]
+B<blaze-init> [B<-fqV>] [B<-b> I<directory>]
 
 B<blaze-init> B<-h> | B<-v>
 
 =head1 DESCRIPTION
 
 B<blaze-init>'s job is either to create a fresh new BlazeBlogger
-repository, or to recover an existing one, changing the configuration and
-template files back to their original state while leaving the user data
-(i.e. both static pages and blog posts) untouched.
+repository, or to recover an existing one, optionally changing the
+configuration and template files back to their original state while leaving
+the user data (i.e. both static pages and blog posts) untouched.
 
 =head1 OPTIONS
 
@@ -561,6 +624,10 @@ template files back to their original state while leaving the user data
 
 Specify the I<directory> where the BlazeBlogger repository is to be placed.
 The default option is the current working directory.
+
+=item B<-f>, B<--force>
+
+Force rewrite of already existing configuration, style and theme files.
 
 =item B<-q>, B<--quiet>
 
