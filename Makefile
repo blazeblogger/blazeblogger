@@ -18,7 +18,7 @@ SHELL   = /bin/sh
 INSTALL = /usr/bin/install -c
 POD2MAN = /usr/bin/pod2man
 SRCS   := $(wildcard src/*.pl)
-DOCS   := $(wildcard docs/*.pod)
+DOCS   := $(wildcard pod/*.pod)
 MAN1   := $(patsubst %.pl, %.1, $(SRCS))
 MAN7   := $(patsubst %.pod, %.7, $(DOCS))
 
@@ -59,10 +59,10 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 644 src/blaze-config.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-remove.1 $(man1dir)
 	$(INSTALL) -d $(man7dir)
-	$(INSTALL) -m 644 docs/blazeintro.7 $(man7dir)
-	$(INSTALL) -m 644 docs/blazetheme.7 $(man7dir)
-	$(INSTALL) -m 644 docs/blazestyle.7 $(man7dir)
-	$(INSTALL) -m 644 docs/blazeblogger.7 $(man7dir)
+	$(INSTALL) -m 644 pod/blazeintro.7 $(man7dir)
+	$(INSTALL) -m 644 pod/blazetheme.7 $(man7dir)
+	$(INSTALL) -m 644 pod/blazestyle.7 $(man7dir)
+	$(INSTALL) -m 644 pod/blazeblogger.7 $(man7dir)
 
 uninstall:
 	@echo "Removing scripts..."
