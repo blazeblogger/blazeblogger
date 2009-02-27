@@ -384,7 +384,7 @@ else {
 
   # Prepare the list of successfully added IDs:
   $added   =  join(', ', sort(@list));
-  $added   =~ s/, ([^,]+)$/ and \1/;
+  $added   =~ s/, ([^,]+)$/ and $1/;
 }
 
 # Log the event:
