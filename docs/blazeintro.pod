@@ -26,9 +26,12 @@ If nothing goes wrong, you should get a response similar to this:
   Created/recovered a BlazeBlogger repository in .blaze.
 
 As the message suggests, you can use the same command any time later to
-return the repository to a consistent state, restoring the default
-configuration, theme and style files to their initial state while leaving
-the rest of your data (i.e. blog posts and static pages) intact. 
+return the repository to a consistent state while leaving the rest of your
+data (e.g. configuration or blog posts and static pages) intact.
+Optionally, you can force the utility to restore the configuration, theme
+and style files to their initial state like this:
+
+  $ blaze-init --force
 
 =head2 Configuring the Blog
 
