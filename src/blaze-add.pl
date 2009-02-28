@@ -35,6 +35,7 @@ our $verbose = 1;                                   # Verbosity level.
 # Command-line options:
 my  $type    = 'post';                              # Type: post or page.
 my  $added   = '';                                  # List of added IDs.
+my  $data    = {};                                  # Post/page metadata.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
@@ -56,11 +57,17 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqPV] [-b directory] [file...]
+Usage: $NAME [-pqPV] [-b directory] [-a author] [-d date] [-t title]
+                 [-T tags] [-u url] [file...]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
+  -t, --title title           use given title
+  -a, --author author         use given author
+  -d, --date date             use given date; has to be in YYYY-MM-DD form
+  -T, --tags tags             tag the post; pages ignore these
+  -u, --url url               use given url; based on the title by default
   -p, --page                  add the static page instead of the post
   -P, --post                  add the blog post; the default option
   -q, --quiet                 avoid displaying unnecessary messages
@@ -157,7 +164,7 @@ sub save_record {
   my $file = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
   my $type = shift || 'post';
-  my $data = {};
+  my $data = shift || {};
   my $line = '';
 
   # Prepare the record file names:
@@ -203,26 +210,6 @@ sub save_record {
   return 1;
 }
 
-# Add given string to the log file
-sub add_to_log {
-  my $text = shift || 'Something miraculous has just happened!';
-  my $file = catfile($blogdir, '.blaze', 'log');
-
-  # Open the log file for appending:
-  open(LOG, ">>$file") or return 0;
-
-  # Write to the log file: 
-  print LOG "Date: " . localtime(time) . "\n\n";
-  print LOG wrap('    ', '    ', $text);
-  print LOG "\n\n";
-
-  # Close the file:
-  close(LOG);
-
-  # Return success:
-  return 1;
-}
-
 # Translate given date to YYYY-MM-DD string:
 sub date_to_string {
   my @date = localtime(shift);
@@ -256,6 +243,7 @@ sub choose_id {
 # Add given files to the repository:
 sub add_files {
   my $type  = shift || 'post';
+  my $data  = shift || {};
   my $files = shift || die 'Missing argument';
   my @list  = ();
 
@@ -265,7 +253,7 @@ sub add_files {
     my $id = choose_id($type);
 
     # Save the record:
-    save_record($file, $id, $type)
+    save_record($file, $id, $type, $data)
       and push(@list, $id)
       or print STDERR "Unable to add $file.\n";
   }
@@ -277,6 +265,7 @@ sub add_files {
 # Add new record to the repository:
 sub add_new {
   my $type = shift || 'post';
+  my $data = shift || {};
 
   # Prepare the temporary file name:
   my $temp = catfile($blogdir, '.blaze', 'temp');
@@ -290,8 +279,11 @@ sub add_new {
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
   # Prepare the data for the temporary file header:
-  my $name = $conf->{user}->{name} || 'admin';
-  my $date = date_to_string(time);
+  my $title  = $data->{header}->{title} || '';
+  my $author = $data->{header}->{author}|| $conf->{user}->{name} || 'admin';
+  my $date   = $data->{header}->{date}  || date_to_string(time);
+  my $tags   = $data->{header}->{tags}  || '';
+  my $url    = $data->{header}->{url}   || '';
 
   # Prepare the temporary file header:
   my $head = << "END_HEAD";
@@ -300,13 +292,14 @@ sub add_new {
 # ber that the date has to be in an  YYYY-MM-DD  form,  the tags is a comma
 # separated list of categories the post (pages ignore these) belong and the
 # URL, if provided, should consist of alphanumeric characters,  hyphens and
-# underscores only.
+# underscores only. Specifying your own URL  is especially recommended when
+# you use non-ASCII characters in your $type title.
 #
-#   title:
-#   author: $name
+#   title:  $title
+#   author: $author
 #   date:   $date
-#   tags:
-#   url:
+#   tags:   $tags
+#   url:    $url
 #
 # The header ends here.  The rest is the content of your $type.  You can use
 # <!-- break --> to mark the end of the part to be displayed on index page.
@@ -349,10 +342,30 @@ END_HEAD
   }
 
   # Add file to the repository:
-  my @list = add_files($type, [ $temp ]);
+  my @list = add_files($type, $data, [ $temp ]);
 
   # Return the record ID:
   return shift(@list);
+}
+
+# Add given string to the log file
+sub add_to_log {
+  my $text = shift || 'Something miraculous has just happened!';
+  my $file = catfile($blogdir, '.blaze', 'log');
+
+  # Open the log file for appending:
+  open(LOG, ">>$file") or return 0;
+
+  # Write to the log file:
+  print LOG "Date: " . localtime(time) . "\n\n";
+  print LOG wrap('    ', '    ', $text);
+  print LOG "\n\n";
+
+  # Close the file:
+  close(LOG);
+
+  # Return success:
+  return 1;
 }
 
 # Set up the options parser:
@@ -367,6 +380,11 @@ GetOptions(
   'quiet|q'       => sub { $verbose = 0;      },
   'verbose|V'     => sub { $verbose = 1;      },
   'blogdir|b=s'   => sub { $blogdir = $_[1];  },
+  'title|t=s'     => sub { $data->{header}->{title}  = $_[1]; },
+  'author|a=s'    => sub { $data->{header}->{author} = $_[1]; },
+  'date|d=s'      => sub { $data->{header}->{date}   = $_[1]; },
+  'tags|T=s'      => sub { $data->{header}->{tags}   = $_[1]; },
+  'url|u=s'       => sub { $data->{header}->{url}    = $_[1]; },
 );
 
 # Check the repository is present (however naive this method is):
@@ -376,11 +394,11 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 # Check whether any file is supplied:
 if (scalar(@ARGV) == 0) {
   # Add new record to the repository:
-  $added   = add_new($type) or exit 1;
+  $added   = add_new($type, $data) or exit 1;
 }
 else {
   # Add given files to the repository:
-  my @list = add_files($type, \@ARGV) or exit 1;
+  my @list = add_files($type, $data, \@ARGV) or exit 1;
 
   # Prepare the list of successfully added IDs:
   $added   =  join(', ', sort(@list));
@@ -405,7 +423,8 @@ blaze-add - add a blog post or a page to the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-add> [B<-pqPV>] [B<-b> I<directory>] [I<file>...]
+B<blaze-add> [B<-pqPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
+I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
 
 B<blaze-add> B<-h> | B<-v>
 
@@ -423,6 +442,31 @@ otherwise an external editor is opened to let you create a new content.
 
 Specify the I<directory> where the BlazeBlogger repository is placed. The
 default option is the current working directory.
+
+=item B<-t>, B<--title> I<title>
+
+Specify the post/page I<title>.
+
+=item B<-a>, B<--author> I<author>
+
+Specify the post/page I<author>.
+
+=item B<-d>, B<--date> I<date>
+
+Specify the post/page date of publishing; the I<date> has to be in the
+YYYY-MM-DD form.
+
+=item B<-T>, B<--tags> I<tags>
+
+Specify the comma separated list of I<tags> attached to the post; pages
+ignore these.
+
+=item B<-u>, B<--url> I<url>
+
+Specify the post/page I<url> to be used instead of the one based on the
+post/page title. It should consist of alphanumeric characters, hyphens and
+underscores only, and it is especially useful if non-ASCII characters are
+present in the title.
 
 =item B<-p>, B<--page>
 
