@@ -105,6 +105,50 @@ END_VERSION
   return 1;
 }
 
+# Set the option:
+sub set_option {
+  my $option = shift || die 'Missing argument';
+  my $value  = shift || die 'Missing argument';
+
+  # Get the option pair:
+  my ($section, $key) = split(/\./, $option);
+
+  # Read the configuration file:
+  my $file = catfile($blogdir, '.blaze', 'config');
+  my $conf = ReadINI($file)
+             or print STDERR "Unable to read configuration.\n";
+
+  # Set up the option:
+  $conf->{$section}->{$key} = $value;
+
+  # Save the configuration file:
+  WriteINI($file, $conf) or return 0;
+
+  # Return success:
+  return 1;
+}
+
+# Display the option:
+sub display_option {
+  my $option = shift || die 'Missing argument';
+
+  # Get the option pair:
+  my ($section, $key) = split(/\./, $option);
+
+  # Read the configuration file:
+  my $file = catfile($blogdir, '.blaze', 'config');
+  my $conf = ReadINI($file) or return 0;
+
+  # Check whether the option is set:
+  if (my $value = $conf->{$section}->{$key}) {
+    # Display the value:
+    print "$value\n";
+  }
+
+  # Return success:
+  return 1;
+}
+
 # Set up the options parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
@@ -128,36 +172,19 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 exit_with_error("Invalid option `$ARGV[0]'.", 22)
   unless (exists $options{$ARGV[0]});
 
-# Read the configuration file:
-my $file = catfile($blogdir, '.blaze', 'config');
-my $conf = ReadINI($file)
-           or exit_with_error("Unable to read `$file'.", 13);
+# Decide whether to set or display the option:
+if (scalar(@ARGV) > 1) {
+  # Set the option:
+  set_option(shift(@ARGV), join(' ', @ARGV))
+    or exit_with_error("Unable to save the configuration.", 13);
 
-# Get option key pair:
-my ($section, $key) = split(/\./, shift(@ARGV));
-
-# Decide whether to get or set the value:
-if (scalar(@ARGV) != 0) {
-  # Use the rest of the arguments as a value:
-  $conf->{$section}->{$key} = join(' ', @ARGV);
-
-  # Save the configuration file:
-  WriteINI($file, $conf)
-    or exit_with_error("Unable to write to `$file'.", 13);
-
-  # Report success: 
+  # Report success:
   print "The option has been successfully saved.\n" if $verbose;
 }
 else {
-  # Check whether the option is set:
-  if (my $value = $conf->{$section}->{$key}) {
-    # Display the value:
-    print "$value\n";
-  }
-  else {
-    # Return failure:
-    exit 1;
-  }
+  # Display the option:
+  display_option(shift(@ARGV))
+    or exit_with_error("Unable to read the configuration.", 13);
 }
 
 # Return success:
