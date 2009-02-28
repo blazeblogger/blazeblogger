@@ -47,14 +47,16 @@ considerably reasonable option. To change it to, lets say, C<pico>, type:
   $ blaze-config core.editor pico
 
 Another thing you might want to change is the heading and subheading of
-your blog, for example:
+your blog and the default user name, for example:
 
   $ blaze-config blog.title My Blog
   $ blaze-config blog.subtitle yet another blog
-
-Finally, to change the default user name, type:
-
   $ blaze-config user.name Your Name
+
+Finally, if you intend to generate RSS feed, you have to specify the base
+URL:
+
+  $ blaze-config blog.url http://blog.example.com/
 
 For the complete list of available options, see B<blaze-config>(1) man
 page. To see the current setting, simply type the option name without the
@@ -78,8 +80,9 @@ To add a new blog post to the repository, type:
   $ blaze-add
 
 This will open the external editor with a preformatted header and empty
-body for you to write. When you are done, save your changes and close the
-editor; you should get a confirmation message with the ID of the new post.
+body for you to write---do not forget to use HTML. When you are done, save
+your changes and close the editor; you should get a confirmation message
+with the ID of the new post.
 
 If you prefer to write your posts in advance (e.g. work with concepts), you
 can also add any number of existing files without opening the text editor
@@ -103,6 +106,8 @@ Similarly to blog posts, you can manage the static pages as follows:
   $ blaze-add --page
   $ blaze-edit --page 3
   $ blaze-remove --page 3
+
+This will add new page, edit the page with ID 3 and remove it afterwards.
 
 =head2 Browsing the Blog Repository
 
