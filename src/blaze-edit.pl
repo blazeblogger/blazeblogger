@@ -182,7 +182,8 @@ sub read_record {
 # ber that the date has to be in an  YYYY-MM-DD  form,  the tags is a comma
 # separated list of categories the post (pages ignore these) belong and the
 # url, if provided, should consist of alphanumeric characters,  hyphens and
-# underscores only.
+# underscores only. Specifying your own URL  is especially recommended when
+# you use non-ASCII characters in your $type title.
 #
 #   title:  $title
 #   author: $author
@@ -215,7 +216,7 @@ sub save_record {
   my $file = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
   my $type = shift || 'post';
-  my $data = {};
+  my $data = shift || {};
   my $line = '';
 
   # Prepare the record file names:
@@ -334,7 +335,7 @@ sub add_to_log {
   # Open the log file for appending:
   open(LOG, ">>$file") or return 0;
 
-  # Write to the log file: 
+  # Write to the log file:
   print LOG "Date: " . localtime(time) . "\n\n";
   print LOG wrap('    ', '    ', $text);
   print LOG "\n\n";
