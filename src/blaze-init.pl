@@ -146,7 +146,7 @@ sub create_config {
 #style=default.css
 #lang=en_GB
 #posts=10
-#url=http://127.0.0.1/
+#url=
 
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
@@ -649,7 +649,7 @@ Display version information and exit.
 
 =head1 SEE ALSO
 
-B<perl>(1).
+B<blaze-config>(1), B<perl>(1).
 
 =head1 BUGS
 
