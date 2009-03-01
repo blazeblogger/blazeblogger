@@ -64,14 +64,10 @@ value like this:
 
   $ blaze-config user.name
 
-Note: The configuration file is located in C<.blaze/config> and the
-recommended way to set it up is to leave it intact and use
-B<blaze-config>(1) instead as described above. Nevertheless, if you prefer
-to configure the settings by hand, simply uncomment the desired option
-(i.e. remove the hash sign from the beginning of the line) and replace the
-value next to the equal sign. If you have previously used the configuration
-tool and all the comments are erased, you can return the configuration file
-to its initial state using B<blaze-init>(1) first.
+You can also edit all options at once opening the configuration file in the
+external text editor like this:
+
+  $ blaze-config --edit
 
 =head2 Managing the Blog Posts
 
