@@ -21,6 +21,7 @@ use File::Basename;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;
+use Digest::MD5;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -29,6 +30,9 @@ use constant VERSION => '0.7.1';                    # Script version.
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
 our $verbose = 1;                                   # Verbosity level.
+
+# Command-line options:
+my  $edit = 0;                                      # Edit config directly?
 
 # List of valid options:
 our %options = (
@@ -72,10 +76,11 @@ sub display_help {
   # Print the message to the STDOUT:
   print << "END_HELP";
 Usage: $NAME [-qV] [-b directory] name [value...]
-       $NAME -h | -v
+       $NAME -e | -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
+  -e, --edit                  open the config file in the text editor
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -100,6 +105,169 @@ distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
 TICULAR PURPOSE.
 END_VERSION
+
+  # Return success:
+  return 1;
+}
+
+# Create a human readable version of configuration file:
+sub read_config {
+  my $file = shift || die 'Missing argument';
+  my $conf = shift || die 'Missing argument';
+
+  # Prepare the blog related settings:
+  my $blog_title     = $conf->{blog}->{title}     || 'My Blog';
+  my $blog_subtitle  = $conf->{blog}->{subtitle}  || 'yet another blog';
+  my $blog_theme     = $conf->{blog}->{theme}     || 'default.html';
+  my $blog_style     = $conf->{blog}->{style}     || 'default.css';
+  my $blog_lang      = $conf->{blog}->{lang}      || 'en_GB';
+  my $blog_posts     = $conf->{blog}->{posts}     || '10';
+  my $blog_url       = $conf->{blog}->{url}       || '';
+
+  # Prepare the core settings:
+  my $core_editor    = $conf->{core}->{editor}    || 'vi';
+  my $core_encoding  = $conf->{core}->{encoding}  || 'UTF-8';
+  my $core_extension = $conf->{core}->{extension} || 'html';
+
+  # Prepare the user related settings:
+  my $user_name      = $conf->{user}->{name}      || 'admin';
+  my $user_email     = $conf->{user}->{email}     || 'admin@localhost';
+
+  # Open the file for writing:
+  open(FILE, ">$file") or return 0;
+
+  # Write to the temporary file:
+  print FILE << "END_TEMP";
+## The following are the blog related settings, having the direct influence
+## on the way the whole thing looks. The options are as follows:
+##
+##   title    - The blog title.
+##   subtitle - The blog subtitle, supposedly a brief, single-line descrip-
+##              tion of what should the occasional visitor  expect to find.
+##   theme    - The blog theme;  the value should point to an existing file
+##              in the .blaze/theme directory.
+##   style    - The blog style; the value should point to an existing file,
+##              either  in  .blaze/style,  or in the  destination directory
+##              where the static content is to be placed.
+##   lang     - The blog language;  the value  should point to an  existing
+##              file in the .blaze/lang directory.
+##   posts    - Number of posts to be listed on a single page;  the default
+##              value is 10.
+##   url      - The blog base url; required for RSS feed only.
+##
+[blog]
+title=$blog_title
+subtitle=$blog_subtitle
+theme=$blog_theme
+style=$blog_style
+lang=$blog_lang
+posts=$blog_posts
+url=$blog_url
+
+## The following are the core settings,  affecting the way the BlazeBlogger
+## works. The options are as follows:
+##
+##   editor    - An external text editor to be used for editing purposes.
+##   encoding  - Records  encoding in the form  recognised by the  W3C HTML
+##               4.01 standard (e.g. the default UTF-8).
+##   extension - File extension for the generated pages.
+##
+[core]
+editor=$core_editor
+encoding=$core_encoding
+extension=$core_extension
+
+## The following are the user related settings. The options are as follows:
+##
+##   user  - User's name  to be used as a default posts' author  and in the
+##           copyright notice.
+##   email - User's e-mail;  so far,  this option is not actually used any-
+##           where.
+##
+[user]
+name=$user_name
+email=$user_email
+END_TEMP
+
+  # Close the file:
+  close(FILE);
+
+  # Return success:
+  return 1;
+}
+
+# Read configuration from the temporary file and save it:
+sub save_config {
+  my $temp = shift || die 'Missing argument';
+  my $file = shift || die 'Missing argument';
+
+  # Read the temporary file:
+  my $conf = ReadINI($temp) or return 0;
+
+  # Save the configuration file:
+  WriteINI($file, $conf) or return 0;
+
+  # Return success:
+  return 1;
+}
+
+# Edit the configuration file:
+sub edit_config {
+  my ($before, $after);
+
+  # Prepare the temporary file name:
+  my $temp = catfile($blogdir, '.blaze', 'temp');
+
+  # Read the configuration file:
+  my $file = catfile($blogdir, '.blaze', 'config');
+  my $conf = ReadINI($file) or return 0;
+
+  # Decide which editor to use:
+  my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
+
+  # Create the temporary file:
+  read_config($temp, $conf)
+    or exit_with_error("Unable to create the temporary file.", 13);
+
+  # Open the file for reading:
+  if (open(FILE, "$temp")) {
+    # Set the IO handler to binmode:
+    binmode(FILE);
+
+    # Count checksum:
+    $before = Digest::MD5->new->addfile(*FILE)->hexdigest;
+
+    # Close the file:
+    close(FILE);
+  }
+
+  # Open the temporary file in the external editor:
+  system($edit, $temp) == 0 or exit_with_error("Unable to run `$edit'.",1);
+
+  # Open the file for reading:
+  if (open(FILE, "$temp")) {
+    # Set the IO handler to binmode:
+    binmode(FILE);
+
+    # Count checksum:
+    $after = Digest::MD5->new->addfile(*FILE)->hexdigest;
+
+    # Close the file:
+    close(FILE);
+
+    # Compare the checksum:
+    if ($before eq $after) {
+      # Report aborting:
+      print STDERR "File have not been changed: aborting.\n";
+
+      # Return failure:
+      return 0;
+    }
+  }
+
+  # Save the configuration file:
+  save_config($temp, $file)
+    or exit_with_error("Ubable to save the configuration file.", 13);
 
   # Return success:
   return 1;
@@ -156,35 +324,49 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
+  'edit|e'        => sub { $edit    = 1;     },
   'quiet|q'       => sub { $verbose = 0;     },
   'verbose|V'     => sub { $verbose = 1;     },
   'blogdir|b=s'   => sub { $blogdir = $_[1]; },
 );
 
-# Check missing options:
-exit_with_error("Missing option.", 22) if (scalar(@ARGV) == 0);
-
 # Check the repository is present (however naive this method is):
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# Check whether the option is valid:
-exit_with_error("Invalid option `$ARGV[0]'.", 22)
-  unless (exists $options{$ARGV[0]});
+# Decide which action to perform:
+if ($edit) {
+  # Check superfluous options:
+  exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 0);
 
-# Decide whether to set or display the option:
-if (scalar(@ARGV) > 1) {
-  # Set the option:
-  set_option(shift(@ARGV), join(' ', @ARGV))
-    or exit_with_error("Unable to save the configuration.", 13);
+  # Edit the configuration file:
+  edit_config() or exit 1;
 
   # Report success:
-  print "The option has been successfully saved.\n" if $verbose;
+  print "Your changes have been successfully saved.\n" if $verbose;
 }
 else {
-  # Display the option:
-  display_option(shift(@ARGV))
-    or exit_with_error("Unable to read the configuration.", 13);
+  # Check missing options:
+  exit_with_error("Missing option.", 22) if (scalar(@ARGV) == 0);
+
+  # Check whether the option is valid:
+  exit_with_error("Invalid option `$ARGV[0]'.", 22)
+    unless (exists $options{$ARGV[0]});
+
+  # Decide whether to set or display the option:
+  if (scalar(@ARGV) > 1) {
+    # Set the option:
+    set_option(shift(@ARGV), join(' ', @ARGV))
+      or exit_with_error("Unable to save the configuration.", 13);
+
+    # Report success:
+    print "The option has been successfully saved.\n" if $verbose;
+  }
+  else {
+    # Display the option:
+    display_option(shift(@ARGV))
+      or exit_with_error("Unable to read the configuration.", 13);
+  }
 }
 
 # Return success:
@@ -200,7 +382,7 @@ blaze-config - display or set the BlazeBlogger repository options
 
 B<blaze-config> [B<-qV>] [B<-b> I<directory>] I<name> [I<value...>]
 
-B<blaze-config> B<-h> | B<-v>
+B<blaze-config> B<-e> | B<-h> | B<-v>
 
 =head1 DESCRIPTION
 
@@ -223,6 +405,10 @@ explanation of their meaning, see the appropriate section below.
 
 Specify the I<directory> where the BlazeBlogger repository is placed. The
 default option is the current working directory.
+
+=item B<-e>, B<--edit>
+
+Open the configuration file in the external text editor.
 
 =item B<-q>, B<--quiet>
 
@@ -263,13 +449,13 @@ directory.
 =item B<blog.style>
 
 Blog stylesheet; the value should point to an existing file, either in
-.blaze/style (recommended), or in the destination directory where the
+C<.blaze/style> (recommended), or in the destination directory where the
 static content is to be placed.
 
 =item B<blog.lang>
 
 Blog language; the value should point to an existing file in the
-.blaze/lang directory.
+C<.blaze/lang> directory.
 
 =item B<blog.posts>
 
@@ -290,8 +476,8 @@ the default UTF-8).
 
 =item B<core.extension>
 
-File extension for the generated pages. By default, the `html' is used as a
-reasonable choice.
+File extension for the generated pages. By default, the C<html> is used as
+a reasonable choice.
 
 =item B<user.name>
 
@@ -303,6 +489,19 @@ on the page, depending on the theme (e.g. in the copyright notice).
 User's e-mail. Depending on the theme, it can be used anywhere on the page
 (e.g. in the copyright notice). However, non of the official themes
 actually use it.
+
+=back
+
+=head1 ENVIRONMENT
+
+=over
+
+=item B<EDITOR>
+
+Unless the BlazeBlogger specific option I<core.editor> is set, blaze-edit
+tries to use system wide settings to decide which editor to run. If neither
+of these options are supplied, the B<vi> is used instead as a considerably
+reasonable choice.
 
 =back
 
