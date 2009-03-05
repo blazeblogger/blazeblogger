@@ -585,7 +585,7 @@ sub generate_rss {
   # Read required data from the configuration:
   my $ext           = $conf->{core}->{extension} || 'html';
   my $blog_title    = $conf->{blog}->{title}     || 'My Blog';
-  my $blog_subtitle = $conf->{blog}->{title}     || 'yet another blog';
+  my $blog_subtitle = $conf->{blog}->{subtitle}  || 'yet another blog';
   my $base          = $conf->{blog}->{url};
 
   # Check whether the base URL is specified:
