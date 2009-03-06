@@ -30,6 +30,7 @@ use constant VERSION => '0.7.1';                    # Script version.
 # General script settings:
 our $blogdir    = '.';                              # Repository location.
 our $destdir    = '.';                              # HTML pages location.
+our $force      = 0;                                # Force files rewrite?
 our $verbose    = 1;                                # Verbosity level.
 our $with_index = 1;                                # Generate index page?
 our $with_posts = 1;                                # Generate posts?
@@ -62,7 +63,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqrtPV] [-b directory] [-d directory]
+Usage: $NAME [-fpqrtPV] [-b directory] [-d directory]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
@@ -74,6 +75,7 @@ Usage: $NAME [-pqrtPV] [-b directory] [-d directory]
   -P, --no-pages              disable static pages creation
   -t, --no-tags               disable support for tags
   -r, --no-rss                disable RSS feed creation
+  -f, --force                 force rewrite of already existing files
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages including the list of
                               created files
@@ -1064,7 +1066,7 @@ sub copy_stylesheet {
   my $to    = catfile($destdir, $style);
 
   # Skip existing stylesheet:
-  return 1 if (-e $to);
+  return 1 if (-e $to && !$force);
 
   # Copy the file:
   copy($from, $to) or return 0;
@@ -1083,6 +1085,7 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
+  'force|f'       => sub { $force      = 1;     },
   'quiet|q'       => sub { $verbose    = 0;     },
   'verbose|V'     => sub { $verbose    = 2;     },
   'blogdir|b=s'   => sub { $blogdir    = $_[1]; },
@@ -1225,6 +1228,10 @@ Disable support for tags.
 =item B<-r>, B<--no-rss>
 
 Disable creation of RSS feed.
+
+=item B<-f>, B<--force>
+
+Force rewrite of already existing style sheet.
 
 =item B<-q>, B<--quiet>
 
