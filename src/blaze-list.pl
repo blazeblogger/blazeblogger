@@ -208,8 +208,8 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
-  'pages|p'       => sub { $type    = 'page'; },
-  'posts|P'       => sub { $type    = 'post'; },
+  'page|pages|p'  => sub { $type    = 'page'; },
+  'post|posts|P'  => sub { $type    = 'post'; },
   'id|i=s'        => sub { $id      = $_[1];  },
   'title|t=s'     => sub { $title   = $_[1];  },
   'author|a=s'    => sub { $author  = $_[1];  },

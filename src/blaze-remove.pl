@@ -7,12 +7,12 @@
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
 # Free Software Foundation, version 3 of the License.
-# 
+#
 # This program  is  distributed  in the hope  that it will  be useful,  but
 # WITHOUT  ANY WARRANTY;  without  even the implied  warranty of MERCHANTA-
 # BILITY  or  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
 # License for more details.
-# 
+#
 # You should have received a copy of the  GNU General Public License  along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
@@ -97,7 +97,7 @@ sub add_to_log {
   # Open the log file for appending:
   open(LOG, ">>$file") or return 0;
 
-  # Write to the log file: 
+  # Write to the log file:
   print LOG localtime(time) . " - $text\n";
 
   # Close the file:
@@ -114,8 +114,8 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
-  'page|p'        => sub { $type    = 'page'; },
-  'post|P'        => sub { $type    = 'post'; },
+  'page|pages|p'  => sub { $type    = 'page'; },
+  'post|posts|P'  => sub { $type    = 'post'; },
   'quiet|q'       => sub { $verbose = 0;      },
   'verbose|V'     => sub { $verbose = 1;      },
   'blogdir|b=s'   => sub { $blogdir = $_[1];  },
