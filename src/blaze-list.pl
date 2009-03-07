@@ -34,7 +34,8 @@ our $verbose    = 1;                                # Verbosity level.
 # Command-line options:
 my  $type       = 'post';                           # Type: post or page.
 my  $id         = '';                               # ID search pattern.
-my  $name       = '';                               # Name search pattern.
+my  $title      = '';                               # Title search pattern.
+my  $author     = '';                               # Name search pattern.
 my  $year       = '';                               # Year search pattern.
 my  $month      = '';                               # Month search pattern.
 my  $day        = '';                               # Day search pattern.
@@ -59,13 +60,14 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqPV] [-b directory] [-i id] [-a author] [-d day] [-m month]
-                     [-y year]
+Usage: $NAME [-pqPV] [-b directory] [-i id] [-t title] [-a author]
+                  [-d day] [-m month] [-y year]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
   -i, --id id                 display record with specified ID
+  -t, --title title           list records with matching title
   -a, --author author         list records by specified author
   -d, --day day               list records from the day in the DD form
   -m, --month month           list records from the month in the MM form
@@ -150,7 +152,8 @@ sub collect_headers {
 sub display_records {
   my $type    = shift || 'post';
   my $id      = shift || '.*';
-  my $name    = shift || '.*';
+  my $title   = shift || '';
+  my $author  = shift || '.*';
   my $year    = shift || '....';
   my $month   = shift || '..';
   my $day     = shift || '..';
@@ -162,24 +165,26 @@ sub display_records {
   foreach(@headers) {
     # Decompose the header record:
     $_ =~ /^([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)$/;
-    my $date   = $1;
-    my $index  = $2;
-    my $tags   = $3;
-    my $author = $4;
-    my $title  = $6;
+    my $record_date   = $1;
+    my $record_id     = $2;
+    my $record_tags   = $3;
+    my $record_author = $4;
+    my $record_title  = $6;
 
     # Check whether the record matches the pattern:
-    unless ($date   =~ /^$year-$month-$day$/ &&
-            $author =~ /^$name$/ &&
-            $index  =~ /^$id$/) {
+    unless ($record_date   =~ /^$year-$month-$day$/i &&
+            $record_title  =~ /^.*$title.*$/i &&
+            $record_author =~ /^$author$/i &&
+            $record_id     =~ /^$id$/i) {
       # Skip the record:
       next;
     }
 
     # Display the record:
-    print "ID: $index | $date | $author\n\n";
-    print wrap('    ', ' ' x 11, "Title: $title\n");
-    print wrap('    ', ' ' x 11, "Tags:  $tags\n") if ($type eq 'post');
+    print "ID: $record_id | $record_date | $record_author\n\n";
+    print wrap('    ', ' ' x 11, "Title: $record_title\n");
+    print wrap('    ', ' ' x 11, "Tags:  $record_tags\n")
+      if ($type eq 'post');
     print "\n";
   }
 
@@ -197,7 +202,8 @@ GetOptions(
   'pages|p'       => sub { $type    = 'page'; },
   'posts|P'       => sub { $type    = 'post'; },
   'id|i=s'        => sub { $id      = $_[1];  },
-  'author|a=s'    => sub { $name    = $_[1];  },
+  'title|t=s'     => sub { $title   = $_[1];  },
+  'author|a=s'    => sub { $author  = $_[1];  },
   'year|y=i'      => sub { $year    = sprintf("%04d", $_[1]); },
   'month|m=i'     => sub { $month   = sprintf("%02d", $_[1]); },
   'day|d=i'       => sub { $day     = sprintf("%02d", $_[1]); },
@@ -217,14 +223,15 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 my $reserved  = '[\\\\\^\.\$\|\(\)\[\]\*\+\?\{\}]';
 
 # Escape reserved characters:
-$id    =~ s/($reserved)/\\$1/g if $id;
-$name  =~ s/($reserved)/\\$1/g if $name;
-$year  =~ s/($reserved)/\\$1/g if $year;
-$month =~ s/($reserved)/\\$1/g if $month;
-$month =~ s/($reserved)/\\$1/g if $day;
+$id     =~ s/($reserved)/\\$1/g if $id;
+$title  =~ s/($reserved)/\\$1/g if $title;
+$author =~ s/($reserved)/\\$1/g if $author;
+$year   =~ s/($reserved)/\\$1/g if $year;
+$month  =~ s/($reserved)/\\$1/g if $month;
+$month  =~ s/($reserved)/\\$1/g if $day;
 
 # Display the list of matching records:
-display_records($type, $id, $name, $year, $month, $day)
+display_records($type, $id, $title, $author, $year, $month, $day)
   or exit_with_error("Unable to read repository data.", 13);
 
 # Return success:
@@ -239,7 +246,7 @@ blaze-list - browse the content of the BlazeBlogger repository
 =head1 SYNOPSIS
 
 B<blaze-list> [B<-pqPV>] [B<-b> I<directory>] [B<-i> I<id>]
-[B<-a> I<author>] [B<-d> I<day>] [B<-m> I<month>] [B<-y> I<year>]
+[B<-t> I<title>] [B<-a> I<author>] [B<-d> I<day>] [B<-m> I<month>] [B<-y> I<year>]
 
 B<blaze-list> B<-h> | B<-v>
 
@@ -261,6 +268,10 @@ default option is the current working directory.
 =item B<-i>, B<--id> I<id>
 
 Display the record with specified I<id> only.
+
+=item B<-t>, B<--title> I<title>
+
+List records with matching I<title>.
 
 =item B<-a>, B<--author> I<author>
 
