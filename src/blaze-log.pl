@@ -29,9 +29,7 @@ use constant VERSION => '0.7.1';                    # Script version.
 # General script settings:
 our $blogdir    = '.';                              # Repository location.
 our $verbose    = 1;                                # Verbosity level.
-
-# Command-line options:
-my  $type       = 0;                                # Log display type.
+our $compact    = 0;                                # Use compact listing?
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -90,7 +88,6 @@ END_VERSION
 
 # Display log records:
 sub display_log {
-  my $type = shift || 0;
   my $file = catfile($blogdir, '.blaze', 'log');
 
   # Open the log file for reading:
@@ -98,8 +95,8 @@ sub display_log {
 
   # Process each record:
   while (my $record = <LOG>) {
-    # Decide which type of display to use:
-    unless ($type) {
+    # Check whether to use compact listing:
+    unless ($compact) {
       # Decompose the record:
       my ($date, $message) = split(/\s+-\s+/, $record, 2);
 
@@ -128,7 +125,7 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
-  'short|s'       => sub { $type    = 1;      },
+  'short|s'       => sub { $compact = 1;      },
   'quiet|q'       => sub { $verbose = 0;      },
   'verbose|V'     => sub { $verbose = 1;      },
   'blogdir|b=s'   => sub { $blogdir = $_[1];  },
@@ -142,7 +139,7 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
 # Display log records:
-display_log($type) or exit_with_error("Unable to read log file.", 13);
+display_log() or exit_with_error("Unable to read log file.", 13);
 
 # Return success:
 exit 0;
