@@ -30,6 +30,7 @@ use constant VERSION => '0.7.1';                    # Script version.
 # General script settings:
 our $blogdir    = '.';                              # Repository location.
 our $verbose    = 1;                                # Verbosity level.
+our $compact    = 0;                                # Use compact listing?
 
 # Command-line options:
 my  $type       = 'post';                           # Type: post or page.
@@ -74,6 +75,7 @@ Usage: $NAME [-pqPV] [-b directory] [-i id] [-t title] [-a author]
   -y, --year year             list records from the year in the YYYY form
   -p, --pages                 list static pages instead of posts
   -P, --posts                 list blog posts; the default option
+  -s, --short                 display each record on a single line
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -180,12 +182,19 @@ sub display_records {
       next;
     }
 
-    # Display the record:
-    print "ID: $record_id | $record_date | $record_author\n\n";
-    print wrap('    ', ' ' x 11, "Title: $record_title\n");
-    print wrap('    ', ' ' x 11, "Tags:  $record_tags\n")
-      if ($type eq 'post');
-    print "\n";
+    # Check whether to use compact listing:
+    unless ($compact) {
+      # Display the full record:
+      print "ID: $record_id | $record_date | $record_author\n\n";
+      print wrap('    ', ' ' x 11, "Title: $record_title\n");
+      print wrap('    ', ' ' x 11, "Tags:  $record_tags\n")
+        if ($type eq 'post');
+      print "\n";
+    }
+    else {
+      # Display the short record:
+      print "ID: $record_id | $record_date | $record_title\n";
+    }
   }
 
   # Return success:
@@ -207,6 +216,7 @@ GetOptions(
   'year|y=i'      => sub { $year    = sprintf("%04d", $_[1]); },
   'month|m=i'     => sub { $month   = sprintf("%02d", $_[1]); },
   'day|d=i'       => sub { $day     = sprintf("%02d", $_[1]); },
+  'short|s'       => sub { $compact = 1;      },
   'quiet|q'       => sub { $verbose = 0;      },
   'verbose|V'     => sub { $verbose = 1;      },
   'blogdir|b=s'   => sub { $blogdir = $_[1];  },
@@ -300,6 +310,10 @@ List static pages instead of blog posts.
 =item B<-P>, B<--posts>
 
 List blog posts; this is the default option.
+
+=item B<-s>, B<--short>
+
+Display each record on a single line.
 
 =item B<-q>, B<--quiet>
 
