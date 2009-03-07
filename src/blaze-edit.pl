@@ -17,7 +17,6 @@
 
 use strict;
 use warnings;
-use Text::Wrap;
 use File::Basename;
 use File::Spec::Functions;
 use Config::IniHash;
@@ -336,9 +335,7 @@ sub add_to_log {
   open(LOG, ">>$file") or return 0;
 
   # Write to the log file:
-  print LOG "Date: " . localtime(time) . "\n\n";
-  print LOG wrap('    ', '    ', $text);
-  print LOG "\n\n";
+  print LOG localtime(time) . " - $text\n";
 
   # Close the file:
   close(LOG);
