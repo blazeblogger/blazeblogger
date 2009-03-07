@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-log, show the repository log
+# blaze-log, display the BlazeBlogger repository log
 # Copyright (C) 2009 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -151,7 +151,7 @@ __END__
 
 =head1 NAME
 
-blaze-log - show the repository log
+blaze-log - display the BlazeBlogger repository log
 
 =head1 SYNOPSIS
 

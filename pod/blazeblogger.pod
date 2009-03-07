@@ -19,6 +19,8 @@ B<blaze-list> [B<-pqPV>] [B<-b> I<directory>] [B<-i> I<id>]
 
 B<blaze-make> [B<-pqrtPV>] [B<-b> I<directory>] [B<-d> I<directory>]
 
+B<blaze-log> [B<-qsV>] [B<-b> I<directory>]
+
 =head1 DESCRIPTION
 
 B<BlazeBlogger> is a simple to use but capable CMS for the command line.
@@ -32,7 +34,7 @@ Using BlazeBlogger is really easy. Strongly inspired by Git in its design
 and in the best spirit of Unix philosophy, it comes as a set of smaller
 utilities that do one thing and do it well rather than the monolithic
 program for everything. Keeping the default configuration you can have a
-full-featured blog with the first post in only three steps! 
+full-featured blog with the first post in only three steps!
 
 =head1 SEE ALSO
 
@@ -77,6 +79,10 @@ Browse the content of the BlazeBlogger repository.
 =item B<blaze-make>(1)
 
 Generate static content from the BlazeBlogger repository.
+
+=item B<blaze-log>(1)
+
+Display the BlazeBlogger repository log.
 
 =back
 
