@@ -43,6 +43,7 @@ install: $(MAN1) $(MAN7)
 	@echo "Copying scripts..."
 	$(INSTALL) -d $(bindir)
 	$(INSTALL) -m 755 src/blaze-add.pl $(bindir)/blaze-add
+	$(INSTALL) -m 755 src/blaze-log.pl $(bindir)/blaze-log
 	$(INSTALL) -m 755 src/blaze-edit.pl $(bindir)/blaze-edit
 	$(INSTALL) -m 755 src/blaze-init.pl $(bindir)/blaze-init
 	$(INSTALL) -m 755 src/blaze-list.pl $(bindir)/blaze-list
@@ -52,6 +53,7 @@ install: $(MAN1) $(MAN7)
 	@echo "Copying man pages..."
 	$(INSTALL) -d $(man1dir)
 	$(INSTALL) -m 644 src/blaze-add.1 $(man1dir)
+	$(INSTALL) -m 644 src/blaze-log.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-edit.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-init.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-list.1 $(man1dir)
@@ -67,6 +69,7 @@ install: $(MAN1) $(MAN7)
 uninstall:
 	@echo "Removing scripts..."
 	-rm -f $(bindir)/blaze-add
+	-rm -f $(bindir)/blaze-log
 	-rm -f $(bindir)/blaze-edit
 	-rm -f $(bindir)/blaze-init
 	-rm -f $(bindir)/blaze-list
@@ -75,6 +78,7 @@ uninstall:
 	-rm -f $(bindir)/blaze-remove
 	@echo "Removing man pages..."
 	-rm -f $(man1dir)/blaze-add.1
+	-rm -f $(man1dir)/blaze-log.1
 	-rm -f $(man1dir)/blaze-edit.1
 	-rm -f $(man1dir)/blaze-init.1
 	-rm -f $(man1dir)/blaze-list.1
