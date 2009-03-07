@@ -6,12 +6,12 @@
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
 # Free Software Foundation, version 3 of the License.
-# 
+#
 # This program  is  distributed  in the hope  that it will  be useful,  but
 # WITHOUT  ANY WARRANTY;  without  even the implied  warranty of MERCHANTA-
 # BILITY  or  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
 # License for more details.
-# 
+#
 # You should have received a copy of the  GNU General Public License  along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
@@ -70,13 +70,16 @@ Usage: $NAME [-pqPV] [-b directory] [-i id] [-a author] [-d day] [-m month]
   -d, --day day               list records from the day in the DD form
   -m, --month month           list records from the month in the MM form
   -y, --year year             list records from the year in the YYYY form
-  -p, --page                  list static pages instead of posts
-  -P, --post                  list blog posts; the default option
+  -p, --pages                 list static pages instead of posts
+  -P, --posts                 list blog posts; the default option
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
+
+  # Return success:
+  return 1;
 }
 
 # Display version information:
@@ -104,6 +107,45 @@ sub date_to_string {
   return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
 }
 
+# Return the list of posts/pages header records:
+sub collect_headers {
+  my $type    = shift || 'post';
+  my $head    = catdir($blogdir, '.blaze', "${type}s", 'head');
+  my @records = ();
+
+  # Open the headers directory:
+  opendir(HEAD, $head) or return @records;
+
+  # Process each file:
+  while (my $id = readdir(HEAD)) {
+    # Skip both . and ..:
+    next if $id =~ /^\.\.?$/;
+
+    # Parse the header data:
+    my $data = ReadINI(catfile($head, $id)) or next;
+
+    # Fix the erroneous or missing header data:
+    $data->{header}->{date}   ||= 'XXXX-XX-XX';
+    $data->{header}->{tags}   ||= '';
+    $data->{header}->{author} ||= 'admin';
+    $data->{header}->{url}    ||= '';
+    $data->{header}->{title}  ||= '';
+
+    # Add the record to the beginning of the list:
+    push(@records, $data->{header}->{date}   . ':' . $id . ':' .
+                   $data->{header}->{tags}   . ':' .
+                   $data->{header}->{author} . ':' .
+                   $data->{header}->{url}    . ':' .
+                   $data->{header}->{title});
+  }
+
+  # Close the directory:
+  closedir(HEAD);
+
+  # Return the result:
+  return sort { $b cmp $a } @records;
+}
+
 # Display the list of matching records:
 sub display_records {
   my $type    = shift || 'post';
@@ -113,43 +155,33 @@ sub display_records {
   my $month   = shift || '..';
   my $day     = shift || '..';
 
-  # Prepare the directory name:
-  my $head    = catdir($blogdir, '.blaze', "${type}s", 'head');
+  # Collect the pages/posts headers:
+  my @headers = collect_headers($type);
 
-  # Open the headers directory:
-  opendir(HEAD, $head) or return 0;
-
-  # Process each file:
-  while (my $file = readdir(HEAD)) {
-    # Skip both . and ..:
-    next if $file =~ /^\.\.?$/;
-
-    # Parse the header data:
-    my $data = ReadINI(catfile($head, $file)) or next;
-
-    # Replace missing header data with defaults:
-    my $title  = $data->{header}->{title}  || $file;
-    my $author = $data->{header}->{author} || 'admin';
-    my $date   = $data->{header}->{date}   || '-';
-    my $tags   = $data->{header}->{tags}   || '';
+  # Process each header:
+  foreach(@headers) {
+    # Decompose the header record:
+    $_ =~ /^([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)$/;
+    my $date   = $1;
+    my $index  = $2;
+    my $tags   = $3;
+    my $author = $4;
+    my $title  = $6;
 
     # Check whether the record matches the pattern:
     unless ($date   =~ /^$year-$month-$day$/ &&
             $author =~ /^$name$/ &&
-            $file   =~ /^$id$/) {
+            $index  =~ /^$id$/) {
       # Skip the record:
       next;
     }
 
     # Display the record:
-    print "ID: $file | $date | $author\n\n";
+    print "ID: $index | $date | $author\n\n";
     print wrap('    ', ' ' x 11, "Title: $title\n");
     print wrap('    ', ' ' x 11, "Tags:  $tags\n") if ($type eq 'post');
     print "\n";
   }
-
-  # Close the directory:
-  closedir(HEAD);
 
   # Return success:
   return 1;
@@ -162,8 +194,8 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
-  'page|p'        => sub { $type    = 'page'; },
-  'post|P'        => sub { $type    = 'post'; },
+  'pages|p'       => sub { $type    = 'page'; },
+  'posts|P'       => sub { $type    = 'post'; },
   'id|i=s'        => sub { $id      = $_[1];  },
   'author|a=s'    => sub { $name    = $_[1];  },
   'year|y=i'      => sub { $year    = sprintf("%04d", $_[1]); },
@@ -250,11 +282,11 @@ list all july records.
 
 List records from the specified year where I<year> is in the YYYY format.
 
-=item B<-p>, B<--page>
+=item B<-p>, B<--pages>
 
 List static pages instead of blog posts.
 
-=item B<-P>, B<--post>
+=item B<-P>, B<--posts>
 
 List blog posts; this is the default option.
 
