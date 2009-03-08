@@ -24,7 +24,7 @@ use Getopt::Long;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
-use constant VERSION => '0.7.1';                    # Script version.
+use constant VERSION => '0.8.0-rc1';                # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
@@ -205,8 +205,10 @@ B<perl>(1).
 
 =head1 BUGS
 
-To report bugs please visit the appropriate section on the project
-homepage: <http://code.google.com/p/blazeblogger/issues/>.
+To report bug or even send patch, either add new issue to the project
+bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
+the discussion group at <http://groups.google.com/group/blazeblogger/>. You
+can also contact the author directly via e-mail.
 
 =head1 AUTHOR
 

@@ -6,12 +6,12 @@
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
 # Free Software Foundation, version 3 of the License.
-# 
+#
 # This program  is  distributed  in the hope  that it will  be useful,  but
 # WITHOUT  ANY WARRANTY;  without  even the implied  warranty of MERCHANTA-
 # BILITY  or  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
 # License for more details.
-# 
+#
 # You should have received a copy of the  GNU General Public License  along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
@@ -25,7 +25,7 @@ use Digest::MD5;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
-use constant VERSION => '0.7.1';                    # Script version.
+use constant VERSION => '0.8.0-rc1';                # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
@@ -521,8 +521,10 @@ B<perl>(1).
 
 =head1 BUGS
 
-To report bugs please visit the appropriate section on the project
-homepage: <http://code.google.com/p/blazeblogger/issues/>.
+To report bug or even send patch, either add new issue to the project
+bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
+the discussion group at <http://groups.google.com/group/blazeblogger/>. You
+can also contact the author directly via e-mail.
 
 =head1 AUTHOR
 

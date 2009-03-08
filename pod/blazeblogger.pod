@@ -88,8 +88,10 @@ Display the BlazeBlogger repository log.
 
 =head1 BUGS
 
-To report bugs please visit the appropriate section on the project
-homepage: <http://code.google.com/p/blazeblogger/issues/>.
+To report bug or even send patch, either add new issue to the project
+bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
+the discussion group at <http://groups.google.com/group/blazeblogger/>. You
+can also contact the author directly via e-mail.
 
 =head1 AUTHOR
 
