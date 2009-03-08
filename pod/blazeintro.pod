@@ -121,7 +121,7 @@ date or author. For example, to find all posts written by admin from the
 To browse static pages instead of blog posts, simply add the C<--page>
 option as follows:
 
-  $ blaze-list --page
+  $ blaze-list --pages
 
 =head2 Generating the Static Content
 
