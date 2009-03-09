@@ -493,6 +493,7 @@ sub create_lang {
 [lang]
 archive=Archive for
 tags=Posts tagged as
+taglist=List of tags
 previous=&laquo; previous
 next=next &raquo;
 more=more &raquo;
@@ -624,7 +625,8 @@ The default option is the current working directory.
 
 =item B<-f>, B<--force>
 
-Force rewrite of already existing configuration, style and theme files.
+Force rewrite of already existing configuration, style, theme and language
+files.
 
 =item B<-q>, B<--quiet>
 

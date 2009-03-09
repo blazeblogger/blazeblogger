@@ -913,6 +913,7 @@ sub generate_tags {
 
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{tags}     || 'Posts tagged as';
+  my $tags_string  = $locale->{lang}->{taglist}  || 'List of tags';
   my $prev_string  = $locale->{lang}->{previous} || '&laquo; previous';
   my $next_string  = $locale->{lang}->{next}     || 'next &raquo;';
 
@@ -1021,6 +1022,22 @@ sub generate_tags {
       # Report success:
       print "Created $file\n" if $verbose > 1;
     }
+  }
+
+  # Create the tag list if any:
+  if (%{$data->{tags}}) {
+    # Prepare the tag list body:
+    my $taglist_body = "<div class=\"section\">$tags_string</div>\n\n" .
+                       "<ul>\n" . list_of_tags($data, '../') . "</ul>";
+
+    # Prepare the tag list file name:
+    my $file = catfile($destdir, 'tags', "index.$ext");
+
+    # Write the file:
+    write_page($file, $data, $taglist_body, '../') or return 0;
+
+    # Report success:
+    print "Created $file\n" if $verbose > 1;
   }
 
   # Return success:
@@ -1231,7 +1248,7 @@ Disable creation of RSS feed.
 
 =item B<-f>, B<--force>
 
-Force rewrite of already existing style sheet.
+Force rewrite of already existing stylesheet.
 
 =item B<-q>, B<--quiet>
 
@@ -1266,6 +1283,10 @@ BlazeBlogger themes directory.
 =item I<.blaze/style/>
 
 BlazeBlogger stylesheets directory.
+
+=item I<.blaze/lang/>
+
+BlazeBlogger language files directory.
 
 =back
 
