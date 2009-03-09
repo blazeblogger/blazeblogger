@@ -471,7 +471,6 @@ sub write_page {
     $template =~ s/<!--\s*title\s*-->/$title/ig;
     $template =~ s/<!--\s*name\s*-->/$name/ig;
     $template =~ s/<!--\s*year\s*-->/$year/ig;
-    $template =~ s/<!--\s*root\s*-->/$root/ig;
 
     # Store the theme to the cache:
     $cache->{theme}->{$root} = $template;
@@ -480,9 +479,12 @@ sub write_page {
   # Open the file for writing:
   open(FILE, ">$file") or return 0;
 
-  # Substitute the content:
+  # Add page content:
   ($template  = $cache->{theme}->{$root})
               =~ s/<!--\s*content\s*-->/$content/ig;
+
+  # Substitute the root directory placeholder:
+  $template   =~ s/<!--\s*root\s*-->/$root/ig;
 
   # Write the line to the file:
   print FILE $template;

@@ -9,7 +9,7 @@ modify existing stylesheet for your BlazeBlogger web presentation.
 
 To make it as easy to alter as possible, BlazeBlogger theme consists of two
 parts: the template file located in the C<.blaze/theme/> and corresponding
-style sheet in the C<.blaze/style/> directory. This way, you can easily
+stylesheet in the C<.blaze/style/> directory. This way, you can easily
 switch between different styles (e.g. bright and dark one) without even
 touching the template file, which generally does not tend to vary much.
 
