@@ -30,13 +30,13 @@ use constant VERSION => '0.8.0-rc1';                # Script version.
 # General script settings:
 our $blogdir    = '.';                              # Repository location.
 our $destdir    = '.';                              # HTML pages location.
-our $force      = 0;                                # Force files rewrite?
 our $verbose    = 1;                                # Verbosity level.
 our $with_index = 1;                                # Generate index page?
 our $with_posts = 1;                                # Generate posts?
 our $with_pages = 1;                                # Generate pages?
 our $with_tags  = 1;                                # Generate tags?
 our $with_rss   = 1;                                # Generate RSS feed?
+our $with_css   = 1;                                # Generate stylesheet?
 
 # Global variables:
 our $conf       = {};                               # The configuration.
@@ -63,19 +63,19 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-fpqrtPV] [-b directory] [-d directory]
+Usage: $NAME [-pqrtPV] [-b directory] [-d directory]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
   -d, --destdir directory     specify the directory where the generated
                               static content is to be placed
+  -c, --no-css                disable stylesheet creation
   -i, --no-index              disable index page creation
   -p, --no-posts              disable posts creation
   -P, --no-pages              disable static pages creation
   -t, --no-tags               disable support for tags
   -r, --no-rss                disable RSS feed creation
-  -f, --force                 force rewrite of already existing files
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages including the list of
                               created files
@@ -1084,9 +1084,6 @@ sub copy_stylesheet {
   my $from  = catfile($blogdir, '.blaze', 'style', $style);
   my $to    = catfile($destdir, $style);
 
-  # Skip existing stylesheet:
-  return 1 if (-e $to && !$force);
-
   # Copy the file:
   copy($from, $to) or return 0;
 
@@ -1104,7 +1101,6 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
-  'force|f'       => sub { $force      = 1;     },
   'quiet|q'       => sub { $verbose    = 0;     },
   'verbose|V'     => sub { $verbose    = 2;     },
   'blogdir|b=s'   => sub { $blogdir    = $_[1]; },
@@ -1119,6 +1115,8 @@ GetOptions(
   'no-tags|t'     => sub { $with_tags  = 0 },
   'with-rss'      => sub { $with_rss   = 1 },
   'no-rss|r'      => sub { $with_rss   = 0 },
+  'with-css'      => sub { $with_css   = 1 },
+  'no-css|c'      => sub { $with_css   = 0 },
 );
 
 # Check superfluous options:
@@ -1184,7 +1182,8 @@ generate_pages($data)
 
 # Copy the stylesheet:
 copy_stylesheet()
-  or exit_with_error("Unable to copy the stylesheet.", 13);
+  or exit_with_error("Unable to copy the stylesheet.", 13)
+  if $with_css;
 
 # Report success:
 print "Done.\n" if $verbose;
@@ -1226,6 +1225,10 @@ default option is the current working directory.
 Specify the I<directory> where the generated static content is to be
 placed. The default option is the current working directory.
 
+=item B<-c>, B<--no-css>
+
+Disable creation of stylesheet.
+
 =item B<-i>, B<--no-index>
 
 Disable creation of index page. This is especially useful for websites with
@@ -1247,10 +1250,6 @@ Disable support for tags.
 =item B<-r>, B<--no-rss>
 
 Disable creation of RSS feed.
-
-=item B<-f>, B<--force>
-
-Force rewrite of already existing stylesheet.
 
 =item B<-q>, B<--quiet>
 
