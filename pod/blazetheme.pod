@@ -82,15 +82,15 @@ List of tags.
 
 List of months.
 
-=item B<<!-- root -->>
-
-Relative path to the root directory of the blog. Note that this is the only
-placeholder that can safely appear even in the post/page body and will be
-still taken into account.
-
 =item B<<!-- content -->>
 
 Main content (e.g. post or page body, posts listing etc.).
+
+=item B<%root%>
+
+Relative path to the root directory of the blog; to be used inside links.
+Note that this is the only placeholder that can safely appear in the
+post/page body as well and will be still taken into account.
 
 =back
 

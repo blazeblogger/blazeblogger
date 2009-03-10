@@ -484,7 +484,8 @@ sub write_page {
               =~ s/<!--\s*content\s*-->/$content/ig;
 
   # Substitute the root directory placeholder:
-  $template   =~ s/<!--\s*root\s*-->/$root/ig;
+  $template   =~ s/<!--\s*root\s*-->/$root/ig; # Obsolete!
+  $template   =~ s/%root%/$root/ig;
 
   # Write the line to the file:
   print FILE $template;
