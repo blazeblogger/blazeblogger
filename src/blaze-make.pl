@@ -22,6 +22,7 @@ use File::Copy;
 use File::Spec::Functions;
 use Config::IniHash;
 use Getopt::Long;
+use Time::Local 'timelocal_nocheck';
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -110,6 +111,20 @@ END_VERSION
 sub date_to_string {
   my @date = localtime(shift);
   return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
+}
+
+# Translate given date to RFC 822 format string:
+sub rfc_822_date {
+  my @date = localtime(shift);
+
+  # Prepare the aliases:
+  my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
+  my @days   = qw( Sun Mon Tue Wed Thu Fri Sat );
+
+  # Return the result:
+  return sprintf("%s, %02d %s %d %02d:%02d:%02d GMT", $days[$date[6]],
+                 $date[3], $months[$date[4]], 1900 + $date[5],
+                 $date[2], $date[1], $date[0]);
 }
 
 # Create given directories:
@@ -635,16 +650,21 @@ sub generate_rss {
 
     # Decompose the record:
     my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
-    my ($year, $month) = split(/-/, $date);
+    my ($year, $month, $day) = split(/-/, $date);
 
     # Strip HTML elements:
     my $post_title = strip_html($title);
     my $post_desc  = strip_html(substr(read_body($id, 'post', 1), 0, 500));
 
+    # Get the RFC 822 date-time string:
+    my $time       = timelocal_nocheck(1, 0, 0, $day, --$month, $year);
+    my $date_time  = rfc_822_date($time);
+
     # Add the post item:
     print RSS "  <item>\n    <title>$post_title</title>\n  " .
               "  <link>$base/$year/$month/$id-$url/index.$ext</link>\n  " .
-              "  <description>$post_desc    </description>\n" .
+              "  <description>$post_desc    </description>\n  " .
+              "  <pubDate>$date_time</pubDate>\n" .
               "  </item>\n";
 
     # Increase the number of listed items:
