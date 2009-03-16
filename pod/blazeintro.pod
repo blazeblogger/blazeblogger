@@ -124,7 +124,7 @@ date or author. For example, to find all posts written by admin from the
 
   $ blaze-list --author admin --year 2008 --month 12 --day 19
 
-To browse static pages instead of blog posts, simply add the C<--page>
+To browse static pages instead of blog posts, simply add the C<--pages>
 option as follows:
 
   $ blaze-list --pages
