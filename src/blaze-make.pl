@@ -657,7 +657,7 @@ sub generate_rss {
     my $post_desc  = strip_html(substr(read_body($id, 'post', 1), 0, 500));
 
     # Get the RFC 822 date-time string:
-    my $time       = timelocal_nocheck(1, 0, 0, $day, --$month, $year);
+    my $time       = timelocal_nocheck(1, 0, 0, $day, ($month - 1), $year);
     my $date_time  = rfc_822_date($time);
 
     # Add the post item:
