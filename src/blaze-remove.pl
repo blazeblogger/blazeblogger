@@ -1,7 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-remove, remove a blog post or a page from the BlazeBlogger
-#               repository
+# blaze-remove, remove a post/page from the BlazeBlogger repository
 # Copyright (C) 2008, 2009 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -20,6 +19,7 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec::Functions;
+use Config::IniHash;
 use Getopt::Long;
 
 # General script information:
@@ -29,6 +29,7 @@ use constant VERSION => '0.8.0-rc2';                # Script version.
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
 our $verbose = 1;                                   # Verbosity level.
+our $prompt  = 0;                                   # Ask for confirmation?
 
 # Command-line options:
 my  $type    = 'post';                              # Type: post or page.
@@ -53,13 +54,15 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqPV] [-b directory] id
+Usage: $NAME [-fipqPV] [-b directory] id
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
   -p, --page                  remove the static page instead of the post
   -P, --post                  remove the blog post; the default option
+  -i, --interactive           prompt before removal
+  -f, --force                 do not prompt; the default option
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -116,6 +119,8 @@ GetOptions(
   'version|v'     => sub { display_version(); exit 0; },
   'page|pages|p'  => sub { $type    = 'page'; },
   'post|posts|P'  => sub { $type    = 'post'; },
+  'force|f'       => sub { $prompt  = 0;      },
+  'interactive|i' => sub { $prompt  = 1;      },
   'quiet|q'       => sub { $verbose = 0;      },
   'verbose|V'     => sub { $verbose = 1;      },
   'blogdir|b=s'   => sub { $blogdir = $_[1];  },
@@ -131,6 +136,25 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 # Prepare the file names:
 my $head = catfile($blogdir, '.blaze', "${type}s", 'head', $ARGV[0]);
 my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $ARGV[0]);
+
+# Enter the interactive mode if requested:
+if ($prompt) {
+  # Parse header data:
+  my $data = ReadINI($head)
+    or exit_with_error("Unable to read the record with ID $ARGV[0].", 13);
+
+  # Display prompt:
+  print "Remove $type titled `" . ($data->{header}->{title} || '') . "'? ";
+
+  # Exit unless confirmed:
+  unless (readline(*STDIN) =~ /^(y|yes)$/i) {
+    # Report abortion:
+    print "Aborted.\n" if $verbose;
+
+    # Return success:
+    exit 0;
+  }
+}
 
 # Remove the files:
 unlink($head) and unlink($body)
@@ -150,12 +174,11 @@ __END__
 
 =head1 NAME
 
-blaze-remove - remove a blog post or a page from the BlazeBlogger
-repository
+blaze-remove - remove a post/page from the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-remove> [B<-pqPV>] [B<-b> I<directory>] I<id>
+B<blaze-remove> [B<-fipqPV>] [B<-b> I<directory>] I<id>
 
 B<blaze-remove> B<-h> | B<-v>
 
@@ -180,6 +203,14 @@ Remove the static page instead of the blog post.
 =item B<-P>, B<--post>
 
 Remove the blog post; this is the default option.
+
+=item B<-i>, B<--interactive>
+
+Prompt before post/page removal.
+
+=item B<-f>, B<--force>
+
+Do not prompt before post/page removal; this is the default option.
 
 =item B<-q>, B<--quiet>
 
