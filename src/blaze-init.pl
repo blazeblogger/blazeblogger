@@ -164,8 +164,7 @@ sub create_config {
 ##
 ##   user  - User's name  to be used as a default posts' author  and in the
 ##           copyright notice.
-##   email - User's e-mail;  so far,  this option is not actually used any-
-##           where.
+##   email - User's e-mail.
 ##
 [user]
 #name=admin

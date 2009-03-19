@@ -101,6 +101,13 @@ following command:
 
   $ blaze-remove 3
 
+Note that the utility has no conscience and remorselessly deletes anything
+you tell it to, with no way to take it back (unless you have backup, of
+course). To prevent the accidental loss of potentially valuable data, you
+might want to consider running it in an interactive mode using the
+C<--interactive> (or shorter C<-i>) option and thus having to confirm every
+deletion.
+
 =head2 Managing the Static Pages
 
 Similarly to blog posts, you can manage the static pages as follows:
