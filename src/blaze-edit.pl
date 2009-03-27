@@ -295,7 +295,7 @@ sub edit_record {
   }
 
   # Open the temporary file in the external editor:
-  system($edit, $temp) == 0 or exit_with_error("Unable to run `$edit'.",1);
+  system("$edit $temp") == 0 or exit_with_error("Unable to run `$edit'.",1);
 
   # Open the file for reading:
   if (open(FILE, "$temp")) {

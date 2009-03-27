@@ -531,7 +531,7 @@ sub read_body {
       # Check whether the link is provided:
       if ($link) {
         # Read required data from the language file:
-        my $more = $locale->{lang}->{more} || 'more &raquo;';
+        my $more = $locale->{lang}->{more} || 'Read more &raquo;';
 
         # Add the `read more' link:
         $result .= "<p><a href=\"$link\">$more</a></p>\n";
