@@ -20,7 +20,6 @@ use warnings;
 use Text::Wrap;
 use File::Basename;
 use File::Spec::Functions;
-use Config::IniHash;
 use Getopt::Long;
 
 # General script information:
@@ -111,6 +110,35 @@ sub date_to_string {
   return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
 }
 
+# Read data from the INI file:
+sub read_ini {
+  my $file    = shift || die 'Missing argument';
+  my $hash    = {};
+  my $section = 'default';
+
+  # Open the file for reading:
+  open(INI, "$file") or return 0;
+
+  # Process each line:
+  while (my $line = <INI>) {
+    # Parse line:
+    if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
+      # Change the section:
+      $section = $1;
+    }
+    elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
+      # Add option to the hash:
+      $hash->{$section}->{$1} = $2;
+    }
+  }
+
+  # Close the file:
+  close(INI);
+
+  # Return the result:
+  return $hash;
+}
+
 # Return the list of posts/pages header records:
 sub collect_headers {
   my $type    = shift || 'post';
@@ -126,7 +154,7 @@ sub collect_headers {
     next if $id =~ /^\.\.?$/;
 
     # Parse the header data:
-    my $data = ReadINI(catfile($head, $id)) or next;
+    my $data = read_ini(catfile($head, $id)) or next;
 
     # Fix the erroneous or missing header data:
     $data->{header}->{date}   ||= 'XXXX-XX-XX';

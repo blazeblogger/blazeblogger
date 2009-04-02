@@ -19,7 +19,6 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec::Functions;
-use Config::IniHash;
 use Getopt::Long;
 use Digest::MD5;
 
@@ -105,6 +104,62 @@ distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
 TICULAR PURPOSE.
 END_VERSION
+
+  # Return success:
+  return 1;
+}
+
+# Read data from the INI file:
+sub read_ini {
+  my $file    = shift || die 'Missing argument';
+  my $hash    = {};
+  my $section = 'default';
+
+  # Open the file for reading:
+  open(INI, "$file") or return 0;
+
+  # Process each line:
+  while (my $line = <INI>) {
+    # Parse line:
+    if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
+      # Change the section:
+      $section = $1;
+    }
+    elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
+      # Add option to the hash:
+      $hash->{$section}->{$1} = $2;
+    }
+  }
+
+  # Close the file:
+  close(INI);
+
+  # Return the result:
+  return $hash;
+}
+
+# Write data to the INI file:
+sub write_ini {
+  my $file = shift || 'Missing argument';
+  my $hash = shift || 'Missing argument';
+
+  # Open the file for writing:
+  open(INI, ">$file") or return 0;
+
+  # Process each section:
+  foreach my $section (sort(keys(%$hash))) {
+    # Write the section header:
+    print INI "[$section]\n";
+
+    # Process each option in the section:
+    foreach my $option (sort(keys(%{$hash->{$section}}))) {
+      # Write the option and its value:
+      print INI "  $option = $hash->{$section}->{$option}\n";
+    }
+  }
+
+  # Close the file:
+  close(INI);
 
   # Return success:
   return 1;
@@ -201,10 +256,10 @@ sub save_config {
   my $file = shift || die 'Missing argument';
 
   # Read the temporary file:
-  my $conf = ReadINI($temp) or return 0;
+  my $conf = read_ini($temp) or return 0;
 
   # Save the configuration file:
-  WriteINI($file, $conf) or return 0;
+  write_ini($file, $conf) or return 0;
 
   # Return success:
   return 1;
@@ -219,7 +274,7 @@ sub edit_config {
 
   # Read the configuration file:
   my $file = catfile($blogdir, '.blaze', 'config');
-  my $conf = ReadINI($file) or return 0;
+  my $conf = read_ini($file) or return 0;
 
   # Decide which editor to use:
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
@@ -282,14 +337,14 @@ sub set_option {
 
   # Read the configuration file:
   my $file = catfile($blogdir, '.blaze', 'config');
-  my $conf = ReadINI($file)
+  my $conf = read_ini($file)
              or print STDERR "Unable to read configuration.\n";
 
   # Set up the option:
   $conf->{$section}->{$key} = $value;
 
   # Save the configuration file:
-  WriteINI($file, $conf) or return 0;
+  write_ini($file, $conf) or return 0;
 
   # Return success:
   return 1;
@@ -304,7 +359,7 @@ sub display_option {
 
   # Read the configuration file:
   my $file = catfile($blogdir, '.blaze', 'config');
-  my $conf = ReadINI($file) or return 0;
+  my $conf = read_ini($file) or return 0;
 
   # Check whether the option is set:
   if (my $value = $conf->{$section}->{$key}) {

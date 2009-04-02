@@ -19,7 +19,6 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec::Functions;
-use Config::IniHash;
 use Getopt::Long;
 use Digest::MD5;
 
@@ -85,6 +84,62 @@ distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
 TICULAR PURPOSE.
 END_VERSION
+
+  # Return success:
+  return 1;
+}
+
+# Read data from the INI file:
+sub read_ini {
+  my $file    = shift || die 'Missing argument';
+  my $hash    = {};
+  my $section = 'default';
+
+  # Open the file for reading:
+  open(INI, "$file") or return 0;
+
+  # Process each line:
+  while (my $line = <INI>) {
+    # Parse line:
+    if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
+      # Change the section:
+      $section = $1;
+    }
+    elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
+      # Add option to the hash:
+      $hash->{$section}->{$1} = $2;
+    }
+  }
+
+  # Close the file:
+  close(INI);
+
+  # Return the result:
+  return $hash;
+}
+
+# Write data to the INI file:
+sub write_ini {
+  my $file = shift || 'Missing argument';
+  my $hash = shift || 'Missing argument';
+
+  # Open the file for writing:
+  open(INI, ">$file") or return 0;
+
+  # Process each section:
+  foreach my $section (sort(keys(%$hash))) {
+    # Write the section header:
+    print INI "[$section]\n";
+
+    # Process each option in the section:
+    foreach my $option (sort(keys(%{$hash->{$section}}))) {
+      # Write the option and its value:
+      print INI "  $option = $hash->{$section}->{$option}\n";
+    }
+  }
+
+  # Close the file:
+  close(INI);
 
   # Return success:
   return 1;
@@ -161,7 +216,7 @@ sub read_record {
   my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
 
   # Parse the record header data:
-  my $data = ReadINI($head) or return 0;
+  my $data = read_ini($head) or return 0;
 
   # Collect the data for the file header:
   my $author = $data->{header}->{author} || '';
@@ -240,7 +295,7 @@ sub save_record {
   check_header($data, $id, $type);
 
   # Write the record header:
-  WriteINI($head, $data) or return 0;
+  write_ini($head, $data) or return 0;
 
   # Open the record body for writing:
   open(BODY, ">$body") or return 0;
@@ -272,7 +327,7 @@ sub edit_record {
 
   # Read the configuration file:
   my $file = catfile($blogdir, '.blaze', 'config');
-  my $conf = ReadINI($file)
+  my $conf = read_ini($file)
              or print STDERR "Unable to read configuration.\n";
 
   # Decide which editor to use:

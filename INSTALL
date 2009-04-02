@@ -21,7 +21,6 @@ and as such, it should be runnable on almost any operating system, provided
 that following dependencies are met:
 
   * Working installation of Perl 5 (tested on version 5.8.8).
-  * Config::IniHash Perl extension (available from <http://www.cpan.org/>).
 
 
 2. INSTALLING ON UNIX SYSTEMS

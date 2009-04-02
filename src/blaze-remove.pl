@@ -19,7 +19,6 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Spec::Functions;
-use Config::IniHash;
 use Getopt::Long;
 
 # General script information:
@@ -110,6 +109,35 @@ sub add_to_log {
   return 1;
 }
 
+# Read data from the INI file:
+sub read_ini {
+  my $file    = shift || die 'Missing argument';
+  my $hash    = {};
+  my $section = 'default';
+
+  # Open the file for reading:
+  open(INI, "$file") or return 0;
+
+  # Process each line:
+  while (my $line = <INI>) {
+    # Parse line:
+    if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
+      # Change the section:
+      $section = $1;
+    }
+    elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
+      # Add option to the hash:
+      $hash->{$section}->{$1} = $2;
+    }
+  }
+
+  # Close the file:
+  close(INI);
+
+  # Return the result:
+  return $hash;
+}
+
 # Set up the options parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
@@ -140,7 +168,7 @@ my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $ARGV[0]);
 # Enter the interactive mode if requested:
 if ($prompt) {
   # Parse header data:
-  my $data = ReadINI($head)
+  my $data = read_ini($head)
     or exit_with_error("Unable to read the record with ID $ARGV[0].", 13);
 
   # Display prompt:

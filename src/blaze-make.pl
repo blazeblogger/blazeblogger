@@ -20,7 +20,6 @@ use warnings;
 use File::Basename;
 use File::Copy;
 use File::Spec::Functions;
-use Config::IniHash;
 use Getopt::Long;
 use Time::Local 'timelocal_nocheck';
 
@@ -145,6 +144,35 @@ sub make_directories {
   return 1;
 }
 
+# Read data from the INI file:
+sub read_ini {
+  my $file    = shift || die 'Missing argument';
+  my $hash    = {};
+  my $section = 'default';
+
+  # Open the file for reading:
+  open(INI, "$file") or return 0;
+
+  # Process each line:
+  while (my $line = <INI>) {
+    # Parse line:
+    if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
+      # Change the section:
+      $section = $1;
+    }
+    elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
+      # Add option to the hash:
+      $hash->{$section}->{$1} = $2;
+    }
+  }
+
+  # Close the file:
+  close(INI);
+
+  # Return the result:
+  return $hash;
+}
+
 # Fix the erroneous or missing header data:
 sub fix_header {
   my $data = shift || die 'Missing argument';
@@ -260,7 +288,7 @@ sub collect_headers {
     next if $id =~ /^\.\.?$/;
 
     # Parse the header data:
-    my $data = ReadINI(catfile($head, $id)) or next;
+    my $data = read_ini(catfile($head, $id)) or next;
 
     # Fix the erroneous or missing header data:
     fix_header($data, $id, $type);
@@ -1164,13 +1192,13 @@ unless ($with_posts || $with_pages) {
 
 # Read the configuration file:
 my $temp = catfile($blogdir, '.blaze', 'config');
-$conf    = ReadINI($temp)
+$conf    = read_ini($temp)
            or print STDERR "Unable to read configuration.\n";
 
 # Read the language file:
 $temp    = catfile($blogdir, '.blaze', 'lang',
                    ($conf->{blog}->{lang} || 'en_GB'));
-$locale  = ReadINI($temp)
+$locale  = read_ini($temp)
            or print STDERR "Unable to read language file `$temp'.", 13;
 
 # Collect the necessary metadata:
