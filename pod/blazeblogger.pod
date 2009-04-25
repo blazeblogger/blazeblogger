@@ -4,15 +4,16 @@ blazeblogger - a CMS without boundaries
 
 =head1 SYNOPSIS
 
-B<blaze-init> [B<-qV>] [B<-b> I<directory>]
+B<blaze-init> [B<-fqV>] [B<-b> I<directory>]
 
 B<blaze-config> [B<-qV>] [B<-b> I<directory>] I<name> [I<value>...]
 
-B<blaze-add> [B<-pqPV>] [B<-b> I<directory>] [I<file>...]
+B<blaze-add> [B<-pqPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
+I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
 
 B<blaze-edit> [B<-pqPV>] [B<-b> I<directory>] I<id>
 
-B<blaze-remove> [B<-pqPV>] [B<-b> I<directory>] I<id>
+B<blaze-remove> [B<-fipqPV>] [B<-b> I<directory>] I<id>
 
 B<blaze-list> [B<-pqPV>] [B<-b> I<directory>] [B<-i> I<id>]
 [B<-a> I<author>] [B<-d> I<day>] [B<-m> I<month>] [B<-y> I<year>]
