@@ -24,7 +24,7 @@ use Digest::MD5;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
-use constant VERSION => '0.8.0-rc2';                # Script version.
+use constant VERSION => '0.8.0';                    # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
