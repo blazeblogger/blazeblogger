@@ -474,18 +474,20 @@ sub write_page {
   my $data     = shift || return 0;
   my $content  = shift || '';
   my $root     = shift || '/';
+  my $home     = fix_url($root);
   my $template = '';
 
   # Check whether the theme is not already cached:
   unless ($cache->{theme}->{$root}) {
     # Read required data from the configuration:
-    my $encoding = $conf->{core}->{encoding} || 'UTF-8';
-    my $name     = $conf->{user}->{name}     || 'admin';
-    my $email    = $conf->{user}->{email}    || 'admin@localhost';
-    my $style    = $conf->{blog}->{style}    || 'default.css';
-    my $subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
-    my $theme    = $conf->{blog}->{theme}    || 'default.html';
-    my $title    = $conf->{blog}->{title}    || 'My Blog';
+    my $encoding = $conf->{core}->{encoding}  || 'UTF-8';
+    my $name     = $conf->{user}->{name}      || 'admin';
+    my $email    = $conf->{user}->{email}     || 'admin@localhost';
+    my $style    = $conf->{blog}->{style}     || 'default.css';
+    my $subtitle = $conf->{blog}->{subtitle}  || 'yet another blog';
+    my $theme    = $conf->{blog}->{theme}     || 'default.html';
+    my $title    = $conf->{blog}->{title}     || 'My Blog';
+    my $ext      = $conf->{core}->{extension} || 'html';
 
     # Prepare the pages, tags and months lists:
     my $archive  = list_of_months($data, $root);
@@ -546,8 +548,10 @@ sub write_page {
               =~ s/<!--\s*content\s*-->/$content/ig;
 
   # Substitute the root directory placeholder:
-  $template   =~ s/<!--\s*root\s*-->/$root/ig; # Obsolete!
   $template   =~ s/%root%/$root/ig;
+
+  # Substitute the home page placeholder:
+  $template   =~ s/%home%/$home/ig;
 
   # Write the line to the file:
   print FILE $template;
@@ -1327,7 +1331,7 @@ Disable creation of RSS feed.
 
 =item B<-F>, B<--full-paths>
 
-Enable full paths creation, i.e. always include index pages in generated
+Enable full paths creation, i.e. always include page names in generated
 links.
 
 =item B<-q>, B<--quiet>

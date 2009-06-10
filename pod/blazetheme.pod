@@ -89,7 +89,13 @@ Main content (e.g. post or page body, posts listing etc.).
 =item B<%root%>
 
 Relative path to the root directory of the blog; to be used inside links.
-Note that this is the only placeholder that can safely appear in the
+Note that this is one of two placeholders that can safely appear in the
+post/page body as well and will be still taken into account.
+
+=item B<%home%>
+
+Relative path to the website home (index) page; to be used inside links.
+Note that this is one of two placeholders that can safely appear in the
 post/page body as well and will be still taken into account.
 
 =back
