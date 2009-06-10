@@ -37,6 +37,7 @@ our $with_pages = 1;                                # Generate pages?
 our $with_tags  = 1;                                # Generate tags?
 our $with_rss   = 1;                                # Generate RSS feed?
 our $with_css   = 1;                                # Generate stylesheet?
+our $full_paths = 0;                                # Generate full paths?
 
 # Global variables:
 our $conf       = {};                               # The configuration.
@@ -63,7 +64,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqrtPV] [-b directory] [-d directory]
+Usage: $NAME [-pqrtFPV] [-b directory] [-d directory]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
@@ -76,6 +77,7 @@ Usage: $NAME [-pqrtPV] [-b directory] [-d directory]
   -P, --no-pages              disable static pages creation
   -t, --no-tags               disable support for tags
   -r, --no-rss                disable RSS feed creation
+  -F, --full-paths            enable full paths creation
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages including the list of
                               created files
@@ -273,6 +275,23 @@ sub fix_header {
   return 1;
 }
 
+# Append proper index file name to the end of the URL if requested:
+sub fix_url {
+  my $url = shift || die 'Missing argument';
+
+  # Check whether the full path is enabled:
+  if ($full_paths) {
+    # Append slash if missing:
+    $url .= "/" unless $url =~ /\/$/;
+
+    # Append index file name:
+    $url .= "index." . ($conf->{core}->{extension} || 'html');
+  }
+
+  # Return the correct URL:
+  return $url;
+}
+
 # Return the list of posts/pages header records:
 sub collect_headers {
   my $type    = shift || 'post';
@@ -395,8 +414,8 @@ sub list_of_months {
   if (my %months = %{$data->{months}}) {
     # Return the list of months:
     return join("\n", sort { $b cmp $a } (map {
-      "<li><a href=\"${root}" . $months{$_}->{url} . "\">$_</a> (" .
-      $months{$_}->{count} . ")</li>"
+      "<li><a href=\"" . fix_url($root . $months{$_}->{url}) .
+      "\">$_</a> (" . $months{$_}->{count} . ")</li>"
     } grep(/$year$/, keys(%months))));
   }
   else {
@@ -420,7 +439,7 @@ sub list_of_pages {
     $_ =~ /^[^:]*:[^:]*:[^:]*:[^:]*:([^:]*):(.*)$/;
 
     # Add the page link to the list:
-    $list .= "<li><a href=\"$root$1\">$2</a></li>\n";
+    $list .= "<li><a href=\"" . fix_url("$root$1") . "\">$2</a></li>\n";
   }
 
   # Return the list of pages:
@@ -439,8 +458,8 @@ sub list_of_tags {
   if (my %tags = %{$data->{tags}}) {
     # Return the list of tags:
     return join("\n", map {
-      "<li><a href=\"${root}tags/" . $tags{$_}->{url} . "\">$_</a> (" .
-      $tags{$_}->{count} . ")</li>"
+      "<li><a href=\"" . fix_url("${root}tags/" . $tags{$_}->{url}) .
+      "\">$_</a> (" . $tags{$_}->{count} . ")</li>"
     } sort(keys(%tags)));
   }
   else {
@@ -562,7 +581,7 @@ sub read_body {
         my $more = $locale->{lang}->{more} || 'Read more &raquo;';
 
         # Add the `read more' link:
-        $result .= "<p><a href=\"$link\">$more</a></p>\n";
+        $result .= "<p><a href=\"" . fix_url($link) . "\">$more</a></p>\n";
       }
 
       # Exit the loop:
@@ -588,7 +607,8 @@ sub format_tags {
 
   # Return the list of tag links:
   return join(', ', map {
-    "<a href=\"${root}tags/" . $data->{tags}->{$_}->{url} . "\">$_</a>"
+    "<a href=\"" . fix_url("${root}tags/" . $data->{tags}->{$_}->{url}) .
+    "\">$_</a>"
   } split(/,\s*/, lc($tags)));
 }
 
@@ -736,7 +756,8 @@ sub generate_index {
       my ($year, $month) = split(/-/, $date);
 
       # Add the post heading with excerpt:
-      $body.=format_heading("<a href=\"$year/$month/$id-$url\">$title</a>",
+      $body.=format_heading("<a href=\"" .fix_url("$year/$month/$id-$url").
+                            "\">$title</a>",
                             $date, $author,
                             format_tags($data, './', $tags)) .
              read_body($id, 'post', 1, "$year/$month/$id-$url");
@@ -908,7 +929,8 @@ sub generate_posts {
     }
 
     # Add the post heading with excerpt:
-    $month_body .= format_heading("<a href=\"$id-$url\">$title</a>",
+    $month_body .= format_heading("<a href=\"" . fix_url("$id-$url") .
+                                  "\">$title</a>",
                                   $date, $author,
                                   format_tags($data, '../../', $tags)) .
                    read_body($id, 'post', 1, "$id-$url");
@@ -1032,7 +1054,8 @@ sub generate_tags {
       }
 
       # Add the post heading with excerpt:
-      $tag_body .= format_heading("<a href=\"../../$year/$month/$id-$url" .
+      $tag_body .= format_heading("<a href=\"" .
+                                  fix_url("../../$year/$month/$id-$url") .
                                   "\">$title</a>", $date, $author,
                                   format_tags($data, '../../', $tags)) .
                    read_body($id, 'post', 1,"../../$year/$month/$id-$url");
@@ -1166,6 +1189,8 @@ GetOptions(
   'no-rss|r'      => sub { $with_rss   = 0 },
   'with-css'      => sub { $with_css   = 1 },
   'no-css|c'      => sub { $with_css   = 0 },
+  'full-paths|F'  => sub { $full_paths = 1 },
+  'no-full-paths' => sub { $full_paths = 0 },
 );
 
 # Check superfluous options:
@@ -1248,7 +1273,7 @@ blaze-make - generate static content from the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-make> [B<-pqrtPV>] [B<-b> I<directory>] [B<-d> I<directory>]
+B<blaze-make> [B<-pqrtFPV>] [B<-b> I<directory>] [B<-d> I<directory>]
 
 B<blaze-make> B<-h> | B<-v>
 
@@ -1299,6 +1324,11 @@ Disable support for tags.
 =item B<-r>, B<--no-rss>
 
 Disable creation of RSS feed.
+
+=item B<-F>, B<--full-paths>
+
+Enable full paths creation, i.e. always include index pages in generated
+links.
 
 =item B<-q>, B<--quiet>
 
