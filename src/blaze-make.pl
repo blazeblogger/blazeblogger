@@ -363,7 +363,7 @@ sub collect_metadata {
       (my $url = $date) =~ s/-/\//;
 
       # Set up the URL:
-      $months->{$name}->{url}   = "$url/";
+      $months->{$name}->{url}   = $url;
 
       # Set up the counter:
       $months->{$name}->{count} = 1;
@@ -384,7 +384,7 @@ sub collect_metadata {
         (my $url = $tag) =~ s/[^\w\s\-]//g; $url =~ s/\s/-/g;
 
         # Set up the URL:
-        $tags->{$tag}->{url}   = "$url/";
+        $tags->{$tag}->{url}   = $url;
 
         # Set up the counter:
         $tags->{$tag}->{count} = 1;
