@@ -144,19 +144,23 @@ and RSS feed included, type:
 
   $ blaze-make
 
-or if you want to see a list of files as they are created:
+or if you wish to see a list of files as they are created:
 
   $ blaze-make --verbose
 
 You can now check the appearance of your web presentation in the browser
-and/or copy the files to the hosting. Furthermore, if the public web
-directory is located on the same server, you can create the content
-directly in that location like this:
+and/or copy the files to the hosting. Note that you can force the full
+paths creation to make it easier to browse the off-line content like this:
+
+  $ blaze-make --full-paths
+
+Furthermore, if the public web directory is located on the same server, you
+can create the content directly in that location like this:
 
   $ blaze-make --destdir ~/public_html
 
-For the complete list of all command line options, see
-B<blaze-make>(1) man page.
+For the complete list of all command line options, see B<blaze-make>(1) man
+page.
 
 =head1 SEE ALSO
 
