@@ -435,7 +435,7 @@ GetOptions(
   'title|t=s'     => sub { $data->{header}->{title}  = $_[1]; },
   'author|a=s'    => sub { $data->{header}->{author} = $_[1]; },
   'date|d=s'      => sub { $data->{header}->{date}   = $_[1]; },
-  'tags|T=s'      => sub { $data->{header}->{tags}   = $_[1]; },
+  'tags|tag|T=s'  => sub { $data->{header}->{tags}   = $_[1]; },
   'url|u=s'       => sub { $data->{header}->{url}    = $_[1]; },
 );
 
