@@ -39,6 +39,7 @@ my  $author     = '';                               # Name search pattern.
 my  $year       = '';                               # Year search pattern.
 my  $month      = '';                               # Month search pattern.
 my  $day        = '';                               # Day search pattern.
+my  $tag        = '';                               # Tag search pattern.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -60,15 +61,16 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqPV] [-b directory] [-i id] [-t title] [-a author]
-                  [-d day] [-m month] [-y year]
+Usage: $NAME [-pqPV] [-b directory] [-i id] [-a author] [-t title]
+                  [-T tag] [-d day] [-m month] [-y year]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
   -i, --id id                 display record with specified ID
-  -t, --title title           list records with matching title
   -a, --author author         list records by specified author
+  -t, --title title           list records with matching title
+  -T, --tag tag               list records with matching tag
   -d, --day day               list records from the day in the DD form
   -m, --month month           list records from the month in the MM form
   -y, --year year             list records from the year in the YYYY form
@@ -182,8 +184,9 @@ sub collect_headers {
 sub display_records {
   my $type    = shift || 'post';
   my $id      = shift || '.*';
-  my $title   = shift || '';
   my $author  = shift || '.*';
+  my $title   = shift || '';
+  my $tag     = shift || '.*';
   my $year    = shift || '....';
   my $month   = shift || '..';
   my $day     = shift || '..';
@@ -204,6 +207,7 @@ sub display_records {
     # Check whether the record matches the pattern:
     unless ($record_date   =~ /^$year-$month-$day$/i &&
             $record_title  =~ /^.*$title.*$/i &&
+            $record_tags   =~ /^(|.*, *)$tag(,.*|)$/i &&
             $record_author =~ /^$author$/i &&
             $record_id     =~ /^$id$/i) {
       # Skip the record:
@@ -239,8 +243,9 @@ GetOptions(
   'page|pages|p'  => sub { $type    = 'page'; },
   'post|posts|P'  => sub { $type    = 'post'; },
   'id|i=s'        => sub { $id      = $_[1];  },
-  'title|t=s'     => sub { $title   = $_[1];  },
   'author|a=s'    => sub { $author  = $_[1];  },
+  'title|t=s'     => sub { $title   = $_[1];  },
+  'tags|tag|T=s'  => sub { $tag     = $_[1];  },
   'year|y=i'      => sub { $year    = sprintf("%04d", $_[1]); },
   'month|m=i'     => sub { $month   = sprintf("%02d", $_[1]); },
   'day|d=i'       => sub { $day     = sprintf("%02d", $_[1]); },
@@ -262,14 +267,15 @@ my $reserved  = '[\\\\\^\.\$\|\(\)\[\]\*\+\?\{\}]';
 
 # Escape reserved characters:
 $id     =~ s/($reserved)/\\$1/g if $id;
-$title  =~ s/($reserved)/\\$1/g if $title;
 $author =~ s/($reserved)/\\$1/g if $author;
+$title  =~ s/($reserved)/\\$1/g if $title;
+$tag    =~ s/($reserved)/\\$1/g if $tag;
 $year   =~ s/($reserved)/\\$1/g if $year;
 $month  =~ s/($reserved)/\\$1/g if $month;
 $month  =~ s/($reserved)/\\$1/g if $day;
 
 # Display the list of matching records:
-display_records($type, $id, $title, $author, $year, $month, $day)
+display_records($type, $id, $author, $title, $tag, $year, $month, $day)
   or exit_with_error("Unable to read repository data.", 13);
 
 # Return success:
@@ -284,7 +290,8 @@ blaze-list - browse the content of the BlazeBlogger repository
 =head1 SYNOPSIS
 
 B<blaze-list> [B<-pqPV>] [B<-b> I<directory>] [B<-i> I<id>]
-[B<-t> I<title>] [B<-a> I<author>] [B<-d> I<day>] [B<-m> I<month>] [B<-y> I<year>]
+[B<-a> I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>]
+[B<-m> I<month>] [B<-y> I<year>]
 
 B<blaze-list> B<-h> | B<-v>
 
@@ -307,13 +314,17 @@ default option is the current working directory.
 
 Display the record with specified I<id> only.
 
+=item B<-a>, B<--author> I<author>
+
+List records by specified I<author> only.
+
 =item B<-t>, B<--title> I<title>
 
 List records with matching I<title>.
 
-=item B<-a>, B<--author> I<author>
+=item B<-T>, B<--tag> I<tag>
 
-List records by specified I<author> only.
+List records tagged as I<tag>.
 
 =item B<-d>, B<--day> I<day>
 
