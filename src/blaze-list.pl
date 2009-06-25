@@ -61,7 +61,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqPV] [-b directory] [-i id] [-a author] [-t title]
+Usage: $NAME [-pqPSV] [-b directory] [-i id] [-a author] [-t title]
                   [-T tag] [-d day] [-m month] [-y year]
        $NAME -h | -v
 
@@ -76,6 +76,7 @@ Usage: $NAME [-pqPV] [-b directory] [-i id] [-a author] [-t title]
   -y, --year year             list records from the year in the YYYY form
   -p, --pages                 list static pages instead of posts
   -P, --posts                 list blog posts; the default option
+  -S, --stats                 show repository statistics instead of posts
   -s, --short                 display each record on a single line
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
@@ -233,6 +234,38 @@ sub display_records {
   return 1;
 }
 
+# Display repository statistics:
+sub display_statistics {
+  # Collect the necessary metadata:
+  my @pages = collect_headers('page');
+  my @posts = collect_headers('post');
+
+  # Get desired values:
+  my $pages_count = scalar @pages;
+  my $posts_count = scalar @posts;
+  my $first_post  = substr($posts[$#posts], 0, 10) if @posts;
+  my $last_post   = substr($posts[0],       0, 10) if @posts;
+
+  # Check whether to use compact listing:
+  unless ($compact) {
+    # Display the full results:
+    print "Number of pages: $pages_count\n";
+    print "Number of posts: $posts_count\n";
+    print "Last post date:  $last_post\n"  if @posts;
+    print "First post date: $first_post\n" if @posts;
+  }
+  else {
+    # Display shortened results:
+    printf("There is a total number of $posts_count blog post%s " .
+           "and $pages_count page%s in the repository.\n",
+           (($posts_count != 1) ? 's' : ''),
+           (($pages_count != 1) ? 's' : ''));
+  }
+
+  # Return success:
+  return 1;
+}
+
 # Set up the options parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
@@ -240,19 +273,20 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
-  'page|pages|p'  => sub { $type    = 'page'; },
-  'post|posts|P'  => sub { $type    = 'post'; },
-  'id|i=s'        => sub { $id      = $_[1];  },
-  'author|a=s'    => sub { $author  = $_[1];  },
-  'title|t=s'     => sub { $title   = $_[1];  },
-  'tags|tag|T=s'  => sub { $tag     = $_[1];  },
+  'page|pages|p'  => sub { $type    = 'page';  },
+  'post|posts|P'  => sub { $type    = 'post';  },
+  'stats|S'       => sub { $type    = 'stats'; },
+  'id|i=s'        => sub { $id      = $_[1];   },
+  'author|a=s'    => sub { $author  = $_[1];   },
+  'title|t=s'     => sub { $title   = $_[1];   },
+  'tags|tag|T=s'  => sub { $tag     = $_[1];   },
   'year|y=i'      => sub { $year    = sprintf("%04d", $_[1]); },
   'month|m=i'     => sub { $month   = sprintf("%02d", $_[1]); },
   'day|d=i'       => sub { $day     = sprintf("%02d", $_[1]); },
-  'short|s'       => sub { $compact = 1;      },
-  'quiet|q'       => sub { $verbose = 0;      },
-  'verbose|V'     => sub { $verbose = 1;      },
-  'blogdir|b=s'   => sub { $blogdir = $_[1];  },
+  'short|s'       => sub { $compact = 1;       },
+  'quiet|q'       => sub { $verbose = 0;       },
+  'verbose|V'     => sub { $verbose = 1;       },
+  'blogdir|b=s'   => sub { $blogdir = $_[1];   },
 );
 
 # Detect superfluous options:
@@ -262,21 +296,29 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# Prepare the list of reserved characters:
-my $reserved  = '[\\\\\^\.\$\|\(\)\[\]\*\+\?\{\}]';
+# Check whether to post/pages, or show statistics:
+unless ($type eq 'stats') {
+  # Prepare the list of reserved characters:
+  my $reserved  = '[\\\\\^\.\$\|\(\)\[\]\*\+\?\{\}]';
 
-# Escape reserved characters:
-$id     =~ s/($reserved)/\\$1/g if $id;
-$author =~ s/($reserved)/\\$1/g if $author;
-$title  =~ s/($reserved)/\\$1/g if $title;
-$tag    =~ s/($reserved)/\\$1/g if $tag;
-$year   =~ s/($reserved)/\\$1/g if $year;
-$month  =~ s/($reserved)/\\$1/g if $month;
-$month  =~ s/($reserved)/\\$1/g if $day;
+  # Escape reserved characters:
+  $id     =~ s/($reserved)/\\$1/g if $id;
+  $author =~ s/($reserved)/\\$1/g if $author;
+  $title  =~ s/($reserved)/\\$1/g if $title;
+  $tag    =~ s/($reserved)/\\$1/g if $tag;
+  $year   =~ s/($reserved)/\\$1/g if $year;
+  $month  =~ s/($reserved)/\\$1/g if $month;
+  $month  =~ s/($reserved)/\\$1/g if $day;
 
-# Display the list of matching records:
-display_records($type, $id, $author, $title, $tag, $year, $month, $day)
-  or exit_with_error("Unable to read repository data.", 13);
+  # Display the list of matching records:
+  display_records($type, $id, $author, $title, $tag, $year, $month, $day)
+    or exit_with_error("Unable to read repository data.", 13);
+}
+else {
+  # Display repository statistics:
+  display_statistics()
+    or exit_with_error("Unable to read repository data.", 13);
+}
 
 # Return success:
 exit 0;
@@ -289,7 +331,7 @@ blaze-list - browse the content of the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-list> [B<-pqPV>] [B<-b> I<directory>] [B<-i> I<id>]
+B<blaze-list> [B<-pqPSV>] [B<-b> I<directory>] [B<-i> I<id>]
 [B<-a> I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>]
 [B<-m> I<month>] [B<-y> I<year>]
 
@@ -349,6 +391,10 @@ List static pages instead of blog posts.
 =item B<-P>, B<--posts>
 
 List blog posts; this is the default option.
+
+=item B<-S>, B<--stats>
+
+Show repository statistics instead of blog posts.
 
 =item B<-s>, B<--short>
 
