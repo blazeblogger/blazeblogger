@@ -20,6 +20,7 @@ use warnings;
 use Text::Wrap;
 use File::Basename;
 use File::Spec::Functions;
+use Term::ANSIColor;
 use Getopt::Long;
 
 # General script information:
@@ -30,6 +31,7 @@ use constant VERSION => '0.8.1';                    # Script version.
 our $blogdir    = '.';                              # Repository location.
 our $verbose    = 1;                                # Verbosity level.
 our $compact    = 0;                                # Use compact listing?
+our $coloured   = 0;                                # Use coloured listing?
 
 # Command-line options:
 my  $type       = 'post';                           # Type: post or page.
@@ -61,7 +63,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqPSV] [-b directory] [-i id] [-a author] [-t title]
+Usage: $NAME [-cpqCPSV] [-b directory] [-i id] [-a author] [-t title]
                   [-T tag] [-d day] [-m month] [-y year]
        $NAME -h | -v
 
@@ -78,6 +80,8 @@ Usage: $NAME [-pqPSV] [-b directory] [-i id] [-a author] [-t title]
   -P, --posts                 list blog posts; the default option
   -S, --stats                 show repository statistics instead of posts
   -s, --short                 display each record on a single line
+  -c, --color                 enable coloured output
+  -C, --no-color              disable coloured output
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -217,8 +221,19 @@ sub display_records {
 
     # Check whether to use compact listing:
     unless ($compact) {
-      # Display the full record:
-      print "ID: $record_id | $record_date | $record_author\n\n";
+      # Check whether to use colours:
+      unless ($coloured) {
+        # Display the plain record header:
+        print "ID: $record_id | $record_date | $record_author\n\n";
+      }
+      else {
+        # Display the coloured record header:
+        print colored ("ID: $record_id | $record_date | $record_author",
+                       'yellow');
+        print "\n\n";
+      }
+
+      # Display the record body:
       print wrap('    ', ' ' x 11, "Title: $record_title\n");
       print wrap('    ', ' ' x 11, "Tags:  $record_tags\n")
         if ($type eq 'post');
@@ -266,27 +281,39 @@ sub display_statistics {
   return 1;
 }
 
+# Read the configuration file:
+my $conf  = read_ini(catfile($blogdir, '.blaze', 'config'))
+            or print STDERR "Unable to read configuration.\n";
+
+# Read required data from the configuration:
+my $temp  = $conf->{color}->{list} || 'false';
+
+# Set up the output mode:
+$coloured = ($temp =~ /^(true|auto)\s*$/i) ? 1 : 0;
+
 # Set up the options parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
 # Process command-line options:
 GetOptions(
-  'help|h'        => sub { display_help();    exit 0; },
-  'version|v'     => sub { display_version(); exit 0; },
-  'page|pages|p'  => sub { $type    = 'page';  },
-  'post|posts|P'  => sub { $type    = 'post';  },
-  'stats|S'       => sub { $type    = 'stats'; },
-  'id|i=s'        => sub { $id      = $_[1];   },
-  'author|a=s'    => sub { $author  = $_[1];   },
-  'title|t=s'     => sub { $title   = $_[1];   },
-  'tags|tag|T=s'  => sub { $tag     = $_[1];   },
-  'year|y=i'      => sub { $year    = sprintf("%04d", $_[1]); },
-  'month|m=i'     => sub { $month   = sprintf("%02d", $_[1]); },
-  'day|d=i'       => sub { $day     = sprintf("%02d", $_[1]); },
-  'short|s'       => sub { $compact = 1;       },
-  'quiet|q'       => sub { $verbose = 0;       },
-  'verbose|V'     => sub { $verbose = 1;       },
-  'blogdir|b=s'   => sub { $blogdir = $_[1];   },
+  'help|h'               => sub { display_help();    exit 0; },
+  'version|v'            => sub { display_version(); exit 0; },
+  'page|pages|p'         => sub { $type     = 'page';  },
+  'post|posts|P'         => sub { $type     = 'post';  },
+  'stats|S'              => sub { $type     = 'stats'; },
+  'id|i=s'               => sub { $id       = $_[1];   },
+  'author|a=s'           => sub { $author   = $_[1];   },
+  'title|t=s'            => sub { $title    = $_[1];   },
+  'tags|tag|T=s'         => sub { $tag      = $_[1];   },
+  'year|y=i'             => sub { $year     = sprintf("%04d", $_[1]); },
+  'month|m=i'            => sub { $month    = sprintf("%02d", $_[1]); },
+  'day|d=i'              => sub { $day      = sprintf("%02d", $_[1]); },
+  'short|s'              => sub { $compact  = 1;       },
+  'no-color|no-colour|C' => sub { $coloured = 0;       },
+  'color|colour|c'       => sub { $coloured = 1;       },
+  'quiet|q'              => sub { $verbose  = 0;       },
+  'verbose|V'            => sub { $verbose  = 1;       },
+  'blogdir|b=s'          => sub { $blogdir  = $_[1];   },
 );
 
 # Detect superfluous options:
@@ -331,7 +358,7 @@ blaze-list - browse the content of the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-list> [B<-pqPSV>] [B<-b> I<directory>] [B<-i> I<id>]
+B<blaze-list> [B<-cpqCPSV>] [B<-b> I<directory>] [B<-i> I<id>]
 [B<-a> I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>]
 [B<-m> I<month>] [B<-y> I<year>]
 
@@ -399,6 +426,14 @@ Show repository statistics instead of blog posts.
 =item B<-s>, B<--short>
 
 Display each record on a single line.
+
+=item B<-c>, B<--color>, B<--colour>
+
+Enable coloured output, no matter what is set in the configuration.
+
+=item B<-C>, B<--no-color>, B<--no-colour>
+
+Disable coloured output, no matter what is set in the configuration.
 
 =item B<-q>, B<--quiet>
 
