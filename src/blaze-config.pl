@@ -321,7 +321,7 @@ sub edit_config {
 
   # Save the configuration file:
   save_config($temp, $file)
-    or exit_with_error("Ubable to save the configuration file.", 13);
+    or exit_with_error("Unable to save the configuration file.", 13);
 
   # Return success:
   return 1;
