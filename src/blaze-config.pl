@@ -52,6 +52,10 @@ our %options = (
   # User related settings:
   'user.name'      => "User's name to be used as a default posts' author.",
   'user.email'     => "User's e-mail.",
+
+  # Colour related settings:
+  'color.list'     => "true or false -- use coloured posts/pages listing?",
+  'color.log'      => "true or false -- use coloured log listing?",
 );
 
 # Set up the __WARN__ signal handler:
@@ -179,6 +183,10 @@ sub read_config {
   my $blog_posts     = $conf->{blog}->{posts}     || '10';
   my $blog_url       = $conf->{blog}->{url}       || '';
 
+  # Prepare the colour related settings:
+  my $color_list     = $conf->{color}->{list}     || 'false';
+  my $color_log      = $conf->{color}->{log}      || 'false';
+
   # Prepare the core settings:
   my $core_editor    = $conf->{core}->{editor}    || 'vi';
   my $core_encoding  = $conf->{core}->{encoding}  || 'UTF-8';
@@ -218,6 +226,18 @@ style=$blog_style
 lang=$blog_lang
 posts=$blog_posts
 url=$blog_url
+
+## The following are the colour settings, affecting the way various outputs
+## look. The options are as follows:
+##
+##   list - Whether to use coloured posts/pages listing;  the value  has to
+##          be either true, or false.
+##   log  - Whether to use coloured repository log listing;  the value  has
+##          to be either true, or false.
+##
+[color]
+list=$color_list
+log=$color_log
 
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
@@ -518,6 +538,16 @@ Number of posts to be listed on a single page; the default value is 10.
 =item B<blog.url>
 
 Blog base url; required for RSS feeds only.
+
+=item B<color.list>
+
+Whether to use coloured post/pages listing; the value has to be either
+C<true>, or C<false>. Colours are turned off by default.
+
+=item B<color.log>
+
+Whether to use coloured log listing; the value has to be either C<true>, or
+C<false>. Colours are turned off by default.
 
 =item B<core.editor>
 

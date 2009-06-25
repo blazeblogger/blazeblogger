@@ -147,6 +147,18 @@ sub create_config {
 #posts=10
 #url=
 
+## The following are the colour settings, affecting the way various outputs
+## look. The options are as follows:
+##
+##   list - Whether to use coloured posts/pages listing;  the value  has to
+##          be either true, or false.
+##   log  - Whether to use coloured repository log listing;  the value  has
+##          to be either true, or false.
+##
+[color]
+list=false
+log=false
+
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
 ##
