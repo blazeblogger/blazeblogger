@@ -401,6 +401,28 @@ sub collect_metadata {
   };
 }
 
+# Return the list of tags:
+sub list_of_tags {
+  my $data = shift || die 'Missing argument';
+  my $root = shift || '/';
+
+  # Check whether the tags generation is eneabled:
+  return '' unless $with_tags;
+
+  # Check whether the list is not empty:
+  if (my %tags = %{$data->{tags}}) {
+    # Return the list of tags:
+    return join("\n", map {
+      "<li><a href=\"" . fix_url("${root}tags/" . $tags{$_}->{url}) .
+      "\">$_</a> (" . $tags{$_}->{count} . ")</li>"
+    } sort(keys(%tags)));
+  }
+  else {
+    # Return an empty string:
+    return '';
+  }
+}
+
 # Return the list of months:
 sub list_of_months {
   my $data = shift || die 'Missing argument';
@@ -431,7 +453,7 @@ sub list_of_pages {
   my $list = '';
 
   # Check whether the pages generation is enabled:
-  return '' unless $with_pages;
+  return $list unless $with_pages;
 
   # Process each page separately:
   foreach (sort @{$data->{pages}}) {
@@ -446,26 +468,38 @@ sub list_of_pages {
   return $list;
 }
 
-# Return the list of tags:
-sub list_of_tags {
-  my $data = shift || die 'Missing argument';
-  my $root = shift || '/';
+# Return the list of posts:
+sub list_of_posts {
+  my $data  = shift || die 'Missing argument';
+  my $root  = shift || '/';
+  my $max   = shift || 5;
+  my $list  = '';
 
-  # Check whether the tags generation is eneabled:
-  return '' unless $with_tags;
+  # Check whether the posts generation is enabled:
+  return $list unless $with_posts;
 
-  # Check whether the list is not empty:
-  if (my %tags = %{$data->{tags}}) {
-    # Return the list of tags:
-    return join("\n", map {
-      "<li><a href=\"" . fix_url("${root}tags/" . $tags{$_}->{url}) .
-      "\">$_</a> (" . $tags{$_}->{count} . ")</li>"
-    } sort(keys(%tags)));
+  # Initialize the counter:
+  my $count = 0;
+
+  # Process each post separately:
+  foreach my $record (@{$data->{posts}}) {
+    # Stop when the post count reaches the limit:
+    last if $count == $max;
+
+    # Decompose the record:
+    my ($date, $id, undef, undef, $url, $title) = split(/:/, $record, 6);
+    my ($year, $month) = split(/-/, $date);
+
+    # Add the post link to the list:
+    $list .= "<li><a href=\"" . fix_url("$root$year/$month/$id-$url") .
+             "\">$title</a></li>\n";
+
+    # Increase the counter:
+    $count++;
   }
-  else {
-    # Return an empty string:
-    return '';
-  }
+
+  # Return the list of posts:
+  return $list;
 }
 
 # Write a single page:
@@ -490,9 +524,10 @@ sub write_page {
     my $ext      = $conf->{core}->{extension} || 'html';
 
     # Prepare the pages, tags and months lists:
+    my $tags     = list_of_tags($data, $root);
     my $archive  = list_of_months($data, $root);
     my $pages    = list_of_pages($data, $root);
-    my $tags     = list_of_tags($data, $root);
+    my $posts    = list_of_posts($data, $root);
 
     # Get the current year:
     my $year     = substr(date_to_string(time), 0, 4);
@@ -525,9 +560,10 @@ sub write_page {
     $template =~ s/<!--\s*date\s*-->/$date/ig;
 
     # Substitute lists placeholders:
+    $template =~ s/<!--\s*tags\s*-->/$tags/ig;
     $template =~ s/<!--\s*archive\s*-->/$archive/ig;
     $template =~ s/<!--\s*pages\s*-->/$pages/ig;
-    $template =~ s/<!--\s*tags\s*-->/$tags/ig;
+    $template =~ s/<!--\s*posts\s*-->/$posts/ig;
 
     # Substitute body placeholders:
     $template =~ s/<!--\s*subtitle\s*-->/$subtitle/ig;
