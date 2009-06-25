@@ -31,12 +31,7 @@ use constant VERSION => '0.8.1';                    # Script version.
 our $blogdir    = '.';                              # Repository location.
 our $verbose    = 1;                                # Verbosity level.
 our $compact    = 0;                                # Use compact listing?
-
-# Colours settings:
-our $date_col   = 'yellow';                         # Log entry date.
-
-# Global variables:
-our $conf       = {};                               # The configuration.
+our $coloured   = 0;                                # Use coloured listing?
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -58,12 +53,14 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-qsV] [-b directory]
+Usage: $NAME [-cqsCV] [-b directory]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
   -s, --short                 display each log record on a single line
+  -c, --color                 enable coloured output
+  -C, --no-color              disable coloured output
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -126,10 +123,6 @@ sub read_ini {
 sub display_log {
   my $file     = catfile($blogdir, '.blaze', 'log');
 
-  # Read required data from the configuration:
-  my $temp     = $conf->{color}->{log} || 'false';
-  my $coloured = ($temp =~ /^(true|auto)\s*$/i) ? 1 : 0;
-
   # Open the log file for reading:
   open(LOG, "$file") or return 0;
 
@@ -147,7 +140,7 @@ sub display_log {
       }
       else {
         # Display the coloured record header:
-        print colored ("Date: $date", $date_col);
+        print colored ("Date: $date", 'yellow');
         print "\n\n";
       }
 
@@ -168,17 +161,29 @@ sub display_log {
   return 1;
 }
 
+# Read the configuration file:
+my $conf  = read_ini(catfile($blogdir, '.blaze', 'config'))
+            or print STDERR "Unable to read configuration.\n";
+
+# Read required data from the configuration:
+my $temp  = $conf->{color}->{log} || 'false';
+
+# Set up the output mode:
+$coloured = ($temp =~ /^(true|auto)\s*$/i) ? 1 : 0;
+
 # Set up the options parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
 # Process command-line options:
 GetOptions(
-  'help|h'        => sub { display_help();    exit 0; },
-  'version|v'     => sub { display_version(); exit 0; },
-  'short|s'       => sub { $compact = 1;      },
-  'quiet|q'       => sub { $verbose = 0;      },
-  'verbose|V'     => sub { $verbose = 1;      },
-  'blogdir|b=s'   => sub { $blogdir = $_[1];  },
+  'help|h'               => sub { display_help();    exit 0; },
+  'version|v'            => sub { display_version(); exit 0; },
+  'short|s'              => sub { $compact  = 1;      },
+  'no-color|no-colour|C' => sub { $coloured = 0;      },
+  'color|colour|c'       => sub { $coloured = 1;      },
+  'quiet|q'              => sub { $verbose  = 0;      },
+  'verbose|V'            => sub { $verbose  = 1;      },
+  'blogdir|b=s'          => sub { $blogdir  = $_[1];  },
 );
 
 # Detect superfluous options:
@@ -187,10 +192,6 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 # Check the repository is present (however naive this method is):
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
-
-# Read the configuration file:
-$conf = read_ini(catfile($blogdir, '.blaze', 'config'))
-        or print STDERR "Unable to read configuration.\n";
 
 # Display log records:
 display_log()
@@ -207,7 +208,7 @@ blaze-log - display the BlazeBlogger repository log
 
 =head1 SYNOPSIS
 
-B<blaze-log> [B<-qsV>] [B<-b> I<directory>]
+B<blaze-log> [B<-cqsCV>] [B<-b> I<directory>]
 
 B<blaze-log> B<-h> | B<-v>
 
@@ -227,6 +228,14 @@ default option is the current working directory.
 =item B<-s>, B<--short>
 
 Display each log record on a single line.
+
+=item B<-c>, B<--color>, B<--colour>
+
+Enable coloured output, no matter what is set in the configuration.
+
+=item B<-C>, B<--no-color>, B<--no-colour>
+
+Disable coloured output, no matter what is set in the configuration.
 
 =item B<-q>, B<--quiet>
 
