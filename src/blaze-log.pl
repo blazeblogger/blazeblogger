@@ -20,6 +20,7 @@ use warnings;
 use Text::Wrap;
 use File::Basename;
 use File::Spec::Functions;
+use Term::ANSIColor;
 use Getopt::Long;
 
 # General script information:
@@ -30,6 +31,12 @@ use constant VERSION => '0.8.1';                    # Script version.
 our $blogdir    = '.';                              # Repository location.
 our $verbose    = 1;                                # Verbosity level.
 our $compact    = 0;                                # Use compact listing?
+
+# Colours settings:
+our $date_col   = 'yellow';                         # Log entry date.
+
+# Global variables:
+our $conf       = {};                               # The configuration.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -86,9 +93,42 @@ END_VERSION
   return 1;
 }
 
+# Read data from the INI file:
+sub read_ini {
+  my $file    = shift || die 'Missing argument';
+  my $hash    = {};
+  my $section = 'default';
+
+  # Open the file for reading:
+  open(INI, "$file") or return 0;
+
+  # Process each line:
+  while (my $line = <INI>) {
+    # Parse line:
+    if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
+      # Change the section:
+      $section = $1;
+    }
+    elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
+      # Add option to the hash:
+      $hash->{$section}->{$1} = $2;
+    }
+  }
+
+  # Close the file:
+  close(INI);
+
+  # Return the result:
+  return $hash;
+}
+
 # Display log records:
 sub display_log {
-  my $file = catfile($blogdir, '.blaze', 'log');
+  my $file     = catfile($blogdir, '.blaze', 'log');
+
+  # Read required data from the configuration:
+  my $temp     = $conf->{color}->{log} || 'false';
+  my $coloured = ($temp =~ /^(true|auto)\s*$/i) ? 1 : 0;
 
   # Open the log file for reading:
   open(LOG, "$file") or return 0;
@@ -100,8 +140,18 @@ sub display_log {
       # Decompose the record:
       my ($date, $message) = split(/\s+-\s+/, $record, 2);
 
-      # Display the full record:
-      print "Date: $date\n\n";
+      # Check whether to use colours:
+      unless ($coloured) {
+        # Display the plain record header:
+        print "Date: $date\n\n";
+      }
+      else {
+        # Display the coloured record header:
+        print colored ("Date: $date", $date_col);
+        print "\n\n";
+      }
+
+      # Display the record body:
       print wrap('    ', '    ', $message);
       print "\n";
     }
@@ -138,8 +188,13 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
+# Read the configuration file:
+$conf = read_ini(catfile($blogdir, '.blaze', 'config'))
+        or print STDERR "Unable to read configuration.\n";
+
 # Display log records:
-display_log() or exit_with_error("Unable to read log file.", 13);
+display_log()
+  or exit_with_error("Unable to read log file.", 13);
 
 # Return success:
 exit 0;
@@ -203,7 +258,7 @@ BlazeBlogger repository log file.
 
 =head1 SEE ALSO
 
-B<perl>(1).
+B<blaze-config>(1), B<perl>(1).
 
 =head1 BUGS
 
