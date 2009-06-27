@@ -31,7 +31,7 @@ use constant VERSION => '0.8.1';                    # Script version.
 our $blogdir    = '.';                              # Repository location.
 our $verbose    = 1;                                # Verbosity level.
 our $compact    = 0;                                # Use compact listing?
-our $coloured   = 0;                                # Use coloured listing?
+our $coloured   = undef;                            # Use coloured listing?
 
 # Command-line options:
 my  $type       = 'post';                           # Type: post or page.
@@ -281,16 +281,6 @@ sub display_statistics {
   return 1;
 }
 
-# Read the configuration file:
-my $conf  = read_ini(catfile($blogdir, '.blaze', 'config'))
-            or print STDERR "Unable to read configuration.\n";
-
-# Read required data from the configuration:
-my $temp  = $conf->{color}->{list} || 'false';
-
-# Set up the output mode:
-$coloured = ($temp =~ /^(true|auto)\s*$/i) ? 1 : 0;
-
 # Set up the options parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
@@ -322,6 +312,20 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 # Check the repository is present (however naive this method is):
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
+
+# Unless specified on the command line, read the colour setup from the
+# configuration:
+unless (defined $coloured) {
+  # Read the configuration file:
+  my $conf  = read_ini(catfile($blogdir, '.blaze', 'config'))
+              or print STDERR "Unable to read configuration.\n";
+
+  # Read required data from the configuration:
+  my $temp  = $conf->{color}->{list} || 'false';
+
+  # Set up the output mode:
+  $coloured = ($temp =~ /^(true|auto)\s*$/i) ? 1 : 0;
+}
 
 # Check whether to post/pages, or show statistics:
 unless ($type eq 'stats') {
