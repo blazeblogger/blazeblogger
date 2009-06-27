@@ -183,6 +183,8 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
+# Unless specified on the command line, read the colour setup from the
+# configuration:
 unless (defined $coloured) {
   # Read the configuration file:
   my $conf  = read_ini(catfile($blogdir, '.blaze', 'config'))
