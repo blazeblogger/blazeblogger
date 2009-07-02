@@ -239,6 +239,9 @@ sub fix_header {
       $tags =~ s/://g;
     }
 
+    # Make all tags lower case:
+    $tags = lc($tags);
+
     # Strip superfluous spaces and commas:
     $tags =~ s/,+/,/g;
     $tags =~ s/\s{2,}/ /g;
@@ -371,9 +374,6 @@ sub collect_metadata {
 
     # Process each tag separately:
     foreach my $tag (@tags) {
-      # Make the tag lower case:
-      $tag = lc($tag);
-
       # Check whether the tag is already present:
       if ($tags->{$tag}) {
         # Increase the counter:
@@ -649,7 +649,7 @@ sub format_tags {
   return join(', ', map {
     "<a href=\"" . fix_url("${root}tags/" . $data->{tags}->{$_}->{url}) .
     "\">$_</a>"
-  } split(/,\s*/, lc($tags)));
+  } split(/,\s*/, $tags));
 }
 
 # Return the formatted post heading:
@@ -1269,15 +1269,15 @@ $locale  = read_ini($temp)
 # Collect the necessary metadata:
 my $data = collect_metadata();
 
-# Copy the stylesheet:
-copy_stylesheet()
-  or exit_with_error("Unable to copy the stylesheet.", 13)
-  if $with_css;
-
 # Generate RSS feed:
 generate_rss($data)
   or exit_with_error("An error has occured while creating RSS feed.", 1)
   if $with_rss;
+
+# Copy the stylesheet:
+copy_stylesheet()
+  or exit_with_error("Unable to copy the stylesheet.", 13)
+  if $with_css;
 
 # Generate index page:
 generate_index($data)
