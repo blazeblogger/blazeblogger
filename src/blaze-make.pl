@@ -242,11 +242,16 @@ sub fix_header {
     # Make all tags lower case:
     $tags = lc($tags);
 
-    # Strip superfluous spaces and commas:
-    $tags =~ s/,+/,/g;
+    # Strip superfluous spaces:
     $tags =~ s/\s{2,}/ /g;
     $tags =~ s/\s+$//;
-    ($data->{header}->{tags} = $tags) =~ s/^,|,$//g;
+
+    # Strip trailing commas:
+    $tags =~ s/^,+|,+$//g;
+
+    # Remove duplicates:
+    my %temp = map { $_, 1 } split(/,+\s*/, $tags);
+    $data->{header}->{tags} = join(', ', keys(%temp));
   }
   else {
     # Assign the default value:
