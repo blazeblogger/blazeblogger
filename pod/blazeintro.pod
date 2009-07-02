@@ -27,9 +27,9 @@ If nothing goes wrong, you should get a response similar to this:
 
 As the message suggests, you can use the same command any time later to
 return the repository to a consistent state while leaving the rest of your
-data (e.g. configuration or blog posts and static pages) intact.
-Optionally, you can force the utility to restore the configuration, theme,
-style and language files to their initial state like this:
+data (e.g. configuration, blog posts and static pages) intact. Optionally,
+you can force the utility to restore the configuration, theme, style and
+language files to their initial state by adding the following option:
 
   $ blaze-init --force
 
@@ -38,34 +38,40 @@ style and language files to their initial state like this:
 Although the defaults try to be reasonable enough and ready for an
 immediate use, there are few options you might at least want to know about.
 
-The first thing you might want to change is an external text editor to be
-used for writing your posts. Unless this option is set, BlazeBlogger tries
-to use system wide settings by looking at EDITOR environment variable, and
-if neither of these options is supplied, the C<vi> is used as a
-considerably reasonable option. To change it to, lets say, C<pico>, type:
+The first thing probably to be changed is an external text editor you will be
+using for writing your posts. Unless this option is set, BlazeBlogger tries
+to use system wide settings by looking for EDITOR environment variable, and
+if neither of these options is supplied, C<vi> is used as a considerably
+reasonable option. To change it to, lets say, C<pico>, type:
 
   $ blaze-config core.editor pico
 
-Another thing you might want to change is the heading and subheading of
-your blog and the default user name, for example:
+Another things you might want to change are the heading and subheading of
+your blog, and the default user name; for example:
 
   $ blaze-config blog.title My Blog
   $ blaze-config blog.subtitle yet another blog
   $ blaze-config user.name Your Name
 
-Finally, if you intend to generate RSS feed, you have to specify the base
-URL:
+Furthermore, if you intend to generate RSS feed, you have to specify the
+base URL:
 
   $ blaze-config blog.url http://blog.example.com/
 
+Finally, if you prefer coloured output in your terminal window, you can
+enable it individually for each utility that supports it:
+
+  $ blaze-config color.list true
+  $ blaze-config color.log true
+
 For the complete list of available options, see B<blaze-config>(1) man
 page. To see the current setting, simply type the option name without the
-value like this:
+value:
 
   $ blaze-config user.name
 
 You can also edit all options at once opening the configuration file in the
-external text editor like this:
+external text editor:
 
   $ blaze-config --edit
 
@@ -76,21 +82,51 @@ To add a new blog post to the repository, type:
   $ blaze-add
 
 This will open the external editor with a preformatted header and empty
-body for you to write---do not forget to use HTML! You can also use a
-special placeholder, C<%root%>, as a relative path to the base URL
-(directory where the blog is placed) in your links and images. For example,
-to link the RSS feed from your blog post, type something like this:
+body for you to write. For example, your first post might look as the one
+below:
+
+  # This and following lines  beginning with `#'  are the post header.
+  # Please take your time and replace these options with  desired val-
+  # ues. Just remember  that the date has to be in an YYYY-MM-DD form,
+  # the tags  is a comma separated list of categories the post  (pages
+  # ignore these) belong and the  URL, if provided,  should consist of
+  # alphanumeric characters, hyphens and underscores only.  Specifying
+  # your own URL is especially recommended when you use non-ASCII cha-
+  # racters in your post title.
+  #
+  #   title:  Example Post
+  #   author: David
+  #   date:   2009-07-02
+  #   tags:   first tag, second one, third
+  #   url:
+  #
+  # The header ends here.  The rest  is the content  of your post. You
+  # can use <!-- break --> to mark the end of the part to be displayed
+  # on index page.
+
+  <p>This is an example post. Everything above the optional &lt;!--
+  break --&gt; tag is going to be listed on the index page.</p>
+
+  <!-- break -->
+
+  <p>This will only appear if you choose to read the whole post by
+  clicking on its heading or the &lsquo;Read more &raquo;&rsquo;
+  link.</p>
+
+You can also use a special placeholder, C<%root%>, as a relative path to
+the base URL (directory where the blog is placed) in your links and images.
+For example, to link the RSS feed from your blog post, write:
 
   <a href="%root%index.rss">RSS Feed</a>
 
-When you are done, save your changes and close the editor; you should get a
+When you are done, save your changes and close the editor. You should get a
 confirmation message with the ID of the new post.
 
 If you prefer to write your posts in advance (e.g. work with concepts), you
 can also add any number of existing files without opening the text editor
 like this:
 
-  $ blaze-add concept1 concept2
+  $ blaze-add file1 file2 file3
 
 To edit the existing post, e.g. with ID number 3, type:
 
@@ -110,7 +146,8 @@ deletion.
 
 =head2 Managing the Static Pages
 
-Similarly to blog posts, you can manage the static pages as follows:
+Similarly to blog posts, you can manage the static pages using the same
+commands with additional C<--page> (or C<-p> for short) option:
 
   $ blaze-add --page
   $ blaze-edit --page 3
@@ -125,14 +162,13 @@ particular post, use following command:
 
   $ blaze-list
 
-You can also narrow the results by providing the additional options like
-date or author. For example, to find all posts written by admin from the
-19 December 2008, type:
+You can also narrow the results by providing the additional specifications
+like date, tag or author. For example, to find all posts from 19 December
+2008 written by David, type:
 
   $ blaze-list --author admin --year 2008 --month 12 --day 19
 
-To browse static pages instead of blog posts, simply add the C<--pages>
-option as follows:
+To browse pages instead of blog posts, simply add the C<--pages> option:
 
   $ blaze-list --pages
 
@@ -150,12 +186,13 @@ or if you wish to see a list of files as they are created:
 
 You can now check the appearance of your web presentation in the browser
 and/or copy the files to the hosting. Note that you can force the full
-paths creation to make it easier to browse the off-line content like this:
+paths creation to make it easier to browse the off-line content:
 
   $ blaze-make --full-paths
 
 Furthermore, if the public web directory is located on the same server, you
-can create the content directly in that location like this:
+can create the content directly in that location by specifying the
+destination directory:
 
   $ blaze-make --destdir ~/public_html
 
