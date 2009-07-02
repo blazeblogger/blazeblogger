@@ -1269,6 +1269,11 @@ $locale  = read_ini($temp)
 # Collect the necessary metadata:
 my $data = collect_metadata();
 
+# Copy the stylesheet:
+copy_stylesheet()
+  or exit_with_error("Unable to copy the stylesheet.", 13)
+  if $with_css;
+
 # Generate RSS feed:
 generate_rss($data)
   or exit_with_error("An error has occured while creating RSS feed.", 1)
@@ -1293,11 +1298,6 @@ generate_tags($data)
 generate_pages($data)
   or exit_with_error("An error has occurred while creating pages.", 1)
   if $with_pages;
-
-# Copy the stylesheet:
-copy_stylesheet()
-  or exit_with_error("Unable to copy the stylesheet.", 13)
-  if $with_css;
 
 # Report success:
 print "Done.\n" if $verbose;
