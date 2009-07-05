@@ -282,13 +282,13 @@ sub choose_id {
   # Build a list of used IDs:
   my @used = grep {! /^\.\.?$/ } readdir(HEADS);
 
-  # Find the first unused ID:
-  foreach my $id (sort {$a <=> $b} @used) {
-    $chosen++ if ($chosen == $id);
-  }
-
   # Close the directory:
   closedir(HEADS);
+
+  # Find the first unused ID:
+  foreach my $id (sort {$a <=> $b} @used) {
+    ($chosen == $id) ? $chosen++ : last;
+  }
 
   # Return the result:
   return $chosen;
