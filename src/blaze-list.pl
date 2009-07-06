@@ -76,7 +76,7 @@ Usage: $NAME [-cpqCPSV] [-b directory] [-i id] [-a author] [-t title]
   -d, --day day               list records from the day in the DD form
   -m, --month month           list records from the month in the MM form
   -y, --year year             list records from the year in the YYYY form
-  -p, --pages                 list static pages instead of posts
+  -p, --pages                 list pages instead of blog posts
   -P, --posts                 list blog posts; the default option
   -S, --stats                 show repository statistics instead of posts
   -s, --short                 display each record on a single line
@@ -417,7 +417,7 @@ List records from the specified year where I<year> is in the YYYY format.
 
 =item B<-p>, B<--pages>
 
-List static pages instead of blog posts.
+List pages instead of blog posts.
 
 =item B<-P>, B<--posts>
 

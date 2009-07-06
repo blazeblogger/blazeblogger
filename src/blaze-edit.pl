@@ -58,8 +58,8 @@ Usage: $NAME [-pqPV] [-b directory] id
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
-  -p, --page                  edit the static page instead of the post
-  -P, --post                  edit the blog post; the default option
+  -p, --page                  edit page instead of blog post
+  -P, --post                  edit blog post; the default option
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -447,8 +447,8 @@ B<blaze-edit> B<-h> | B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-edit> enables you to edit the blog post or the static page in your
-favourite text editor.
+B<blaze-edit> enables you to edit a blog post or a page in your favourite
+text editor.
 
 =head1 OPTIONS
 
@@ -461,11 +461,11 @@ default option is the current working directory.
 
 =item B<-p>, B<--page>
 
-Edit the static page instead of the blog post.
+Edit page instead of blog post.
 
 =item B<-P>, B<--post>
 
-Edit the blog post; this is the default option.
+Edit blog post; this is the default option.
 
 =item B<-q>, B<--quiet>
 

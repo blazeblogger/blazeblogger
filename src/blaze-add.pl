@@ -64,10 +64,10 @@ Usage: $NAME [-pqPV] [-b directory] [-a author] [-d date] [-t title]
   -t, --title title           use given title
   -a, --author author         use given author
   -d, --date date             use given date; has to be in YYYY-MM-DD form
-  -T, --tags tags             tag the post; pages ignore these
+  -T, --tags tags             tag the blog post; pages ignore these
   -u, --url url               use given url; based on the title by default
-  -p, --page                  add the static page instead of the post
-  -P, --post                  add the blog post; the default option
+  -p, --page                  add page instead of blog post
+  -P, --post                  add blog post; the default option
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -482,9 +482,9 @@ B<blaze-add> B<-h> | B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-add> adds new blog posts or static pages to the BlazeBlogger
-repository. If supplied, it tries to read data from the existing I<file>s,
-otherwise an external editor is opened to let you create a new content.
+B<blaze-add> adds new blog posts or pages to the BlazeBlogger repository.
+If supplied, it tries to read data from the existing I<file>s, otherwise an
+external editor is opened to let you create a new content.
 
 =head1 OPTIONS
 
@@ -510,8 +510,8 @@ YYYY-MM-DD form.
 
 =item B<-T>, B<--tags> I<tags>
 
-Specify the comma separated list of I<tags> attached to the post; pages
-ignore these.
+Specify the comma separated list of I<tags> attached to the blog post;
+pages ignore these.
 
 =item B<-u>, B<--url> I<url>
 
@@ -522,11 +522,11 @@ present in the title.
 
 =item B<-p>, B<--page>
 
-Add the static page instead of the blog post.
+Add page instead of blog post.
 
 =item B<-P>, B<--post>
 
-Add the blog post; this is the default option.
+Add blog post; this is the default option.
 
 =item B<-q>, B<--quiet>
 

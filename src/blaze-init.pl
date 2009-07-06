@@ -571,7 +571,7 @@ make_directories [
   catdir($blogdir, '.blaze', 'lang'),               # Translations.
   catdir($blogdir, '.blaze', 'theme'),              # Templates.
   catdir($blogdir, '.blaze', 'style'),              # Stylesheets.
-  catdir($blogdir, '.blaze', 'pages'),              # Static pages.
+  catdir($blogdir, '.blaze', 'pages'),              # Pages.
   catdir($blogdir, '.blaze', 'pages', 'head'),      # Pages' headers.
   catdir($blogdir, '.blaze', 'pages', 'body'),      # Pages' bodies.
   catdir($blogdir, '.blaze', 'posts'),              # Blog posts.
@@ -623,7 +623,7 @@ B<blaze-init> B<-h> | B<-v>
 B<blaze-init>'s job is either to create a fresh new BlazeBlogger
 repository, or to recover an existing one, optionally changing the
 configuration and template files back to their original state while leaving
-the user data (i.e. both static pages and blog posts) untouched.
+the user data (i.e. both pages and blog posts) untouched.
 
 =head1 OPTIONS
 

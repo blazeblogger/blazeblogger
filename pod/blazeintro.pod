@@ -27,9 +27,9 @@ If nothing goes wrong, you should get a response similar to this:
 
 As the message suggests, you can use the same command any time later to
 return the repository to a consistent state while leaving the rest of your
-data (e.g. configuration, blog posts and static pages) intact. Optionally,
-you can force the utility to restore the configuration, theme, style and
-language files to their initial state by adding the following option:
+data (e.g. configuration, blog posts and pages) intact. Optionally, you can
+force the utility to restore the configuration, theme, style and language
+files to their initial state by adding the following option:
 
   $ blaze-init --force
 
@@ -144,10 +144,10 @@ might want to consider running it in an interactive mode using the
 C<--interactive> (or shorter C<-i>) option and thus having to confirm every
 deletion.
 
-=head2 Managing the Static Pages
+=head2 Managing the Pages
 
-Similarly to blog posts, you can manage the static pages using the same
-commands with additional C<--page> (or C<-p> for short) option:
+Similarly to blog posts, you can manage pages using the same commands with
+additional C<--page> (or C<-p> for short) option:
 
   $ blaze-add --page
   $ blaze-edit --page 3
@@ -175,8 +175,8 @@ To browse pages instead of blog posts, simply add the C<--pages> option:
 =head2 Generating the Static Content
 
 To generate the static content from your repository in the current working
-directory, with all posts, static pages, monthly and yearly archives, tags
-and RSS feed included, type:
+directory, with all posts, pages, monthly and yearly archives, tags and RSS
+feed included, type:
 
   $ blaze-make
 

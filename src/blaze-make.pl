@@ -73,8 +73,8 @@ Usage: $NAME [-pqrtFPV] [-b directory] [-d directory]
                               static content is to be placed
   -c, --no-css                disable stylesheet creation
   -i, --no-index              disable index page creation
-  -p, --no-posts              disable posts creation
-  -P, --no-pages              disable static pages creation
+  -p, --no-posts              disable blog posts creation
+  -P, --no-pages              disable pages creation
   -t, --no-tags               disable support for tags
   -r, --no-rss                disable RSS feed creation
   -F, --full-paths            enable full paths creation
@@ -1351,16 +1351,16 @@ Disable creation of stylesheet.
 =item B<-i>, B<--no-index>
 
 Disable creation of index page. This is especially useful for websites with
-static content only.
+pages only.
 
 =item B<-p>, B<--no-posts>
 
 Disable creation of posts as well as any related pages, i.e. tags and RSS
-feed. This is especially useful for websites with static content only.
+feed. This is especially useful for websites with pages only.
 
 =item B<-P>, B<--no-pages>
 
-Disable creation of static pages.
+Disable creation of pages.
 
 =item B<-t>, B<--no-tags>
 

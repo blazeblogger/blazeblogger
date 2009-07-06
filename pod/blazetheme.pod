@@ -80,7 +80,7 @@ List of months.
 
 =item B<<!-- pages -->>
 
-List of static pages.
+List of pages.
 
 =item B<<!-- posts -->>
 

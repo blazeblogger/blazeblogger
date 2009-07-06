@@ -58,8 +58,8 @@ Usage: $NAME [-fipqPV] [-b directory] id
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
-  -p, --page                  remove the static page instead of the post
-  -P, --post                  remove the blog post; the default option
+  -p, --page                  remove page instead of blog post
+  -P, --post                  remove blog post; the default option
   -i, --interactive           prompt before removal
   -f, --force                 do not prompt; the default option
   -q, --quiet                 avoid displaying unnecessary messages
@@ -212,8 +212,8 @@ B<blaze-remove> B<-h> | B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-remove> deletes the blog post or static page with given I<id> from
-the BlazeBlogger repository.
+B<blaze-remove> deletes the blog post or page with given I<id> from the
+BlazeBlogger repository.
 
 =head1 OPTIONS
 
@@ -226,11 +226,11 @@ default option is the current working directory.
 
 =item B<-p>, B<--page>
 
-Remove the static page instead of the blog post.
+Remove page instead of blog post.
 
 =item B<-P>, B<--post>
 
-Remove the blog post; this is the default option.
+Remove blog post; this is the default option.
 
 =item B<-i>, B<--interactive>
 
