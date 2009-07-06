@@ -724,7 +724,8 @@ sub generate_rss {
   $base =~ s/\/$//;
 
   # Prepare the RSS file name:
-  my $file = catfile($destdir, 'index.rss');
+  my $file = ($destdir eq '.') ? 'index.rss'
+                               : catfile($destdir, 'index.rss');
 
   # Open the file for writing:
   open(RSS, ">$file") or return 0;
@@ -813,7 +814,8 @@ sub generate_index {
   }
 
   # Prepare the index file name:
-  my $file = catfile($destdir, "index.$ext");
+  my $file = ($destdir eq '.') ? "index.$ext"
+                               : catfile($destdir, "index.$ext");
 
   # Write the index file:
   write_page($file, $data, $body, './') or return 0;
@@ -880,7 +882,12 @@ sub generate_posts {
     ];
 
     # Prepare the post file name:
-    $file = catfile($destdir, $year, $month, "$id-$url", "index.$ext");
+    if ($destdir eq '.') {
+      $file = catfile($year, $month, "$id-$url", "index.$ext");
+    }
+    else {
+      $file = catfile($destdir, $year, $month, "$id-$url", "index.$ext");
+    }
 
     # Write the post:
     write_page($file, $data, $post_body, '../../../') or return 0;
@@ -899,7 +906,12 @@ sub generate_posts {
                    "</ul>";
 
       # Prepare this year's archive file name:
-      $file = catfile($destdir, $year, "index.$ext");
+      if ($destdir eq '.') {
+        $file = catfile($year, "index.$ext");
+      }
+      else {
+        $file = catfile($destdir, $year, "index.$ext");
+      }
 
       # Write the file:
       write_page($file, $data, $year_body, '../') or return 0;
@@ -945,7 +957,12 @@ sub generate_posts {
       $month_body .= "</div>\n";
 
       # Prepare the monthly archive file name:
-      $file = catfile($destdir, $year, $month, "index$index.$ext");
+      if ($destdir eq '.') {
+        $file = catfile($year, $month, "index$index.$ext");
+      }
+      else {
+        $file = catfile($destdir, $year, $month, "index$index.$ext");
+      }
 
       # Write the file:
       write_page($file, $data, $month_body, '../../') or return 0;
@@ -1008,7 +1025,12 @@ sub generate_posts {
     $month_body .= "</div>\n";
 
     # Prepare the monthly archive file name:
-    $file = catfile($destdir, $year, $month, "index$index.$ext");
+    if ($destdir eq '.') {
+      $file = catfile($year, $month, "index$index.$ext");
+    }
+    else {
+      $file = catfile($destdir, $year, $month, "index$index.$ext");
+    }
 
     # Write the file:
     write_page($file, $data, $month_body, '../../') or return 0;
@@ -1079,8 +1101,14 @@ sub generate_tags {
         ];
 
         # Prepare the tag file name:
-        $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
-                        "index$index.$ext");
+        if ($destdir eq '.') {
+          $file = catfile('tags', $data->{tags}->{$tag}->{url},
+                          "index$index.$ext");
+        }
+        else {
+          $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
+                          "index$index.$ext");
+        }
 
         # Write the file:
         write_page($file, $data, $tag_body, '../../') or return 0;
@@ -1132,8 +1160,14 @@ sub generate_tags {
       ];
 
       # Prepare the tag file name:
-      $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
-                      "index$index.$ext");
+      if ($destdir eq '.') {
+        $file = catfile('tags', $data->{tags}->{$tag}->{url},
+                        "index$index.$ext");
+      }
+      else {
+        $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
+                        "index$index.$ext");
+      }
 
       # Write the file:
       write_page($file, $data, $tag_body, '../../') or return 0;
@@ -1150,7 +1184,8 @@ sub generate_tags {
                        "<ul>\n" . list_of_tags($data, '../') . "</ul>";
 
     # Prepare the tag list file name:
-    my $file = catfile($destdir, 'tags', "index.$ext");
+    my $file = ($destdir eq '.') ? catfile('tags', "index.$ext")
+                                 : catfile($destdir, 'tags', "index.$ext");
 
     # Write the file:
     write_page($file, $data, $taglist_body, '../') or return 0;
@@ -1182,8 +1217,11 @@ sub generate_pages {
     # Create the directories:
     make_directories [ catdir($destdir, $url) ];
 
+    # Prepare the index file name:
+    my $file = ($destdir eq '.') ? catfile($url, "index.$ext")
+                                 : catfile($destdir, $url, "index.$ext");
+
     # Write the index file:
-    my $file = catfile($destdir, $url, "index.$ext");
     write_page($file, $data, $body, '../') or return 0;
 
     # Report success:
@@ -1199,7 +1237,7 @@ sub copy_stylesheet {
   # Prepare the file names:
   my $style = $conf->{blog}->{style} || 'default.css';
   my $from  = catfile($blogdir, '.blaze', 'style', $style);
-  my $to    = catfile($destdir, $style);
+  my $to    = ($destdir eq '.') ? $style : catfile($destdir, $style);
 
   # Copy the file:
   copy($from, $to) or return 0;
