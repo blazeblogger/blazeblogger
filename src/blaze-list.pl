@@ -63,7 +63,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-cpqCPSV] [-b directory] [-i id] [-a author] [-t title]
+Usage: $NAME [-cpqsCPSV] [-b directory] [-i id] [-a author] [-t title]
                   [-T tag] [-d day] [-m month] [-y year]
        $NAME -h | -v
 
@@ -362,7 +362,7 @@ blaze-list - browse the content of the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-list> [B<-cpqCPSV>] [B<-b> I<directory>] [B<-i> I<id>]
+B<blaze-list> [B<-cpqsCPSV>] [B<-b> I<directory>] [B<-i> I<id>]
 [B<-a> I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>]
 [B<-m> I<month>] [B<-y> I<year>]
 

@@ -79,7 +79,8 @@ sub display_help {
   # Print the message to the STDOUT:
   print << "END_HELP";
 Usage: $NAME [-qV] [-b directory] name [value...]
-       $NAME -e | -h | -v
+       $NAME -e [-b directory]
+       $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
@@ -456,7 +457,9 @@ blaze-config - display or set the BlazeBlogger repository options
 
 B<blaze-config> [B<-qV>] [B<-b> I<directory>] I<name> [I<value...>]
 
-B<blaze-config> B<-e> | B<-h> | B<-v>
+B<blaze-config> B<-e> [B<-b> I<directory>]
+
+B<blaze-config> B<-h> | B<-v>
 
 =head1 DESCRIPTION
 
