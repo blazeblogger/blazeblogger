@@ -27,13 +27,17 @@ use constant NAME    => basename($0, '.pl');        # Script name.
 use constant VERSION => '0.8.1';                    # Script version.
 
 # General script settings:
-our $blogdir = '.';                                 # Repository location.
-our $verbose = 1;                                   # Verbosity level.
+our $blogdir  = '.';                                # Repository location.
+our $verbose  = 1;                                  # Verbosity level.
+
+# Global variables:
+our $chosen   = 1;                                  # Available ID guess.
+our $reserved = undef;                              # Reserved IDs list.
 
 # Command-line options:
-my  $type    = 'post';                              # Type: post or page.
-my  $added   = '';                                  # List of added IDs.
-my  $data    = {};                                  # Post/page metadata.
+my  $type     = 'post';                             # Type: post or page.
+my  $added    = '';                                 # List of added IDs.
+my  $data     = {};                                 # Post/page metadata.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
@@ -270,11 +274,12 @@ sub date_to_string {
   return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
 }
 
-# Return the first unused ID:
-sub choose_id {
-  my $type   = shift || 'post';
-  my $head   = catdir($blogdir, '.blaze', "${type}s", 'head');
-  my $chosen = 1;
+# Collect reserved posts/pages IDs:
+sub collect_ids {
+  my $type = shift || 'post';
+
+  # Prepare the posts/pages directory name:
+  my $head = catdir($blogdir, '.blaze', "${type}s", 'head');
 
   # Open the headers directory:
   opendir(HEADS, $head) or return 0;
@@ -285,13 +290,35 @@ sub choose_id {
   # Close the directory:
   closedir(HEADS);
 
-  # Find the first unused ID:
-  foreach my $id (sort {$a <=> $b} @used) {
-    ($chosen == $id) ? $chosen++ : last;
+  # Return the sorted result:
+  return sort {$a <=> $b} @used;
+}
+
+# Return the first unused ID:
+sub choose_id {
+  my $type   = shift || 'post';
+
+  # Get the list of reserved IDs unless already done:
+  @$reserved = collect_ids($type) unless defined $reserved;
+
+  # Iterate through used IDs:
+  while (my $used = shift(@$reserved)) {
+    # Check whether the candidate ID is really free:
+    if ($chosen == $used) {
+      # Try next ID:
+      $chosen++;
+    }
+    else {
+      # Push the last checked ID back to the list:
+      unshift(@$reserved, $used);
+
+      # Exit the loop:
+      last;
+    }
   }
 
-  # Return the result:
-  return $chosen;
+  # Return the result and increase the next candidate:
+  return $chosen++;
 }
 
 # Add given files to the repository:
