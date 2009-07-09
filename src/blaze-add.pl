@@ -547,11 +547,11 @@ post/page title. It should consist of alphanumeric characters, hyphens and
 underscores only, and it is especially useful if non-ASCII characters are
 present in the title.
 
-=item B<-p>, B<--page>
+=item B<-p>, B<--page>, B<--pages>
 
 Add page instead of blog post.
 
-=item B<-P>, B<--post>
+=item B<-P>, B<--post>, B<--posts>
 
 Add blog post; this is the default option.
 
