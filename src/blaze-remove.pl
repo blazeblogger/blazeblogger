@@ -32,6 +32,7 @@ our $prompt  = 0;                                   # Ask for confirmation?
 
 # Command-line options:
 my  $type    = 'post';                              # Type: post or page.
+my  $removed = '';                                  # List of removed IDs.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
@@ -53,13 +54,13 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-fipqPV] [-b directory] id
+Usage: $NAME [-fipqPV] [-b directory] id...
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
-  -p, --page                  remove page instead of blog post
-  -P, --post                  remove blog post; the default option
+  -p, --page                  remove pages instead of blog posts
+  -P, --post                  remove blogs posts; the default option
   -i, --interactive           prompt before removal
   -f, --force                 do not prompt; the default option
   -q, --quiet                 avoid displaying unnecessary messages
@@ -138,6 +139,50 @@ sub read_ini {
   return $hash;
 }
 
+# Remove given records from the repository:
+sub remove_records {
+  my $type = shift || 'post';
+  my $ids  = shift || die 'Missing argument';
+  my @list = ();
+
+  # Process each record:
+  foreach my $id (@$ids) {
+    # Prepare the file names:
+    my $head = catfile($blogdir, '.blaze', "${type}s", 'head', $id);
+    my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
+
+    # Enter the interactive mode if requested:
+    if ($prompt) {
+      # Parse header data:
+      my $data = read_ini($head);
+
+      # Check whether the ID exists:
+      unless ($data) {
+        # Display appropriate warning:
+        print STDERR "Unable to read the $type with ID $id.\n";
+
+        # Move on to the next ID:
+        next;
+      }
+
+      # Display prompt:
+      print "Remove $type with ID $id titled `" .
+            ($data->{header}->{title} || '') . "'? ";
+
+      # Skip removal unless confirmed:
+      next unless (readline(*STDIN) =~ /^(y|yes)$/i);
+    }
+
+    # Remove the record:
+    unlink($head) and unlink($body)
+      and push(@list, $id)
+      or  print STDERR "Unable to delete the $type with ID $id.\n";
+  }
+
+  # Return the list of removed IDs:
+  return @list;
+}
+
 # Set up the options parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
@@ -155,45 +200,34 @@ GetOptions(
 );
 
 # Check missing options:
-exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 1);
+exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) < 1);
 
 # Check the repository is present (however naive this method is):
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# Prepare the file names:
-my $head = catfile($blogdir, '.blaze', "${type}s", 'head', $ARGV[0]);
-my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $ARGV[0]);
+# Remove given records from the repository:
+my @list = remove_records($type, \@ARGV);
 
-# Enter the interactive mode if requested:
-if ($prompt) {
-  # Parse header data:
-  my $data = read_ini($head)
-    or exit_with_error("Unable to read the record with ID $ARGV[0].", 13);
+# End here unless at least one record was actually removed:
+unless (@list) {
+  # Report abortion:
+  print "Aborted.\n" if $verbose;
 
-  # Display prompt:
-  print "Remove $type titled `" . ($data->{header}->{title} || '') . "'? ";
-
-  # Exit unless confirmed:
-  unless (readline(*STDIN) =~ /^(y|yes)$/i) {
-    # Report abortion:
-    print "Aborted.\n" if $verbose;
-
-    # Return success:
-    exit 0;
-  }
+  # Return failure/success:
+  exit (($prompt) ? 0 : 13);
 }
 
-# Remove the files:
-unlink($head) and unlink($body)
-  or exit_with_error("Unable to delete the record with ID $ARGV[0].", 13);
+# Prepare the list of successfully removed IDs:
+$removed =  join(', ', sort(@list));
+$removed =~ s/, ([^,]+)$/ and $1/;
 
-# Log the record deletion:
-add_to_log("Removed the $type with ID $ARGV[0].")
+# Log the event:
+add_to_log("Removed the $type with ID $removed.")
   or print STDERR "Unable to log the event.\n";
 
 # Report success:
-print "The $type has been successfully removed.\n" if $verbose;
+print "Successfully removed the $type with ID $removed.\n" if $verbose;
 
 # Return success:
 exit 0;
@@ -206,13 +240,13 @@ blaze-remove - remove a post/page from the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-remove> [B<-fipqPV>] [B<-b> I<directory>] I<id>
+B<blaze-remove> [B<-fipqPV>] [B<-b> I<directory>] I<id>...
 
 B<blaze-remove> B<-h> | B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-remove> deletes the blog post or page with given I<id> from the
+B<blaze-remove> deletes the blog posts or pages with given I<id>s from the
 BlazeBlogger repository.
 
 =head1 OPTIONS
@@ -224,13 +258,13 @@ BlazeBlogger repository.
 Specify the I<directory> where the BlazeBlogger repository is placed. The
 default option is the current working directory.
 
-=item B<-p>, B<--page>
+=item B<-p>, B<--page>, B<--pages>
 
-Remove page instead of blog post.
+Remove pages instead of blog posts.
 
-=item B<-P>, B<--post>
+=item B<-P>, B<--post>, B<--posts>
 
-Remove blog post; this is the default option.
+Remove blog posts; this is the default option.
 
 =item B<-i>, B<--interactive>
 
