@@ -146,6 +146,28 @@ sub read_ini {
   return $hash;
 }
 
+# Fix the erroneous or missing header data:
+sub fix_header {
+  my $data   = shift || die 'Missing argument';
+  my @fields = qw( title author date tags url );
+
+  # Process each field separately:
+  foreach my $field (@fields) {
+    # Strip forbidden characters:
+    $data->{header}->{$field} =~ s/://g if $data->{header}->{$field};
+  }
+
+  # Supplement missing fields:
+  $data->{header}->{date}   ||= 'XXXX-XX-XX';
+  $data->{header}->{tags}   ||= '';
+  $data->{header}->{author} ||= 'admin';
+  $data->{header}->{url}    ||= '';
+  $data->{header}->{title}  ||= '';
+
+  # Return success:
+  return 1;
+}
+
 # Return the list of posts/pages header records:
 sub collect_headers {
   my $type    = shift || 'post';
@@ -164,11 +186,7 @@ sub collect_headers {
     my $data = read_ini(catfile($head, $id)) or next;
 
     # Fix the erroneous or missing header data:
-    $data->{header}->{date}   ||= 'XXXX-XX-XX';
-    $data->{header}->{tags}   ||= '';
-    $data->{header}->{author} ||= 'admin';
-    $data->{header}->{url}    ||= '';
-    $data->{header}->{title}  ||= '';
+    fix_header($data);
 
     # Add the record to the beginning of the list:
     push(@records, $data->{header}->{date}   . ':' . $id . ':' .
