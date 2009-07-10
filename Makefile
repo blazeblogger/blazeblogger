@@ -4,12 +4,12 @@
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
 # Free Software Foundation, version 3 of the License.
-# 
+#
 # This program  is  distributed  in the hope  that it will  be useful,  but
 # WITHOUT  ANY WARRANTY;  without  even the implied  warranty of MERCHANTA-
 # BILITY  or  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
 # License for more details.
-# 
+#
 # You should have received a copy of the  GNU General Public License  along
 # with this program. If not, see <http://www.gnu.org/licenses/>.
 
@@ -50,6 +50,8 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 755 src/blaze-make.pl $(bindir)/blaze-make
 	$(INSTALL) -m 755 src/blaze-config.pl $(bindir)/blaze-config
 	$(INSTALL) -m 755 src/blaze-remove.pl $(bindir)/blaze-remove
+	@echo "Copying utilities..."
+	$(INSTALL) -m 755 utils/blaze.sh $(bindir)/blaze
 	@echo "Copying man pages..."
 	$(INSTALL) -d $(man1dir)
 	$(INSTALL) -m 644 src/blaze-add.1 $(man1dir)
@@ -76,6 +78,8 @@ uninstall:
 	-rm -f $(bindir)/blaze-make
 	-rm -f $(bindir)/blaze-config
 	-rm -f $(bindir)/blaze-remove
+	@echo "Removing utilities..."
+	-rm -f $(bindir)/blaze
 	@echo "Removing man pages..."
 	-rm -f $(man1dir)/blaze-add.1
 	-rm -f $(man1dir)/blaze-log.1
