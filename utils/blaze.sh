@@ -69,9 +69,10 @@ case "$COMMAND" in
     ;;
   *)
     # Respond to wrong/missing command:
-    echo "Usage: $NAME command [options]" >&2
+    echo "Usage: $NAME command [option...]" >&2
     echo "Try \`$NAME help' for more information." >&2
 
     # Return failure:
     exit 22
+    ;;
 esac

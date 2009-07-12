@@ -251,7 +251,7 @@ sub fix_header {
 
     # Remove duplicates:
     my %temp = map { $_, 1 } split(/,+\s*/, $tags);
-    $data->{header}->{tags} = join(', ', keys(%temp));
+    $data->{header}->{tags} = join(', ', sort(keys(%temp)));
   }
   else {
     # Assign the default value:
