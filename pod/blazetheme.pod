@@ -7,19 +7,29 @@ blazetheme - an introduction to BlazeBlogger theme creation
 This document tries to provide a brief introduction on how to create new or
 modify existing theme for your BlazeBlogger web presentation.
 
+=head2 BlazeBlogger Theme Structure
+
 To make it as easy to alter as possible, BlazeBlogger theme consists of two
 parts: the template file located in the C<.blaze/theme/> and corresponding
 stylesheet in the C<.blaze/style/> directory. This way, you can easily
 switch between different styles (e.g. bright and dark one) without even
 touching the template file, which generally does not tend to vary much.
 
-The theme file itself is just a bare HTML file (HTML 4.01 Strict is
-recommended, although not required) with various placeholders to be
-substituted by appropriate data. Each placeholder is an ordinary HTML
-comment with a reserved string in it; note that while the case is not
-significant, the fact that it has to be on a single line is.
+=head2 Creating the Template File
 
-=head2 List of Head Placeholders
+The template file is where the page layout is described. It is a bare HTML
+(or XHTML, it really does not matter) file with various placeholders to be
+substituted by appropriate data. Most of the placeholders are just ordinary
+HTML comments with a reserved strings in them. Note that while the case is
+not significant, the fact that the whole placeholder has to be on a single
+line is.
+
+For the example usage, see the default template file.
+
+=head3 List of Head Placeholders
+
+These are the placeholders that usually appear in the HEAD section of the
+HTML/XHTML document.
 
 =over
 
@@ -45,7 +55,10 @@ The RSS feed LINK tag.
 
 =back
 
-=head2 List of Body Placeholders
+=head3 List of Body Placeholders
+
+These are the placeholders that usually appear in the BODY section of the
+HTML/XHTML document.
 
 =over
 
@@ -104,6 +117,52 @@ post/page body as well and will be still taken into account.
 
 =back
 
+=head2 Creating the Stylesheet
+
+The stylesheet is just a plain CSS file (CSS 2.1 is recommended, although
+not required) with most of its parts dependent on elements, classes and IDs
+introduced in the theme file. Those few that are produced by the
+B<blaze-make>(1) are described below.
+
+For the example usage, see the default stylesheet.
+
+=head3 List of Obligatory Classes
+
+=over
+
+=item B<post>
+
+C<H2> element containing the page/post title.
+
+=item B<section>
+
+C<DIV> element containing the name of the current section (e.g. monthly
+archive, tag listing etc.).
+
+=item B<navigation>
+
+C<DIV> element containing the navigation for the listing browsing (i.e.
+previous and next page links).
+
+=item B<information>
+
+C<DIV> element containing the additional information about the post, i.e.
+the date of publishing, the post author and the list of attached tags.
+
+=item B<date>
+
+C<SPAN> element containing the date of publishing.
+
+=item B<author>
+
+C<SPAN> element containing the post author.
+
+=item B<tags>
+
+C<SPAN> element containing the list of attached tags.
+
+=back
+
 =head1 FILES
 
 =over
@@ -112,11 +171,15 @@ post/page body as well and will be still taken into account.
 
 BlazeBlogger themes directory.
 
+=item I<.blaze/style/>
+
+BlazeBlogger stylesheets directory.
+
 =back
 
 =head1 SEE ALSO
 
-B<blazestyle>(7), B<blaze-config>(1), B<blaze-make>(1).
+B<blaze-config>(1), B<blaze-make>(1).
 
 =head1 AUTHOR
 

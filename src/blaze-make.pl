@@ -1455,7 +1455,7 @@ BlazeBlogger language files directory.
 
 =head1 SEE ALSO
 
-B<blazetheme>(7), B<blazestyle>(7), B<blaze-config>(1), B<perl>(1).
+B<blazetheme>(7), B<blaze-config>(1), B<perl>(1).
 
 =head1 BUGS
 

@@ -50,10 +50,6 @@ An introduction to BlazeBlogger.
 
 An introduction to BlazeBlogger theme creation.
 
-=item B<blazestyle>(7)
-
-An introduction to BlazeBlogger stylesheet creation.
-
 =item B<blaze-init>(1)
 
 Create or recover a BlazeBlogger repository.
