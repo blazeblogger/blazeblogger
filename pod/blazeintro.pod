@@ -64,7 +64,7 @@ enable it individually for each utility that supports it:
   $ blaze-config color.list true
   $ blaze-config color.log true
 
-For the complete list of available options, see B<blaze-config>(1) man
+For the complete list of available options, see B<blaze-config>(1) manual
 page. To see the current setting, simply type the option name without the
 value:
 
@@ -82,7 +82,51 @@ To add a new blog post to the repository, type:
   $ blaze-add
 
 This will open the external editor with a preformatted header and empty
-body for you to write. For example, your first post might look as the one
+body for you to write. Although the most of the header lines are devoted
+to the exhaustive explanation of what exactly you should and should not
+fill in, let's take a closer look at the five header options once again
+just to make sure everything is perfectly clear:
+
+=over
+
+=item title
+
+The title of your post; you do not want to omit that one, do you?
+
+=item author
+
+The post author. The user name specified in the configuration is used by
+default, but you are free to change it to whatever name you wish. The only
+limitation is that it should not contain a semicolon.
+
+=item date
+
+Date of the publishing of the post. It has to be in the YYYY-MM-DD form
+(i.e. 17 July 2009 would look like 2009-07-17 etc.) and it has to be
+filled. The default option is current date.
+
+=item tags
+
+Comma separated list of categories the post belongs to. The exact number of
+attached tags is not limited as long as they are all listed on the same
+line and they do not contain a semicolon inside. Since tags are completely
+optional, you can safely leave this option empty, or fill it any time later.
+
+=item url
+
+The use of term `URL' in this context is quite vague and simply means the
+part of the URL representing the particular post. As it is derived from the
+post title, you usually do not have to bother with it at all. There are
+however two cases when it might prove useful: (1) when your title contains
+special characters (typically foreign diacritical marks) that BlazeBlogger
+strips away and you still want your URL look pretty, or (2) in case you
+want your URL different from the title, for example because of the title
+length. Note that the URL should consist of alphanumeric characters,
+hyphens and underscores only.
+
+=back
+
+Keeping that in mind, your first post might look somehow like the one
 below:
 
   # This and following lines  beginning with `#'  are the post header.
@@ -94,24 +138,25 @@ below:
   # your own URL is especially recommended when you use non-ASCII cha-
   # racters in your post title.
   #
-  #   title:  Example Post
+  #   title:  The Hobbit, or There and Back Again
   #   author: David
-  #   date:   2009-07-02
-  #   tags:   first tag, second one, third
-  #   url:
+  #   date:   2009-07-17
+  #   tags:   childrens literature, fantasy
+  #   url:    the-hobbit
   #
   # The header ends here.  The rest  is the content  of your post. You
   # can use <!-- break --> to mark the end of the part to be displayed
   # on index page.
 
-  <p>This is an example post. Everything above the optional &lt;!--
-  break --&gt; tag is going to be listed on the index page.</p>
+  <p>&ldquo;In a hole in the ground there lived a hobbit.&rdquo;
+  &mdash; these are the words that introduces us to the incredible
+  world of nowadays classic Tolkien's novel. But what is so
+  fascinating about it that generation after generation keep returning
+  to its charms?</p>
 
   <!-- break -->
 
-  <p>This will only appear if you choose to read the whole post by
-  clicking on its heading or the &lsquo;Read more &raquo;&rsquo;
-  link.</p>
+  <p><em>The Hobbit</em> is a story about Bilbo Baggins, a hobbit ...
 
 You can also use a special placeholder, C<%root%>, as a relative path to
 the base URL (directory where the blog is placed) in your links and images.
@@ -146,14 +191,31 @@ deletion.
 
 =head2 Managing the Pages
 
+Pages are the right place for all those information that have to be
+immediately accessible from every page on your website (typically the
+About, Contact, Downloads or Screenshots sections). They are usually kept
+in a relatively small number and generally do not tend to vary much. In the
+default theme, they are being listed in the horizontal menu below the blog
+title.
+
 Similarly to blog posts, you can manage pages using the same commands with
-additional C<--page> (or C<-p> for short) option:
+additional C<--page> (or C<-p> for short) option. Adding new page would
+therefore look like this:
 
   $ blaze-add --page
-  $ blaze-edit --page 3
-  $ blaze-remove --page 3
 
-This will add new page, edit the page with ID 3 and remove it afterwards.
+Unlike posts, pages do not respect tags, nor do they display their author
+and the date of publishing. The latter is however still taken in account in
+the sorting process, making it possible to alter the order of pages in the
+menu according to your taste.
+
+To edit existing page with ID 3, use:
+
+  $ blaze-edit --page 3
+
+Finally, to remove pages with ID 2, type:
+
+  $ blaze-remove --page 2
 
 =head2 Browsing the Blog Repository
 
@@ -196,13 +258,87 @@ destination directory:
 
   $ blaze-make --destdir ~/public_html
 
-For the complete list of all command line options, see B<blaze-make>(1) man
-page.
+For the complete list of all command line options, see B<blaze-make>(1)
+manual page.
+
+=head2 Observing the Repository History
+
+Since every significant change in the repository (i.e. its initialization
+and recovery, as well as post/page addition, editing and removal) is
+automatically logged along with the exact time of when it happened, you can
+view the whole history typing:
+
+  $ blaze-log
+
+or if you want to save space:
+
+  $ blaze-log --short
+
+=head2 Changing the Blog Theme
+
+Changing the theme of your blog is rather straightforward. First, extract
+the content of the theme package to the directory where the static content
+is being generated; for example, to install the theme called VectorLover:
+
+  $ tar xfz vectorlover-1.0.tar.gz
+
+Then place the template file and the corresponding stylesheet to the
+C<.blaze/theme/> and C<.blaze/style/> directories respectively: 
+
+  $ mv vectorlover.html .blaze/theme/
+  $ mv vectorlover.css  .blaze/style/
+
+Finally, change the configuration to use this theme:
+
+  $ blaze-config blog.theme vectorlover.html
+  $ blaze-config blog.style vectorlover.css
+
+Run B<blaze-make>(1) to re-create the static content with the new outfit.
+
+For more information on how to modify existing theme or create a new one
+from scratch, see B<blazetheme>(7) manual page.
+
+=head2 Changing the Blog Localization
+
+To change the blog language to, let's say, Czech, copy the file C<cs_CZ> to
+the C<.blaze/lang> directory and change the appropriate configuration
+option:
+
+  $ blaze-config blog.lang cs_CZ
+
+Next time you invoke B<blaze-make>(1), all generated strings should be
+properly translated.
+
+=head1 FILES
+
+=over
+
+=item I<.blaze/config>
+
+BlazeBlogger configuration file.
+
+=item I<.blaze/log>
+
+BlazeBlogger repository log file.
+
+=item I<.blaze/theme/>
+
+BlazeBlogger themes directory.
+
+=item I<.blaze/style/>
+
+BlazeBlogger stylesheets directory.
+
+=item I<.blaze/lang/>
+
+BlazeBlogger language files directory.
+
+=back
 
 =head1 SEE ALSO
 
 B<blaze-init>(1), B<blaze-config>(1), B<blaze-add>(1), B<blaze-edit>(1),
-B<blaze-remove>(1), B<blaze-list>(1), B<blaze-make>(1).
+B<blaze-remove>(1), B<blaze-list>(1), B<blaze-make>(1), B<blaze-log>(1).
 
 =head1 AUTHOR
 
