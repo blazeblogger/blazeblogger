@@ -14,7 +14,19 @@ This document tries to provide a brief introduction on how to create,
 configure, add new content to, and generate a static content from the
 BlazeBlogger repository.
 
+Although each command described below is actually an autonomous utility, on
+most Unix systems, BlazeBlogger should be shipped with a command wrapper,
+making it possible to use C<blaze-command> and more usual C<blaze command>
+interchangeably. In this text, however, we will strictly use the first
+form, as it is the most portable variant.
+
 =head2 Creating a New Blog
+
+To create a new blog, you have to create a repository first. Similarly to
+Git, BlazeBlogger repository is just a (usually hidden) directory named
+C<.blaze>, where all the blog data and configuration are stored and from
+which the static content, i.e. the HTML pages, are generated. In most
+cases, it is placed in the same directory as the generated content.
 
 Assuming you are already in the directory where the blog repository is to
 be placed, you can create a new one typing:
@@ -121,7 +133,7 @@ however two cases when it might prove useful: (1) when your title contains
 special characters (typically foreign diacritical marks) that BlazeBlogger
 strips away and you still want your URL look pretty, or (2) in case you
 want your URL different from the title, for example because of the title
-length. Note that the URL should consist of alphanumeric characters,
+length. Remember that the URL should consist of alphanumeric characters,
 hyphens and underscores only.
 
 =back
