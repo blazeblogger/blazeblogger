@@ -505,8 +505,8 @@ sub create_lang {
 archive=Archive for
 tags=Posts tagged as
 taglist=List of tags
-previous=&laquo; previous
-next=next &raquo;
+previous=&laquo; Previous
+next=Next &raquo;
 more=Read more &raquo;
 postedby=by
 taggedas=tagged as

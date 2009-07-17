@@ -838,8 +838,8 @@ sub generate_posts {
 
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{archive}  || 'Archive for';
-  my $prev_string  = $locale->{lang}->{previous} || '&laquo; previous';
-  my $next_string  = $locale->{lang}->{next}     || 'next &raquo;';
+  my $prev_string  = $locale->{lang}->{previous} || '&laquo; Previous';
+  my $next_string  = $locale->{lang}->{next}     || 'Next &raquo;';
 
   # Prepare the list of month names:
   my @names        = qw( january february march april may june july
@@ -1054,8 +1054,8 @@ sub generate_tags {
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{tags}     || 'Posts tagged as';
   my $tags_string  = $locale->{lang}->{taglist}  || 'List of tags';
-  my $prev_string  = $locale->{lang}->{previous} || '&laquo; previous';
-  my $next_string  = $locale->{lang}->{next}     || 'next &raquo;';
+  my $prev_string  = $locale->{lang}->{previous} || '&laquo; Previous';
+  my $next_string  = $locale->{lang}->{next}     || 'Next &raquo;';
 
   # Process each tag separately:
   foreach my $tag (keys %{$data->{tags}}) {
