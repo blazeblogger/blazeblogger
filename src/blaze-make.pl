@@ -696,7 +696,6 @@ sub generate_rss {
   my $max_posts     = 10;
 
   # Read required data from the configuration:
-  my $ext           = $conf->{core}->{extension} || 'html';
   my $blog_title    = $conf->{blog}->{title}     || 'My Blog';
   my $blog_subtitle = $conf->{blog}->{subtitle}  || 'yet another blog';
   my $base          = $conf->{blog}->{url};
@@ -704,7 +703,8 @@ sub generate_rss {
   # Check whether the base URL is specified:
   unless ($base) {
     # Display the warning:
-    print STDERR "Missing blog.url option. Skipping the RSS feed.\n";
+    print STDERR "Missing blog.url option. " .
+                 "Skipping the RSS feed creation.\n";
 
     # Disable the RSS:
     $with_rss = 0;
@@ -720,8 +720,8 @@ sub generate_rss {
   $blog_title    = strip_html($blog_title);
   $blog_subtitle = strip_html($blog_subtitle);
 
-  # Strip trailing / from the base URL:
-  $base =~ s/\/$//;
+  # Strip trailing forward slash from the base URL:
+  $base =~ s/\/+$//;
 
   # Prepare the RSS file name:
   my $file = ($destdir eq '.') ? 'index.rss'
@@ -756,7 +756,7 @@ sub generate_rss {
 
     # Add the post item:
     print RSS "  <item>\n    <title>$post_title</title>\n  " .
-              "  <link>$base/$year/$month/$id-$url/index.$ext</link>\n  " .
+              "  <link>$base/$year/$month/$id-$url/</link>\n  " .
               "  <description>$post_desc    </description>\n  " .
               "  <pubDate>$date_time</pubDate>\n" .
               "  </item>\n";
