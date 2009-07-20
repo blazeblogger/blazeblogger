@@ -15,11 +15,11 @@ B<blaze-edit> [B<-pqPV>] [B<-b> I<directory>] I<id>
 
 B<blaze-remove> [B<-fipqPV>] [B<-b> I<directory>] I<id>...
 
-B<blaze-list> [B<-cpqsCPSV>] [B<-b> I<directory>] [B<-i> I<id>] [B<-a>
+B<blaze-list> [B<-cpqsCPSV>] [B<-b> I<directory>] [B<-I> I<id>] [B<-a>
 I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>] [B<-m> I<month>]
 [B<-y> I<year>]
 
-B<blaze-make> [B<-pqrtFPV>] [B<-b> I<directory>] [B<-d> I<directory>]
+B<blaze-make> [B<-cpqrtIFPV>] [B<-b> I<directory>] [B<-d> I<directory>]
 
 B<blaze-log> [B<-cqsCV>] [B<-b> I<directory>]
 

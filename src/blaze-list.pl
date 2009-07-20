@@ -63,13 +63,13 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-cpqsCPSV] [-b directory] [-i id] [-a author] [-t title]
+Usage: $NAME [-cpqsCPSV] [-b directory] [-I id] [-a author] [-t title]
                   [-T tag] [-d day] [-m month] [-y year]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
-  -i, --id id                 display record with specified ID
+  -I, --id id                 display record with specified ID
   -a, --author author         list records by specified author
   -t, --title title           list records with matching title
   -T, --tag tag               list records with matching tag
@@ -309,7 +309,7 @@ GetOptions(
   'page|pages|p'         => sub { $type     = 'page';  },
   'post|posts|P'         => sub { $type     = 'post';  },
   'stats|S'              => sub { $type     = 'stats'; },
-  'id|i=s'               => sub { $id       = $_[1];   },
+  'id|I=s'               => sub { $id       = $_[1];   },
   'author|a=s'           => sub { $author   = $_[1];   },
   'title|t=s'            => sub { $title    = $_[1];   },
   'tags|tag|T=s'         => sub { $tag      = $_[1];   },
@@ -380,7 +380,7 @@ blaze-list - browse the content of the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-list> [B<-cpqsCPSV>] [B<-b> I<directory>] [B<-i> I<id>]
+B<blaze-list> [B<-cpqsCPSV>] [B<-b> I<directory>] [B<-I> I<id>]
 [B<-a> I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>]
 [B<-m> I<month>] [B<-y> I<year>]
 
@@ -401,7 +401,7 @@ additional options.
 Specify the I<directory> where the BlazeBlogger repository is placed. The
 default option is the current working directory.
 
-=item B<-i>, B<--id> I<id>
+=item B<-I>, B<--id> I<id>
 
 Display the record with specified I<id> only.
 

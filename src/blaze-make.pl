@@ -72,7 +72,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqrtFPV] [-b directory] [-d directory]
+Usage: $NAME [-cpqrtIFPV] [-b directory] [-d directory]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
@@ -80,7 +80,7 @@ Usage: $NAME [-pqrtFPV] [-b directory] [-d directory]
   -d, --destdir directory     specify the directory where the generated
                               static content is to be placed
   -c, --no-css                disable stylesheet creation
-  -i, --no-index              disable index page creation
+  -I, --no-index              disable index page creation
   -p, --no-posts              disable blog posts creation
   -P, --no-pages              disable pages creation
   -t, --no-tags               disable support for tags
@@ -1342,7 +1342,7 @@ GetOptions(
   'blogdir|b=s'   => sub { $blogdir    = $_[1]; },
   'destdir|d=s'   => sub { $destdir    = $_[1]; },
   'with-index'    => sub { $with_index = 1 },
-  'no-index|i'    => sub { $with_index = 0 },
+  'no-index|I'    => sub { $with_index = 0 },
   'with-posts'    => sub { $with_posts = 1 },
   'no-posts|p'    => sub { $with_posts = 0 },
   'with-pages'    => sub { $with_pages = 1 },
@@ -1432,7 +1432,7 @@ blaze-make - generate static content from the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-make> [B<-pqrtFPV>] [B<-b> I<directory>] [B<-d> I<directory>]
+B<blaze-make> [B<-cpqrtIFPV>] [B<-b> I<directory>] [B<-d> I<directory>]
 
 B<blaze-make> B<-h> | B<-v>
 
@@ -1462,7 +1462,7 @@ placed. The default option is the current working directory.
 
 Disable creation of stylesheet.
 
-=item B<-i>, B<--no-index>
+=item B<-I>, B<--no-index>
 
 Disable creation of index page. This is especially useful for websites with
 pages only.
