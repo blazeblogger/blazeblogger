@@ -538,6 +538,9 @@ sub list_of_pages {
     $list .= "<li><a href=\"".fix_url("$root$url")."\">$title</a></li>\n";
   }
 
+  # Strip trailing line break:
+  chomp($list);
+
   # Return the list of pages:
   return $list;
 }
@@ -571,6 +574,9 @@ sub list_of_posts {
     # Increase the counter:
     $count++;
   }
+
+  # Strip trailing line break:
+  chomp($list);
 
   # Return the list of posts:
   return $list;
@@ -1121,8 +1127,8 @@ sub generate_tags {
   my $data         = shift || die 'Missing argument';
 
   # Read required data from the configuration:
-  my $ext          = $conf->{core}->{extension} || 'html';
-  my $max_posts    = $conf->{blog}->{posts}     || 10;
+  my $ext          = $conf->{core}->{extension}  || 'html';
+  my $max_posts    = $conf->{blog}->{posts}      || 10;
 
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{tags}     || 'Posts tagged as';
