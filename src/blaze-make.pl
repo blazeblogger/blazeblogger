@@ -40,9 +40,9 @@ our $with_css   = 1;                                # Generate stylesheet?
 our $full_paths = 0;                                # Generate full paths?
 
 # Global variables:
-our $conf       = {};                               # The configuration.
-our $locale     = {};                               # The localization.
-our $cache      = {};                               # The cache.
+our $conf       = {};                               # Configuration.
+our $locale     = {};                               # Localization.
+our $cache      = {};                               # Cache.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -56,6 +56,14 @@ sub exit_with_error {
 
   print STDERR NAME . ": $message\n";
   exit $return_value;
+}
+
+# Display given warning message:
+sub display_warning {
+  my $message = shift || 'An unspecified warning was requested.';
+
+  print STDERR "$message\n";
+  return 1;
 }
 
 # Display usage information:
@@ -175,67 +183,81 @@ sub read_ini {
   return $hash;
 }
 
-# Fix the erroneous or missing header data:
-sub fix_header {
-  my $data = shift || die 'Missing argument';
-  my $id   = shift || die 'Missing argument';
-  my $type = shift || die 'Missing argument';
+# Read the configuration file:
+sub read_conf {
+  # Prepare the file name:
+  my $file   = catfile($blogdir, '.blaze', 'config');
 
-  # Check whether the title is specified:
-  unless ($data->{header}->{title}) {
-    # Display the appropriate warning:
-    print STDERR "Missing title in the $type with ID $id.\n";
-
-    # Assign the default value:
-    $data->{header}->{title} = $id;
-  }
-
-  # Check whether the author is specified:
-  if (my $author = $data->{header}->{author}) {
-    # Check whether it contains forbidden characters:
-    if ($author =~ /:/) {
-      # Display the appropriate warning:
-      print STDERR "Invalid author in the $type with ID $id.\n";
-
-      # Strip forbidden characters:
-      $data->{header}->{author} = s/://g;
-    }
+  # Parse the file:
+  if (my $conf = read_ini($file)) {
+    # Return the result:
+    return $conf;
   }
   else {
-    # Display the appropriate warning:
-    print STDERR "Missing author in the $type with ID $id.\n";
+    # Report failure:
+    display_warning("Unable to read configuration.");
 
-    # Assign the default value:
-    $data->{header}->{author} = 'admin';
+    # Return empty configuration:
+    return {};
   }
+}
+
+# Read the language file:
+sub read_lang {
+  my $name = shift || 'en_GB';
+
+  # Prepare the file name:
+  my $file = catfile($blogdir, '.blaze', 'lang', $name);
+
+  # Parse the file:
+  if (my $lang = read_ini($file)) {
+    # Return the result:
+    return $lang;
+  }
+  else {
+    # Report failure:
+    display_warning("Unable to read selected language file.");
+
+    # Return empty language settings:
+    return {};
+  }
+}
+
+# Compose a post/page record:
+sub make_record {
+  my ($type, $date, $id, $tags, $author, $url, $title) = @_;
+
+  # Make sure the certain data are provided:
+  die 'Missing argument' unless $type;
+  die 'Missing argument' unless $id;
 
   # Check whether the date is specified:
-  if (my $date = $data->{header}->{date}) {
+  if ($date) {
     # Check whether the format is valid:
-    if ($date !~ /\d{4}-[01]\d-[0-3]\d/) {
-      # Display the appropriate warning:
-      print STDERR "Invalid date in the $type with ID $id.\n";
+    unless ($date =~ /\d{4}-[01]\d-[0-3]\d/) {
+      # Report invalid date:
+      display_warning("Invalid date in the $type with ID $id.");
 
-      # Use the current date instead:
-      $data->{header}->{date} = date_to_string(time);
+      # Use current date instead:
+      $date = date_to_string(time);
     }
   }
   else {
-    # Display the appropriate warning:
-    print STDERR "Missing date in the $type with ID $id.\n";
+    # Report missing date:
+    display_warning("Missing date in the $type with ID $id.");
 
     # Assign the default value:
-    $data->{header}->{date} = date_to_string(time);
+    $date = date_to_string(time);
   }
 
   # Check whether the tags are specified:
-  if (my $tags = $data->{header}->{tags}) {
+  if ($tags) {
     # Check whether they contain forbidden characters:
     if ($tags =~ /:/) {
-      # Display the appropriate warning:
-      print STDERR "Invalid tags in the $type with ID $id.\n";
+      # Report invalid tags:
+      display_warning("Invalid tags in the $type with ID $id.");
 
-      # Strip forbidden characters:
+      # Strip forbidded characters:
       $tags =~ s/://g;
     }
 
@@ -251,60 +273,88 @@ sub fix_header {
 
     # Remove duplicates:
     my %temp = map { $_, 1 } split(/,+\s*/, $tags);
-    $data->{header}->{tags} = join(', ', sort(keys(%temp)));
+    $tags = join(', ', sort(keys(%temp)));
   }
   else {
     # Assign the default value:
-    $data->{header}->{tags} = '';
+    $tags = '';
   }
 
-  # Check whether the URL is specified:
-  if (my $url = $data->{header}->{url}) {
-    # Check whether it contains forbidden characters:
-    if ($url =~ /[^\w\-]/) {
-      # Display the appropriate warning:
-      print STDERR "Invalid URL in the $type with ID $id.\n";
+  # Check whether the author is specified:
+  if ($author) {
+    # Check whether it contains forbidded charset:
+    if ($author =~ /:/) {
+      # Report invalid author:
+      display_warning("Invalid author in the $type with ID $id.");
 
-      # Strip forbidden characters and substitute spaces:
-      $url =~ s/[^\w\s\-]//g;
-      ($data->{header}->{url} = $url) =~ s/\s/-/g;
+      # Strip forbidden characters:
+      $author =~ s/://g;
     }
   }
   else {
-    # Assign the title:
-    $url = lc($data->{header}->{title});
+    # Report missing author:
+    display_warning("Missing author in the $type with ID $id.");
+
+    # Assign the default value:
+    $author = 'admin';
+  }
+
+  # Check whether the URL is specified:
+  if ($url) {
+    # Check whether it contains forbidded characters:
+    if ($url =~ /[^\w\-]/) {
+      # Report invalid URL:
+      display_warning("Invalid URL in the $type with ID $id.");
+
+      # Strip forbidden characters:
+      $url =~ s/[^\w\s\-]//g;
+
+      # Substitute spaces:
+      $url =~ s/\s+/-/g;
+    }
+  }
+  else {
+    # Derive URL from the post/page title:
+    $url = lc($title);
 
     # Strip forbidden characters:
     $url =~ s/[^\w\s\-]//g;
-    ($data->{header}->{url} = $url) =~ s/\s/-/g;
+
+    # Substitute spaces:
+    $url =~ s/\s+/-/g;
   }
 
-  # Return success:
-  return 1;
+  # Check whether the title is specified:
+  unless ($title) {
+    # Display the appropriate warning:
+    display_warning("Missing title in the $type with ID $id.");
+
+    # Assign the default value:
+    $title = $id;
+  }
+
+  # Return the composed record:
+  return "$date:$id:$tags:$author:$url:$title";
 }
 
-# Append proper index file name to the end of the URL if requested:
-sub fix_url {
-  my $url = shift || die 'Missing argument';
+# Decompose a post/page record:
+sub read_record {
+  my $record = shift || die 'Missing argument';
 
-  # Check whether the full path is enabled:
-  if ($full_paths) {
-    # Append slash if missing:
-    $url .= "/" unless $url =~ /\/$/;
+  # Decompose the record:
+  my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
 
-    # Append index file name:
-    $url .= "index." . ($conf->{core}->{extension} || 'html');
-  }
-
-  # Return the correct URL:
-  return $url;
+  # Return the resulting data:
+  return $date, $id, $tags, $author, $url, $title;
 }
 
 # Return the list of posts/pages header records:
 sub collect_headers {
   my $type    = shift || 'post';
-  my $head    = catdir($blogdir, '.blaze', "${type}s", 'head');
   my @records = ();
+
+  # Prepare the file name:
+  my $head    = catdir($blogdir, '.blaze', "${type}s", 'head');
 
   # Open the headers directory:
   opendir(HEAD, $head) or return @records;
@@ -315,17 +365,18 @@ sub collect_headers {
     next if $id =~ /^\.\.?$/;
 
     # Parse the header data:
-    my $data = read_ini(catfile($head, $id)) or next;
+    my $data   = read_ini(catfile($head, $id)) or next;
+    my $date   = $data->{header}->{date};
+    my $tags   = $data->{header}->{tags};
+    my $author = $data->{header}->{author};
+    my $url    = $data->{header}->{url};
+    my $title  = $data->{header}->{title};
 
-    # Fix the erroneous or missing header data:
-    fix_header($data, $id, $type);
+    # Create the record:
+    my $record = make_record($type, $date, $id, $tags, $author, $url, $title);
 
     # Add the record to the beginning of the list:
-    push(@records, $data->{header}->{date}   . ':' . $id . ':' .
-                   $data->{header}->{tags}   . ':' .
-                   $data->{header}->{author} . ':' .
-                   $data->{header}->{url}    . ':' .
-                   $data->{header}->{title});
+    push(@records, $record);
   }
 
   # Close the directory:
@@ -351,15 +402,16 @@ sub collect_metadata {
   my @posts  = collect_headers('post');
 
   # Process each post header:
-  foreach(@posts) {
+  foreach my $record (@posts) {
     # Decompose the post record:
-    $_ =~ /^([^:]*):[^:]*:([^:]*):[^:]*:[^:]*:.*$/;
+    my ($full_date, undef, $tag_list) = read_record($record);
 
     # Prepare the information:
-    my @tags = split(/,\s*/, $2);
-    my $date = substr($1, 0, 7);
-    my $temp = $month[int(substr($1, 5, 2)) - 1];
-    my $name = ($locale->{lang}->{$temp} || $temp). " " . substr($1, 0, 4);
+    my @tags = split(/,\s*/, $tag_list);
+    my $date = substr($full_date, 0, 7);
+    my $temp = $month[int(substr($full_date, 5, 2)) - 1];
+    my $name = ($locale->{lang}->{$temp} || "\u$temp") . " " .
+               substr($full_date, 0, 4);
 
     # Check whether the month is already present:
     if ($months->{$name}) {
@@ -406,16 +458,33 @@ sub collect_metadata {
   };
 }
 
+# Append proper index file name to the end of the URL if requested:
+sub fix_url {
+  my $url = shift || die 'Missing argument';
+
+  # Check whether the full path is enabled:
+  if ($full_paths) {
+    # Append slash if missing:
+    $url .= "/" unless $url =~ /\/$/;
+
+    # Append index file name:
+    $url .= "index." . ($conf->{core}->{extension} || 'html');
+  }
+
+  # Return the correct URL:
+  return $url;
+}
+
 # Return the list of tags:
 sub list_of_tags {
-  my $data = shift || die 'Missing argument';
+  my $tags = shift || die 'Missing argument';
   my $root = shift || '/';
 
   # Check whether the tags generation is eneabled:
   return '' unless $with_tags;
 
   # Check whether the list is not empty:
-  if (my %tags = %{$data->{tags}}) {
+  if (my %tags = %$tags) {
     # Return the list of tags:
     return join("\n", map {
       "<li><a href=\"" . fix_url("${root}tags/" . $tags{$_}->{url}) .
@@ -430,15 +499,15 @@ sub list_of_tags {
 
 # Return the list of months:
 sub list_of_months {
-  my $data = shift || die 'Missing argument';
-  my $root = shift || '/';
-  my $year = shift || '';
+  my $months = shift || die 'Missing argument';
+  my $root   = shift || '/';
+  my $year   = shift || '';
 
   # Check whether the posts generation is enabled:
   return '' unless $with_posts;
 
   # Check whether the list is not empty:
-  if (my %months = %{$data->{months}}) {
+  if (my %months = %$months) {
     # Return the list of months:
     return join("\n", sort { $b cmp $a } (map {
       "<li><a href=\"" . fix_url($root . $months{$_}->{url}) .
@@ -453,20 +522,20 @@ sub list_of_months {
 
 # Return the list of pages:
 sub list_of_pages {
-  my $data = shift || die 'Missing argument';
-  my $root = shift || '/';
-  my $list = '';
+  my $pages = shift || die 'Missing argument';
+  my $root  = shift || '/';
+  my $list  = '';
 
   # Check whether the pages generation is enabled:
-  return $list unless $with_pages;
+  return '' unless $with_pages;
 
   # Process each page separately:
-  foreach (sort @{$data->{pages}}) {
+  foreach my $record (sort @$pages) {
     # Decompose the page record:
-    $_ =~ /^[^:]*:[^:]*:[^:]*:[^:]*:([^:]*):(.*)$/;
+    my (undef, undef, undef, undef, $url, $title) = read_record($record);
 
     # Add the page link to the list:
-    $list .= "<li><a href=\"" . fix_url("$root$1") . "\">$2</a></li>\n";
+    $list .= "<li><a href=\"".fix_url("$root$url")."\">$title</a></li>\n";
   }
 
   # Return the list of pages:
@@ -475,24 +544,24 @@ sub list_of_pages {
 
 # Return the list of posts:
 sub list_of_posts {
-  my $data  = shift || die 'Missing argument';
+  my $posts = shift || die 'Missing argument';
   my $root  = shift || '/';
   my $max   = shift || 5;
   my $list  = '';
 
   # Check whether the posts generation is enabled:
-  return $list unless $with_posts;
+  return '' unless $with_posts;
 
   # Initialize the counter:
   my $count = 0;
 
   # Process each post separately:
-  foreach my $record (@{$data->{posts}}) {
+  foreach my $record (@$posts) {
     # Stop when the post count reaches the limit:
     last if $count == $max;
 
     # Decompose the record:
-    my ($date, $id, undef, undef, $url, $title) = split(/:/, $record, 6);
+    my ($date, $id, undef, undef, $url, $title) = read_record($record);
     my ($year, $month) = split(/-/, $date);
 
     # Add the post link to the list:
@@ -529,10 +598,10 @@ sub write_page {
     my $ext      = $conf->{core}->{extension} || 'html';
 
     # Prepare the pages, tags and months lists:
-    my $tags     = list_of_tags($data, $root);
-    my $archive  = list_of_months($data, $root);
-    my $pages    = list_of_pages($data, $root);
-    my $posts    = list_of_posts($data, $root);
+    my $tags     = list_of_tags($data->{tags}, $root);
+    my $archive  = list_of_months($data->{months}, $root);
+    my $pages    = list_of_pages($data->{pages}, $root);
+    my $posts    = list_of_posts($data->{posts}, $root);
 
     # Get the current year:
     my $year     = substr(date_to_string(time), 0, 4);
@@ -610,8 +679,10 @@ sub read_body {
   my $type    = shift || 'post';
   my $excerpt = shift || 0;
   my $link    = shift || '';
-  my $file    = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
   my $result  = '';
+
+  # Prepare the file name:
+  my $file    = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
 
   # Open the body file for reading:
   open(FILE, $file) or return '';
@@ -646,15 +717,15 @@ sub read_body {
 
 # Return the tag links:
 sub format_tags {
-  my $data = shift || die 'Missing argument';
-  my $root = shift || die 'Missing argument';
-  my $tags = shift || return '';
+  my $root      = shift || die 'Missing argument';
+  my $tags      = shift || die 'Missing argument';
+  my $tagged_as = shift || return '';
 
   # Return the list of tag links:
   return join(', ', map {
-    "<a href=\"" . fix_url("${root}tags/" . $data->{tags}->{$_}->{url}) .
+    "<a href=\"" . fix_url("${root}tags/" . $tags->{$_}->{url}) .
     "\">$_</a>"
-  } split(/,\s*/, $tags));
+  } split(/,\s*/, $tagged_as));
 }
 
 # Return the formatted post heading:
@@ -703,8 +774,8 @@ sub generate_rss {
   # Check whether the base URL is specified:
   unless ($base) {
     # Display the warning:
-    print STDERR "Missing blog.url option. " .
-                 "Skipping the RSS feed creation.\n";
+    display_warning("Missing blog.url option. " .
+                    "Skipping the RSS feed creation.");
 
     # Disable the RSS:
     $with_rss = 0;
@@ -743,7 +814,7 @@ sub generate_rss {
     last if $count == $max_posts;
 
     # Decompose the record:
-    my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+    my ($date, $id, $tags, $author, $url, $title) = read_record($record);
     my ($year, $month, $day) = split(/-/, $date);
 
     # Strip HTML elements:
@@ -798,14 +869,14 @@ sub generate_index {
       last if $count == $max_posts;
 
       # Decompose the record:
-      my ($date, $id, $tags, $author, $url, $title) = split(/:/,$record,6);
+      my ($date, $id, $tags, $author, $url, $title) = read_record($record);
       my ($year, $month) = split(/-/, $date);
 
       # Add the post heading with excerpt:
       $body.=format_heading("<a href=\"" .fix_url("$year/$month/$id-$url").
                             "\">$title</a>",
                             $date, $author,
-                            format_tags($data, './', $tags)) .
+                            format_tags('./', $data->{tags}, $tags)) .
              read_body($id, 'post', 1, "$year/$month/$id-$url");
 
       # Increase the number of listed items:
@@ -866,12 +937,13 @@ sub generate_posts {
   # Process each record:
   foreach my $record (@{$data->{posts}}) {
     # Decompose the record:
-    ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+    ($date, $id, $tags, $author, $url, $title) = read_record($record);
     ($year, $month) = split(/-/, $date);
 
     # Prepare the post body:
     $post_body  = format_heading($title, $date, $author,
-                                 format_tags($data, '../../../', $tags)) .
+                                 format_tags('../../../', $data->{tags},
+                                             $tags)) .
                   read_body($id, 'post', 0);
 
     # Create the directory tree:
@@ -902,7 +974,7 @@ sub generate_posts {
     if ($year_last ne $year_curr) {
       # Prepare this year's archive body:
       $year_body = "<div class=\"section\">$title_string $year</div>\n\n" .
-                   "<ul>\n" . list_of_months($data, '../', $year) .
+                   "<ul>\n" .list_of_months($data->{months}, '../', $year).
                    "</ul>";
 
       # Prepare this year's archive file name:
@@ -994,7 +1066,8 @@ sub generate_posts {
     $month_body .= format_heading("<a href=\"" . fix_url("$id-$url") .
                                   "\">$title</a>",
                                   $date, $author,
-                                  format_tags($data, '../../', $tags)) .
+                                  format_tags('../../', $data->{tags},
+                                              $tags)) .
                    read_body($id, 'post', 1, "$id-$url");
 
     # Increase the number of listed posts:
@@ -1070,7 +1143,7 @@ sub generate_tags {
     # Process each record:
     foreach my $record (@{$data->{posts}}) {
       # Decompose the record:
-      ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
+      ($date, $id, $tags, $author, $url, $title) = read_record($record);
       ($year, $month) = split(/-/, $date);
 
       # Check whether the post contains the current tag:
@@ -1130,7 +1203,8 @@ sub generate_tags {
       $tag_body .= format_heading("<a href=\"" .
                                   fix_url("../../$year/$month/$id-$url") .
                                   "\">$title</a>", $date, $author,
-                                  format_tags($data, '../../', $tags)) .
+                                  format_tags('../../', $data->{tags},
+                                              $tags)) .
                    read_body($id, 'post', 1,"../../$year/$month/$id-$url");
 
       # Increase the number of listed posts:
@@ -1181,7 +1255,8 @@ sub generate_tags {
   if (%{$data->{tags}}) {
     # Prepare the tag list body:
     my $taglist_body = "<div class=\"section\">$tags_string</div>\n\n" .
-                       "<ul>\n" . list_of_tags($data, '../') . "</ul>";
+                       "<ul>\n" . list_of_tags($data->{tags}, '../') .
+                       "</ul>";
 
     # Prepare the tag list file name:
     my $file = ($destdir eq '.') ? catfile('tags', "index.$ext")
@@ -1283,12 +1358,6 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# When posts are disabled, disable RSS and tags as well:
-unless ($with_posts) {
-  $with_tags = 0;
-  $with_rss  = 0;
-}
-
 # Check whether there is anything to do:
 unless ($with_posts || $with_pages) {
   # Report success:
@@ -1298,16 +1367,17 @@ unless ($with_posts || $with_pages) {
   exit 0;
 }
 
+# When posts are disabled, disable RSS and tags as well:
+unless ($with_posts) {
+  $with_tags = 0;
+  $with_rss  = 0;
+}
+
 # Read the configuration file:
-my $temp = catfile($blogdir, '.blaze', 'config');
-$conf    = read_ini($temp)
-           or print STDERR "Unable to read configuration.\n";
+$conf    = read_conf();
 
 # Read the language file:
-$temp    = catfile($blogdir, '.blaze', 'lang',
-                   ($conf->{blog}->{lang} || 'en_GB'));
-$locale  = read_ini($temp)
-           or print STDERR "Unable to read language file `$temp'.", 13;
+$locale  = read_lang($conf->{blog}->{lang});
 
 # Collect the necessary metadata:
 my $data = collect_metadata();
