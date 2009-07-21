@@ -44,6 +44,14 @@ sub exit_with_error {
   exit $return_value;
 }
 
+# Display given warning message:
+sub display_warning {
+  my $message = shift || 'An unspecified warning was requested.';
+
+  print STDERR "$message\n";
+  return 1;
+}
+
 # Display usage information:
 sub display_help {
   my $NAME = NAME;
@@ -581,23 +589,23 @@ make_directories [
 
 # Create the default configuration file:
 create_config()
-  or print STDERR "Unable to create the configuration file.\n";
+  or display_warning("Unable to create the configuration file.");
 
 # Create the default theme file:
 create_theme()
-  or print STDERR "Unable to create the default theme file.\n";
+  or display_warning("Unable to create the default theme file.");
 
 # Create the default style file:
 create_style()
-  or print STDERR "Unable to create the default style file.\n";
+  or display_warning("Unable to create the default style file.");
 
 # Create the default language file:
 create_lang()
-  or print STDERR "Unable to create the default language file.\n";
+  or display_warning("Unable to create the default language file.");
 
 # Write to / create the log file:
 add_to_log("Created/recovered a BlazeBlogger repository.")
-  or print STDERR "Unable to log the event.\n";
+  or display_warning("Unable to log the event.");
 
 # Report success:
 print "Created/recovered a BlazeBlogger repository in " .

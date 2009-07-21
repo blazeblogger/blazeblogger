@@ -47,6 +47,14 @@ sub exit_with_error {
   exit $return_value;
 }
 
+# Display given warning message:
+sub display_warning {
+  my $message = shift || 'An unspecified warning was requested.';
+
+  print STDERR "$message\n";
+  return 1;
+}
+
 # Display usage information:
 sub display_help {
   my $NAME = NAME;
@@ -153,42 +161,42 @@ sub check_header {
 
   # Check whether the title is specified:
   unless ($data->{header}->{title}) {
-    # Display the appropriate warning:
-    print STDERR "Missing title in the $type with ID $id.\n";
+    # Report missing title:
+    display_warning("Missing title in the $type with ID $id.");
   }
 
   # Check whether the author is specified:
   if (my $author = $data->{header}->{author}) {
     # Check whether it contains forbidden characters:
     if ($author =~ /:/) {
-      # Display the appropriate warning:
-      print STDERR "Invalid author in the $type with ID $id.\n";
+      # Report invalid author:
+      display_warning("Invalid author in the $type with ID $id.");
     }
   }
   else {
-    # Display the appropriate warning:
-    print STDERR "Missing author in the $type with ID $id.\n";
+    # Report missing author:
+    display_warning("Missing author in the $type with ID $id.");
   }
 
   # Check whether the date is specified:
   if (my $date = $data->{header}->{date}) {
     # Check whether the format is valid:
     if ($date !~ /\d{4}-[01]\d-[0-3]\d/) {
-      # Display the appropriate warning:
-      print STDERR "Invalid date in the $type with ID $id.\n";
+      # Report invalid date:
+      display_warning("Invalid date in the $type with ID $id.");
     }
   }
   else {
-    # Display the appropriate warning:
-    print STDERR "Missing date in the $type with ID $id.\n";
+    # Report missing date:
+    display_warning("Missing date in the $type with ID $id.");
   }
 
   # Check whether the tags are specified:
   if (my $tags = $data->{header}->{tags}) {
     # Check whether they contain forbidden characters:
     if ($tags =~ /:/) {
-      # Display the appropriate warning:
-      print STDERR "Invalid tags in the $type with ID $id.\n";
+      # Report invalid tags:
+      display_warning("Invalid tags in the $type with ID $id.");
     }
   }
 
@@ -196,8 +204,8 @@ sub check_header {
   if (my $url = $data->{header}->{url}) {
     # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
-      # Display the appropriate warning:
-      print STDERR "Invalid URL in the $type with ID $id.\n";
+      # Report invalid URL:
+      display_warning("Invalid URL in the $type with ID $id.");
     }
   }
 
@@ -328,7 +336,7 @@ sub edit_record {
   # Read the configuration file:
   my $file = catfile($blogdir, '.blaze', 'config');
   my $conf = read_ini($file)
-             or print STDERR "Unable to read configuration.\n";
+             or display_warning("Unable to read configuration.");
 
   # Decide which editor to use:
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
@@ -365,8 +373,8 @@ sub edit_record {
 
     # Compare the checksums:
     if ($before eq $after) {
-      # Report failure:
-      print STDERR "File have not been changed: aborting.\n";
+      # Report abortion:
+      display_warning("File have not been changed: aborting.");
 
       # Return failure:
       return 0;
@@ -425,7 +433,7 @@ edit_record($ARGV[0], $type) or exit 1;
 
 # Log the event:
 add_to_log("Edited the $type with ID $ARGV[0].")
-  or print STDERR "Unable to log the event.\n";
+  or display_warning("Unable to log the event.");
 
 # Report success:
 print "Your changes have been successfully saved.\n" if $verbose;

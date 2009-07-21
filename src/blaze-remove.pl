@@ -48,6 +48,14 @@ sub exit_with_error {
   exit $return_value;
 }
 
+# Display given warning message:
+sub display_warning {
+  my $message = shift || 'An unspecified warning was requested.';
+
+  print STDERR "$message\n";
+  return 1;
+}
+
 # Display usage information:
 sub display_help {
   my $NAME = NAME;
@@ -159,7 +167,7 @@ sub remove_records {
       # Check whether the ID exists:
       unless ($data) {
         # Display appropriate warning:
-        print STDERR "Unable to read the $type with ID $id.\n";
+        display_warning("Unable to read the $type with ID $id.");
 
         # Move on to the next ID:
         next;
@@ -176,7 +184,7 @@ sub remove_records {
     # Remove the record:
     unlink($head) and unlink($body)
       and push(@list, $id)
-      or  print STDERR "Unable to delete the $type with ID $id.\n";
+      or  display_warning("Unable to delete the $type with ID $id.");
   }
 
   # Return the list of removed IDs:
@@ -224,7 +232,7 @@ $removed =~ s/, ([^,]+)$/ and $1/;
 
 # Log the event:
 add_to_log("Removed the $type with ID $removed.")
-  or print STDERR "Unable to log the event.\n";
+  or display_warning("Unable to log the event.");
 
 # Report success:
 print "Successfully removed the $type with ID $removed.\n" if $verbose;

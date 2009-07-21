@@ -72,6 +72,14 @@ sub exit_with_error {
   exit $return_value;
 }
 
+# Display given warning message:
+sub display_warning {
+  my $message = shift || 'An unspecified warning was requested.';
+
+  print STDERR "$message\n";
+  return 1;
+}
+
 # Display usage information:
 sub display_help {
   my $NAME = NAME;
@@ -332,8 +340,8 @@ sub edit_config {
 
     # Compare the checksum:
     if ($before eq $after) {
-      # Report aborting:
-      print STDERR "File have not been changed: aborting.\n";
+      # Report abortion:
+      display_warning("File have not been changed: aborting.");
 
       # Return failure:
       return 0;
@@ -359,7 +367,7 @@ sub set_option {
   # Read the configuration file:
   my $file = catfile($blogdir, '.blaze', 'config');
   my $conf = read_ini($file)
-             or print STDERR "Unable to read configuration.\n";
+             or display_warning("Unable to read configuration.");
 
   # Set up the option:
   $conf->{$section}->{$key} = $value;

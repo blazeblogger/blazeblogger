@@ -47,6 +47,14 @@ sub exit_with_error {
   exit $return_value;
 }
 
+# Display given warning message:
+sub display_warning {
+  my $message = shift || 'An unspecified warning was requested.';
+
+  print STDERR "$message\n";
+  return 1;
+}
+
 # Display usage information:
 sub display_help {
   my $NAME = NAME;
@@ -188,7 +196,7 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 unless (defined $coloured) {
   # Read the configuration file:
   my $conf  = read_ini(catfile($blogdir, '.blaze', 'config'))
-              or print STDERR "Unable to read configuration.\n";
+              or display_warning("Unable to read configuration.");
 
   # Read required data from the configuration:
   my $temp  = $conf->{color}->{log} || 'false';
