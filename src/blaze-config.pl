@@ -179,7 +179,7 @@ sub write_ini {
 }
 
 # Create a human readable version of configuration file:
-sub read_config {
+sub read_conf {
   my $file = shift || die 'Missing argument';
   my $conf = shift || die 'Missing argument';
 
@@ -280,7 +280,7 @@ END_TEMP
 }
 
 # Read configuration from the temporary file and save it:
-sub save_config {
+sub save_conf {
   my $temp = shift || die 'Missing argument';
   my $file = shift || die 'Missing argument';
 
@@ -295,7 +295,7 @@ sub save_config {
 }
 
 # Edit the configuration file:
-sub edit_config {
+sub edit_conf {
   my ($before, $after);
 
   # Prepare the temporary file name:
@@ -309,7 +309,7 @@ sub edit_config {
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
   # Create the temporary file:
-  read_config($temp, $conf)
+  read_conf($temp, $conf)
     or exit_with_error("Unable to create the temporary file.", 13);
 
   # Open the file for reading:
@@ -349,7 +349,7 @@ sub edit_config {
   }
 
   # Save the configuration file:
-  save_config($temp, $file)
+  save_conf($temp, $file)
     or exit_with_error("Unable to save the configuration file.", 13);
 
   # Return success:
@@ -423,7 +423,7 @@ if ($edit) {
   exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 0);
 
   # Edit the configuration file:
-  edit_config() or exit 1;
+  edit_conf() or exit 1;
 
   # Report success:
   print "Your changes have been successfully saved.\n" if $verbose;

@@ -112,7 +112,7 @@ sub make_directories {
 }
 
 # Create the default configuration file:
-sub create_config {
+sub create_conf {
   my $file = catfile($blogdir, '.blaze', 'config');
 
   # Skip existing file unless forced:
@@ -588,7 +588,7 @@ make_directories [
 ];
 
 # Create the default configuration file:
-create_config()
+create_conf()
   or display_warning("Unable to create the configuration file.");
 
 # Create the default theme file:
