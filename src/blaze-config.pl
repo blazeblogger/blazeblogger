@@ -473,7 +473,7 @@ if ($edit) {
   exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 0);
 
   # Edit the configuration file:
-  edit_options() or exit_with_error("Unable to edit configuration.", 13);
+  edit_options() or exit_with_error("Cannot edit configuration.", 13);
 
   # Report success:
   print "Your changes have been successfully saved.\n" if $verbose;
@@ -490,7 +490,7 @@ else {
   if (scalar(@ARGV) > 1) {
     # Set the option:
     set_option(shift(@ARGV), join(' ', @ARGV))
-      or exit_with_error("Unable to set the option.", 13);
+      or exit_with_error("Cannot set the option.", 13);
 
     # Report success:
     print "The option has been successfully saved.\n" if $verbose;
@@ -498,7 +498,7 @@ else {
   else {
     # Display the option:
     display_option(shift(@ARGV))
-      or exit_with_error("Unable to display the option.", 13);
+      or exit_with_error("Cannot display the option.", 13);
   }
 }
 

@@ -1390,17 +1390,17 @@ my $data = collect_metadata();
 
 # Generate RSS feed:
 generate_rss($data)
-  or exit_with_error("An error has occured while creating RSS feed.", 1)
+  or exit_with_error("An error has occurred while creating RSS feed.", 1)
   if $with_rss;
 
 # Copy the stylesheet:
 copy_stylesheet()
-  or exit_with_error("Unable to copy the stylesheet.", 13)
+  or exit_with_error("An error has occurred while creating stylesheet.", 1)
   if $with_css;
 
 # Generate index page:
 generate_index($data)
-  or exit_with_error("An error has occured while creating index page.", 1)
+  or exit_with_error("An error has occurred while creating index page.", 1)
   if $with_index;
 
 # Generate posts:

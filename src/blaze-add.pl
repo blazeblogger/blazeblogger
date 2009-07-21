@@ -413,17 +413,29 @@ END_HEAD
   my $temp = catfile($blogdir, '.blaze', 'temp');
 
   # Open the file for writing:
-  open(FILE, ">$temp")
-    or exit_with_error("Unable to write the temporary file.");
+  if (open(FILE, ">$temp")) {
+    # Write the temporary file:
+    print FILE $head;
 
-  # Write the temporary file:
-  print FILE $head;
+    # Close the file:
+    close(FILE);
+  }
+  else {
+    # Report failure:
+    display_warning("Unable to create temporary file.");
 
-  # Close the file:
-  close(FILE);
+    # Return failure:
+    return 0;
+  }
 
   # Open the temporary file in the external editor:
-  system("$edit $temp") == 0 or exit_with_error("Unable to run `$edit'.",1);
+  unless (system("$edit $temp") == 0) {
+    # Report failure:
+    display_warning("Unable to run `$edit'.");
+
+    # Return faulure:
+    return 0;
+  }
 
   # Opent the file for reading:
   if (open(FILE, "$temp")) {
@@ -439,11 +451,11 @@ END_HEAD
 
     # Compare the checksums:
     if ($before eq $after) {
-      # Report failure:
+      # Report abortion:
       display_warning("File have not been changed: aborting.");
 
-      # Return failure:
-      return 0;
+      # Return success:
+      exit 0;
     }
   }
 
@@ -498,11 +510,13 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 # Check whether any file is supplied:
 if (scalar(@ARGV) == 0) {
   # Add new record to the repository:
-  $added   = add_new($type, $data) or exit 1;
+  $added   = add_new($type, $data)
+    or exit_with_error("Cannot add $type to the repository.", 13);
 }
 else {
   # Add given files to the repository:
-  my @list = add_files($type, $data, \@ARGV) or exit 1;
+  my @list = add_files($type, $data, \@ARGV)
+    or exit_with_error("Cannot add ${type}s to the repository.", 13);
 
   # Prepare the list of successfully added IDs:
   $added   =  join(', ', sort(@list));

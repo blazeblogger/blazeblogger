@@ -184,7 +184,7 @@ sub remove_records {
     # Remove the record:
     unlink($head) and unlink($body)
       and push(@list, $id)
-      or  display_warning("Unable to delete the $type with ID $id.");
+      or  display_warning("Unable to remove the $type with ID $id.");
   }
 
   # Return the list of removed IDs:

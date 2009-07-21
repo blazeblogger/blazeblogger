@@ -253,11 +253,9 @@ sub read_record {
   my $url    = $data->{header}->{url}    || '';
 
   # Open the file for writing:
-  open(FILE, ">$file")
-    or exit_with_error("Unable to write the temporary file.");
-
-  # Write the header:
-  print FILE << "END_HEADER";
+  if (open(FILE, ">$file")) {
+    # Write the header:
+    print FILE << "END_HEADER";
 # This and following lines beginning with  `#' are the $type header.  Please
 # take your time and replace these options with desired values. Just remem-
 # ber that the date has to be in an  YYYY-MM-DD  form,  the tags is a comma
@@ -276,20 +274,28 @@ sub read_record {
 # <!-- break --> to mark the end of the part to be displayed on index page.
 END_HEADER
 
-  # Open the record body for the reading:
-  open(BODY, "$body") or return 0;
+    # Open the record body for the reading:
+    open(BODY, "$body") or return 0;
 
-  # Add content of the record body to the file:
-  while (my $line = <BODY>) {
-    print FILE $line;
+    # Add content of the record body to the file:
+    while (my $line = <BODY>) {
+      print FILE $line;
+    }
+
+    # Close previously opened files:
+    close(BODY);
+    close(FILE);
+
+    # Return success:
+    return 1;
   }
+  else {
+    # Report failure:
+    display_warning("Unable to create temporary file.");
 
-  # Close previously opened files:
-  close(BODY);
-  close(FILE);
-
-  # Return success:
-  return 1;
+    # Return failure:
+    return 0;
+  }
 }
 
 # Create a record from the single file:
@@ -359,8 +365,13 @@ sub edit_record {
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
   # Create the temporary file:
-  read_record($temp, $id, $type)
-    or exit_with_error("Unable to read record with ID $id.", 13);
+  unless (read_record($temp, $id, $type)) {
+    # Report failure:
+    display_warning("Unable to read record with ID $id.");
+
+    # Return failure:
+    return 0;
+  }
 
   # Open the file for reading:
   if (open(FILE, "$temp")) {
@@ -375,7 +386,13 @@ sub edit_record {
   }
 
   # Open the temporary file in the external editor:
-  system("$edit $temp") == 0 or exit_with_error("Unable to run `$edit'.",1);
+  unless (system("$edit $temp") == 0) {
+    # Report failure:
+    display_warning("Unable to run `$edit'.");
+
+    # Return failure:
+    return 0;
+  }
 
   # Open the file for reading:
   if (open(FILE, "$temp")) {
@@ -393,14 +410,19 @@ sub edit_record {
       # Report abortion:
       display_warning("File have not been changed: aborting.");
 
-      # Return failure:
-      return 0;
+      # Return success:
+      exit 0;
     }
   }
 
   # Save the record:
-  save_record($temp, $id, $type)
-    or exit_with_error("Unable to write the record with ID $id.", 13);
+  unless (save_record($temp, $id, $type)) {
+    # Report failure:
+    display_warning("Unable to write the record with ID $id.");
+
+    # Return failure:
+    return 0
+  }
 
   # Return success:
   return 1;
@@ -446,7 +468,8 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
 # Edit given record:
-edit_record($ARGV[0], $type) or exit 1;
+edit_record($ARGV[0], $type)
+  or exit_with_error("Cannot edit the $type in the repository.", 13);
 
 # Log the event:
 add_to_log("Edited the $type with ID $ARGV[0].")

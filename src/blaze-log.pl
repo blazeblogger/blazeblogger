@@ -225,7 +225,7 @@ unless (defined $coloured) {
 
 # Display log records:
 display_log()
-  or exit_with_error("Unable to read log file.", 13);
+  or exit_with_error("Cannot read log file.", 13);
 
 # Return success:
 exit 0;

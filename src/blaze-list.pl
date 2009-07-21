@@ -387,12 +387,12 @@ unless ($type eq 'stats') {
 
   # Display the list of matching records:
   display_records($type, $id, $author, $title, $tag, $year, $month, $day)
-    or exit_with_error("Unable to read repository data.", 13);
+    or exit_with_error("Cannot read repository data.", 13);
 }
 else {
   # Display repository statistics:
   display_statistics()
-    or exit_with_error("Unable to read repository data.", 13);
+    or exit_with_error("Cannot read repository data.", 13);
 }
 
 # Return success:
