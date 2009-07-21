@@ -153,6 +153,25 @@ sub write_ini {
   return 1;
 }
 
+# Read the configuration file:
+sub read_conf {
+  # Prepare the file name:
+  my $file = catfile($blogdir, '.blaze', 'config');
+
+  # Parse the file:
+  if (my $conf = read_ini($file)) {
+    # Return the result:
+    return $conf;
+  }
+  else {
+    # Report failure:
+    display_warning("Unable to read configuration.");
+
+    # Return empty configuration:
+    return {};
+  }
+}
+
 # Check the header for the erroneous or missing data:
 sub check_header {
   my $data = shift || die 'Missing argument';
@@ -334,9 +353,7 @@ sub edit_record {
   my $temp = catfile($blogdir, '.blaze', 'temp');
 
   # Read the configuration file:
-  my $file = catfile($blogdir, '.blaze', 'config');
-  my $conf = read_ini($file)
-             or display_warning("Unable to read configuration.");
+  my $conf = read_conf();
 
   # Decide which editor to use:
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';

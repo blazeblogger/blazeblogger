@@ -186,7 +186,7 @@ sub read_ini {
 # Read the configuration file:
 sub read_conf {
   # Prepare the file name:
-  my $file   = catfile($blogdir, '.blaze', 'config');
+  my $file = catfile($blogdir, '.blaze', 'config');
 
   # Parse the file:
   if (my $conf = read_ini($file)) {

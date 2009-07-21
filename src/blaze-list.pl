@@ -154,6 +154,25 @@ sub read_ini {
   return $hash;
 }
 
+# Read the configuration file:
+sub read_conf {
+  # Prepare the file name:
+  my $file = catfile($blogdir, '.blaze', 'config');
+
+  # Parse the file:
+  if (my $conf = read_ini($file)) {
+    # Return the result:
+    return $conf;
+  }
+  else {
+    # Report failure:
+    display_warning("Unable to read configuration.");
+
+    # Return empty configuration:
+    return {};
+  }
+}
+
 # Fix the erroneous or missing header data:
 sub fix_header {
   my $data   = shift || die 'Missing argument';
@@ -343,8 +362,7 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 # configuration:
 unless (defined $coloured) {
   # Read the configuration file:
-  my $conf  = read_ini(catfile($blogdir, '.blaze', 'config'))
-              or display_warning("Unable to read configuration.");
+  my $conf  = read_conf();
 
   # Read required data from the configuration:
   my $temp  = $conf->{color}->{list} || 'false';

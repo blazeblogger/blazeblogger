@@ -165,6 +165,25 @@ sub write_ini {
   return 1;
 }
 
+# Read the configuration file:
+sub read_conf {
+  # Prepare the file name:
+  my $file = catfile($blogdir, '.blaze', 'config');
+
+  # Parse the file:
+  if (my $conf = read_ini($file)) {
+    # Return the result:
+    return $conf;
+  }
+  else {
+    # Report failure:
+    display_warning("Unable to read configuration.");
+
+    # Return empty configuration:
+    return {};
+  }
+}
+
 # Check the header for the erroneous or missing data:
 sub check_header {
   my $data = shift || die 'Missing argument';
@@ -356,13 +375,8 @@ sub add_new {
   my $type = shift || 'post';
   my $data = shift || {};
 
-  # Prepare the temporary file name:
-  my $temp = catfile($blogdir, '.blaze', 'temp');
-
   # Read the configuration file:
-  my $file = catfile($blogdir, '.blaze', 'config');
-  my $conf = read_ini($file)
-             or display_warning("Unable to read configuration.");
+  my $conf = read_conf();
 
   # Decide which editor to use:
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
@@ -394,6 +408,9 @@ sub add_new {
 # <!-- break --> to mark the end of the part to be displayed on index page.
 
 END_HEAD
+
+  # Prepare the temporary file name:
+  my $temp = catfile($blogdir, '.blaze', 'temp');
 
   # Open the file for writing:
   open(FILE, ">$temp")
