@@ -758,7 +758,7 @@ sub format_heading {
 
 # Strip HTML elements:
 sub strip_html {
-  my $string = shift || die 'Missing argument';
+  my $string = shift || return '';
 
   # Strip HTML elements and forbidded characters:
   $string =~ s/(<[^>]*>|&[^;]*;|<|>|&)//g;
