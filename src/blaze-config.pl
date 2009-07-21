@@ -30,33 +30,33 @@ use constant VERSION => '0.8.1';                    # Script version.
 our $blogdir = '.';                                 # Repository location.
 our $verbose = 1;                                   # Verbosity level.
 
-# Command-line options:
-my  $edit = 0;                                      # Edit config directly?
-
-# List of valid options:
-our %options = (
+# List of valid options and their default values:
+our %opt = (
   # Blog related settings:
-  'blog.title'     => "Blog title.",
-  'blog.subtitle'  => "Blog subtitle.",
-  'blog.theme'     => "Blog theme.",
-  'blog.style'     => "Blog stylesheet.",
-  'blog.lang'      => "Blog language.",
-  'blog.posts'     => "Number of posts to be listed on a single page.",
-  'blog.url'       => "Blog base url.",
-
-  # Core settings:
-  'core.editor'    => "Text editor to be used for editing purposes.",
-  'core.encoding'  => "File encoding in a form recognized by HTML 4.01.",
-  'core.extension' => "File extension for the generated pages.",
-
-  # User related settings:
-  'user.name'      => "User's name to be used as a default posts' author.",
-  'user.email'     => "User's e-mail.",
+  'blog.title'     => 'My Blog',                    # Blog title.
+  'blog.subtitle'  => 'yet another blog',           # Blog subtitle.
+  'blog.theme'     => 'default.html',               # Blog template file.
+  'blog.style'     => 'default.css',                # Blog stylesheet file.
+  'blog.lang'      => 'en_GB',                      # Blog language.
+  'blog.posts'     => '10',                         # Posts to display.
+  'blog.url'       => '',                           # Blog base URL.
 
   # Colour related settings:
-  'color.list'     => "true or false -- use coloured posts/pages listing?",
-  'color.log'      => "true or false -- use coloured log listing?",
+  'color.list'     => 'false',                      # Coloured listing?
+  'color.log'      => 'false',                      # Coloured log?
+
+  # Core settings:
+  'core.editor'    => 'vi',                         # External text editor.
+  'core.encoding'  => 'UTF-8',                      # Posts/pages codepage.
+  'core.extension' => 'html',                       # File extension.
+
+  # User related settings:
+  'user.name'      => 'admin',                      # User's name.
+  'user.email'     => 'admin@localhost',            # User's e-mail.
 );
+
+# Command-line options:
+my  $edit = 0;                                      # Edit config directly?
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
@@ -178,38 +178,76 @@ sub write_ini {
   return 1;
 }
 
-# Create a human readable version of configuration file:
+# Read the configuration file:
 sub read_conf {
-  my $file = shift || die 'Missing argument';
+  # Prepare the file name:
+  my $file = catfile($blogdir, '.blaze', 'config');
+
+  # Parse the file:
+  if (my $conf = read_ini($file)) {
+    # Return the result:
+    return $conf;
+  }
+  else {
+    # Report failure:
+    display_warning("Unable to read configuration.");
+
+    # Return empty configuration:
+    return {};
+  }
+}
+
+# Read configuration from the temporary file and save it:
+sub write_conf {
   my $conf = shift || die 'Missing argument';
 
+  # Prepare the file name:
+  my $file = catfile($blogdir, '.blaze', 'config');
+
+  # Save the configuration file:
+  unless (write_ini($file, $conf)) {
+    # Report failure:
+    display_warning("Unable to write configuration.");
+
+    # Return failure:
+    return 0;
+  }
+
+  # Return success:
+  return 1;
+}
+
+# Create a human readable version of configuration file:
+sub create_temp {
+  my $conf = shift || die 'Missing argument';
+  my $file = shift || catfile($blogdir, '.blaze', 'temp');
+
   # Prepare the blog related settings:
-  my $blog_title     = $conf->{blog}->{title}     || 'My Blog';
-  my $blog_subtitle  = $conf->{blog}->{subtitle}  || 'yet another blog';
-  my $blog_theme     = $conf->{blog}->{theme}     || 'default.html';
-  my $blog_style     = $conf->{blog}->{style}     || 'default.css';
-  my $blog_lang      = $conf->{blog}->{lang}      || 'en_GB';
-  my $blog_posts     = $conf->{blog}->{posts}     || '10';
-  my $blog_url       = $conf->{blog}->{url}       || '';
+  my $blog_title     = $conf->{blog}->{title}     || $opt{'blog.title'};
+  my $blog_subtitle  = $conf->{blog}->{subtitle}  || $opt{'blog.subtitle'};
+  my $blog_theme     = $conf->{blog}->{theme}     || $opt{'blog.theme'};
+  my $blog_style     = $conf->{blog}->{style}     || $opt{'blog.style'};
+  my $blog_lang      = $conf->{blog}->{lang}      || $opt{'blog.lang'};
+  my $blog_posts     = $conf->{blog}->{posts}     || $opt{'blog.posts'};
+  my $blog_url       = $conf->{blog}->{url}       || $opt{'blog.url'};
 
   # Prepare the colour related settings:
-  my $color_list     = $conf->{color}->{list}     || 'false';
-  my $color_log      = $conf->{color}->{log}      || 'false';
+  my $color_list     = $conf->{color}->{list}     || $opt{'color.list'};
+  my $color_log      = $conf->{color}->{log}      || $opt{'color.log'};
 
   # Prepare the core settings:
-  my $core_editor    = $conf->{core}->{editor}    || 'vi';
-  my $core_encoding  = $conf->{core}->{encoding}  || 'UTF-8';
-  my $core_extension = $conf->{core}->{extension} || 'html';
+  my $core_editor    = $conf->{core}->{editor}    || $opt{'core.editor'};
+  my $core_encoding  = $conf->{core}->{encoding}  || $opt{'core.encoding'};
+  my $core_extension = $conf->{core}->{extension} || $opt{'core.extension'};
 
   # Prepare the user related settings:
-  my $user_name      = $conf->{user}->{name}      || 'admin';
-  my $user_email     = $conf->{user}->{email}     || 'admin@localhost';
+  my $user_name      = $conf->{user}->{name}      || $opt{'user.name'};
+  my $user_email     = $conf->{user}->{email}     || $opt{'user.email'};
 
   # Open the file for writing:
-  open(FILE, ">$file") or return 0;
-
-  # Write to the temporary file:
-  print FILE << "END_TEMP";
+  if(open(FILE, ">$file")) {
+    # Write to the temporary file:
+    print FILE << "END_TEMP";
 ## The following are the blog related settings, having the direct influence
 ## on the way the whole thing looks. The options are as follows:
 ##
@@ -272,45 +310,39 @@ name=$user_name
 email=$user_email
 END_TEMP
 
-  # Close the file:
-  close(FILE);
+    # Close the file:
+    close(FILE);
 
-  # Return success:
-  return 1;
-}
+    # Return success:
+    return 1;
+  }
+  else {
+    # Report failure:
+    display_warning("Unable to create temporary file.");
 
-# Read configuration from the temporary file and save it:
-sub save_conf {
-  my $temp = shift || die 'Missing argument';
-  my $file = shift || die 'Missing argument';
-
-  # Read the temporary file:
-  my $conf = read_ini($temp) or return 0;
-
-  # Save the configuration file:
-  write_ini($file, $conf) or return 0;
-
-  # Return success:
-  return 1;
+    # Return failure:
+    return 0;
+  }
 }
 
 # Edit the configuration file:
-sub edit_conf {
+sub edit_options {
   my ($before, $after);
 
   # Prepare the temporary file name:
   my $temp = catfile($blogdir, '.blaze', 'temp');
 
   # Read the configuration file:
-  my $file = catfile($blogdir, '.blaze', 'config');
-  my $conf = read_ini($file) or return 0;
+  my $conf = read_conf();
+
+  # Make sure the configuration was successfully read:
+  return 0 if (scalar(keys %$conf) == 0);
 
   # Decide which editor to use:
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
   # Create the temporary file:
-  read_conf($temp, $conf)
-    or exit_with_error("Unable to create the temporary file.", 13);
+  create_temp($conf, $temp) or return 0;
 
   # Open the file for reading:
   if (open(FILE, "$temp")) {
@@ -325,7 +357,13 @@ sub edit_conf {
   }
 
   # Open the temporary file in the external editor:
-  system("$edit $temp") == 0 or exit_with_error("Unable to run `$edit'.",1);
+  unless (system("$edit $temp") == 0) {
+    # Report failure:
+    display_warning("Unable to run `$edit'.");
+
+    # Return failure:
+    return 0;
+  }
 
   # Open the file for reading:
   if (open(FILE, "$temp")) {
@@ -343,17 +381,26 @@ sub edit_conf {
       # Report abortion:
       display_warning("File have not been changed: aborting.");
 
-      # Return failure:
-      return 0;
+      # Return success:
+      exit 0;
     }
   }
 
-  # Save the configuration file:
-  save_conf($temp, $file)
-    or exit_with_error("Unable to save the configuration file.", 13);
+  # Read configuration from the temporary file:
+  if ($conf = read_ini($temp)) {
+    # Save the configuration file:
+    write_conf($conf) or return 0;
 
-  # Return success:
-  return 1;
+    # Return success:
+    return 1;
+  }
+  else {
+    # Report failure:
+    display_warning("Unable to read temporary file.");
+
+    # Return failure:
+    return 0;
+  }
 }
 
 # Set the option:
@@ -365,15 +412,16 @@ sub set_option {
   my ($section, $key) = split(/\./, $option);
 
   # Read the configuration file:
-  my $file = catfile($blogdir, '.blaze', 'config');
-  my $conf = read_ini($file)
-             or display_warning("Unable to read configuration.");
+  my $conf = read_conf();
+
+  # Make sure the configuration was successfully read:
+  return 0 if (scalar(keys %$conf) == 0);
 
   # Set up the option:
   $conf->{$section}->{$key} = $value;
 
   # Save the configuration file:
-  write_ini($file, $conf) or return 0;
+  write_conf($conf) or return 0;
 
   # Return success:
   return 1;
@@ -387,8 +435,10 @@ sub display_option {
   my ($section, $key) = split(/\./, $option);
 
   # Read the configuration file:
-  my $file = catfile($blogdir, '.blaze', 'config');
-  my $conf = read_ini($file) or return 0;
+  my $conf = read_conf();
+
+  # Make sure the configuration was successfully read:
+  return 0 if (scalar(keys %$conf) == 0);
 
   # Check whether the option is set:
   if (my $value = $conf->{$section}->{$key}) {
@@ -423,7 +473,7 @@ if ($edit) {
   exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 0);
 
   # Edit the configuration file:
-  edit_conf() or exit 1;
+  edit_options() or exit_with_error("Unable to edit configuration.", 13);
 
   # Report success:
   print "Your changes have been successfully saved.\n" if $verbose;
@@ -434,13 +484,13 @@ else {
 
   # Check whether the option is valid:
   exit_with_error("Invalid option `$ARGV[0]'.", 22)
-    unless (exists $options{$ARGV[0]});
+    unless (exists $opt{$ARGV[0]});
 
   # Decide whether to set or display the option:
   if (scalar(@ARGV) > 1) {
     # Set the option:
     set_option(shift(@ARGV), join(' ', @ARGV))
-      or exit_with_error("Unable to save the configuration.", 13);
+      or exit_with_error("Unable to set the option.", 13);
 
     # Report success:
     print "The option has been successfully saved.\n" if $verbose;
@@ -448,7 +498,7 @@ else {
   else {
     # Display the option:
     display_option(shift(@ARGV))
-      or exit_with_error("Unable to read the configuration.", 13);
+      or exit_with_error("Unable to display the option.", 13);
   }
 }
 
