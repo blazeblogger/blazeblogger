@@ -65,7 +65,8 @@ Usage: $NAME [-fqV] [-b directory]
                               repository is to be placed
   -f, --force                 force rewrite of already existing files
   -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages; the default option
+  -V, --verbose               display all messages including the list of
+                              created files
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -104,6 +105,9 @@ sub make_directories {
     unless (-d $dir) {
       # Create the directory:
       mkdir($dir, $mask) || exit_with_error("Creating `$dir': $!", 13);
+
+      # Report success:
+      print "Created $dir\n" if $verbose > 1;
     }
   }
 
@@ -195,6 +199,9 @@ END_CONFIG
   # Close the file:
   close(FILE);
 
+  # Report success:
+  print "Created $file\n" if $verbose > 1;
+
   # Return success:
   return 1;
 }
@@ -273,6 +280,9 @@ END_THEME
 
   # Close the file:
   close(FILE);
+
+  # Report success:
+  print "Created $file\n" if $verbose > 1;
 
   # Return success:
   return 1;
@@ -493,6 +503,9 @@ END_STYLE
   # Close the file:
   close(FILE);
 
+  # Report success:
+  print "Created $file\n" if $verbose > 1;
+
   # Return success:
   return 1;
 }
@@ -535,6 +548,9 @@ END_LANG
   # Close the file:
   close(FILE);
 
+  # Report success:
+  print "Created $file\n" if $verbose > 1;
+
   # Return success:
   return 1;
 }
@@ -566,7 +582,7 @@ GetOptions(
   'version|v'     => sub { display_version(); exit 0; },
   'force|f'       => sub { $force   = 1;     },
   'quiet|q'       => sub { $verbose = 0;     },
-  'verbose|V'     => sub { $verbose = 1;     },
+  'verbose|V'     => sub { $verbose = 2;     },
   'blogdir|b=s'   => sub { $blogdir = $_[1]; },
 );
 
@@ -653,7 +669,7 @@ Avoid displaying messages that are not necessary.
 
 =item B<-V>, B<--verbose>
 
-Display all messages. This is the default option.
+Display all messages including the list of created files.
 
 =item B<-h>, B<--help>
 
