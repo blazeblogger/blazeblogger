@@ -139,11 +139,6 @@ C<H2> element containing the page/post title.
 C<DIV> element containing the name of the current section (e.g. monthly
 archive, tag listing etc.).
 
-=item B<navigation>
-
-C<DIV> element containing the navigation for the listing browsing (i.e.
-previous and next page links).
-
 =item B<information>
 
 C<DIV> element containing the additional information about the post, i.e.
@@ -160,6 +155,18 @@ C<SPAN> element containing the post author.
 =item B<tags>
 
 C<SPAN> element containing the list of attached tags.
+
+=item B<previous>
+
+C<DIV> element containing link to the page with older posts.
+
+=item B<next>
+
+C<DIV> element containing link to the page with newer posts.
+
+=item B<more>
+
+C<A> element containing the `Read more' link.
 
 =back
 

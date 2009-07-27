@@ -432,14 +432,14 @@ body {
   color: #808080;
 }
 
-#content .navigation {
-  text-align: center;
-  font-size: x-small;
+#content .previous {
+  padding: 10px 0px 10px 0px;
+  float: left;
 }
 
-#content .navigation a {
-  padding-left: 0.5em;
-  padding-right: 0.5em;
+#content .next {
+  padding: 10px 0px 10px 0px;
+  float: right;
 }
 
 #sidebar {

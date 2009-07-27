@@ -703,7 +703,8 @@ sub read_body {
         my $more = $locale->{lang}->{more} || 'Read more &raquo;';
 
         # Add the `read more' link:
-        $result .= "<p><a href=\"" . fix_url($link) . "\">$more</a></p>\n";
+        $result .= "<p><a href=\"" . fix_url($link) . "\" class=\"more\">".
+                   "$more</a></p>\n";
       }
 
       # Exit the loop:
@@ -1027,12 +1028,12 @@ sub generate_posts {
                      "$month_body";
 
       # Add navigation:
-      $month_body .= "<div class=\"navigation\">\n";
-      $month_body .= "  <a href=\"index$prev.$ext\">$prev_string</a>\n"
-        if $month_curr eq $month_last;
-      $month_body .= "  <a href=\"index$next.$ext\">$next_string</a>\n"
-        if $month_page;
-      $month_body .= "</div>\n";
+      $month_body .= "<div class=\"previous\"><a href=\"index$prev.$ext\"".
+                     ">$prev_string</a></div>\n"
+                     if $month_curr eq $month_last;
+      $month_body .= "<div class=\"next\"><a href=\"index$next.$ext\"".
+                     ">$next_string</a></div>\n"
+                     if $month_page;
 
       # Prepare the monthly archive file name:
       if ($destdir eq '.') {
@@ -1098,10 +1099,8 @@ sub generate_posts {
                    "$month_body";
 
     # Add navigation:
-    $month_body .= "<div class=\"navigation\">\n";
-    $month_body .= "  <a href=\"index$next.$ext\">$next_string</a>\n"
-      if $month_page;
-    $month_body .= "</div>\n";
+    $month_body .= "<div class=\"next\"><a href=\"index$next.$ext\">" .
+                   "$next_string</a></div>\n" if $month_page;
 
     # Prepare the monthly archive file name:
     if ($destdir eq '.') {
@@ -1167,11 +1166,10 @@ sub generate_tags {
                      "$tag_body";
 
         # Add navigation:
-        $tag_body .= "<div class=\"navigation\">\n";
-        $tag_body .= "  <a href=\"index$prev.$ext\">$prev_string</a>\n";
-        $tag_body .= "  <a href=\"index$next.$ext\">$next_string</a>\n"
-          if $tag_page;
-        $tag_body .= "</div>\n";
+        $tag_body .= "<div class=\"previous\"><a href=\"index$prev.$ext\"".
+                     ">$prev_string</a></div>\n";
+        $tag_body .= "<div class=\"next\"><a href=\"index$next.$ext\"".
+                     ">$next_string</a></div>\n" if $tag_page;
 
         # Create the directory tree:
         make_directories [
@@ -1228,10 +1226,8 @@ sub generate_tags {
                    "$tag_body";
 
       # Add navigation:
-      $tag_body .= "<div class=\"navigation\">\n";
-      $tag_body .= "  <a href=\"index$next.$ext\">$next_string</a>\n"
-        if $tag_page;
-      $tag_body .= "</div>\n";
+      $tag_body .= "<div class=\"next\"><a href=\"index$next.$ext\">" .
+                   "$next_string</a></div>\n" if $tag_page;
 
       # Create the directory tree:
       make_directories [
