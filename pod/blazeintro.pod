@@ -25,8 +25,8 @@ form, as it is the most portable variant.
 To create a new blog, you have to create a repository first. Similarly to
 Git, BlazeBlogger repository is just a (usually hidden) directory named
 C<.blaze>, where all the blog data and configuration are stored and from
-which the static content, i.e. the HTML pages, are generated. In most
-cases, it is placed in the same directory as the generated content.
+which the static content, i.e. the HTML pages, is generated. In most cases,
+it is placed in the same directory as the generated content.
 
 Assuming you are already in the directory where the blog repository is to
 be placed, you can create a new one typing:
@@ -294,8 +294,11 @@ is being generated; for example, to install the theme called VectorLover:
 
   $ tar xfz vectorlover-1.0.tar.gz
 
-Then place the template file and the corresponding stylesheet to the
-C<.blaze/theme/> and C<.blaze/style/> directories respectively: 
+Open the template file, in this case C<vectorlover.html>, in your favourite
+text editor and replace the sidebar sections like `About' or `Links' with
+appropriate information. Then place both template file and the
+corresponding stylesheet to the C<.blaze/theme/> and C<.blaze/style/>
+directories respectively:
 
   $ mv vectorlover.html .blaze/theme/
   $ mv vectorlover.css  .blaze/style/
@@ -313,7 +316,7 @@ from scratch, see B<blazetheme>(7) manual page.
 =head2 Changing the Blog Localization
 
 To change the blog language to, let's say, Czech, copy the file C<cs_CZ> to
-the C<.blaze/lang> directory and change the appropriate configuration
+the C<.blaze/lang/> directory and change the appropriate configuration
 option:
 
   $ blaze-config blog.lang cs_CZ
