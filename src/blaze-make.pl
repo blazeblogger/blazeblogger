@@ -587,6 +587,7 @@ sub write_page {
   my $file     = shift || die 'Missing argument';
   my $data     = shift || return 0;
   my $content  = shift || '';
+  my $heading  = shift || $conf->{blog}->{title} || 'My Blog';
   my $root     = shift || '/';
   my $home     = fix_url($root);
   my $template = '';
@@ -659,9 +660,12 @@ sub write_page {
   # Open the file for writing:
   open(FILE, ">$file") or return 0;
 
-  # Add page content:
+  # Substitute page title:
   ($template  = $cache->{theme}->{$root})
-              =~ s/<!--\s*content\s*-->/$content/ig;
+              =~ s/<!--\s*page-title\s*-->/$heading/ig;
+
+  # Add page content:
+  $template   =~ s/<!--\s*content\s*-->/$content/ig;
 
   # Substitute the root directory placeholder:
   $template   =~ s/%root%/$root/ig;
@@ -858,15 +862,16 @@ sub generate_rss {
 
 # Generate index page:
 sub generate_index {
-  my $data      = shift || die 'Missing argument';
-  my $body      = '';
+  my $data       = shift || die 'Missing argument';
+  my $body       = '';
 
   # Read required data from the configuration:
-  my $ext       = $conf->{core}->{extension} || 'html';
-  my $max_posts = $conf->{blog}->{posts}     || 10;
+  my $ext        = $conf->{core}->{extension} || 'html';
+  my $max_posts  = $conf->{blog}->{posts}     || 10;
+  my $blog_title = $conf->{blog}->{title}     || 'My Blog';
 
   # Initialize necessary variables:
-  my $count     = 0;
+  my $count      = 0;
 
   # Check whether the posts are enabled:
   if ($with_posts) {
@@ -896,7 +901,7 @@ sub generate_index {
                                : catfile($destdir, "index.$ext");
 
   # Write the index file:
-  write_page($file, $data, $body, './') or return 0;
+  write_page($file, $data, $body, $blog_title, './') or return 0;
 
   # Report success:
   print "Created $file\n" if $verbose > 1;
@@ -969,7 +974,7 @@ sub generate_posts {
     }
 
     # Write the post:
-    write_page($file, $data, $post_body, '../../../') or return 0;
+    write_page($file, $data, $post_body, $title, '../../../') or return 0;
 
     # Report success:
     print "Created $file\n" if $verbose > 1;
@@ -993,7 +998,8 @@ sub generate_posts {
       }
 
       # Write the file:
-      write_page($file, $data, $year_body, '../') or return 0;
+      write_page($file, $data, $year_body, "$title_string $year", '../')
+        or return 0;
 
       # Make the previous year be the current one:
       $year_last = $year_curr;
@@ -1044,7 +1050,8 @@ sub generate_posts {
       }
 
       # Write the file:
-      write_page($file, $data, $month_body, '../../') or return 0;
+      write_page($file, $data, $month_body, "$title_string $name",'../../')
+        or return 0;
 
       # Check whether the month has changed:
       if ($month_curr ne $month_last) {
@@ -1111,7 +1118,8 @@ sub generate_posts {
     }
 
     # Write the file:
-    write_page($file, $data, $month_body, '../../') or return 0;
+    write_page($file, $data, $month_body, "$title_string $name", '../../')
+      or return 0;
 
     # Report success:
     print "Created $file\n" if $verbose > 1;
@@ -1188,7 +1196,8 @@ sub generate_tags {
         }
 
         # Write the file:
-        write_page($file, $data, $tag_body, '../../') or return 0;
+        write_page($file, $data, $tag_body, "$title_string $tag", '../../')
+          or return 0;
 
         # Clear the tag body:
         $tag_body  = '';
@@ -1246,7 +1255,8 @@ sub generate_tags {
       }
 
       # Write the file:
-      write_page($file, $data, $tag_body, '../../') or return 0;
+      write_page($file, $data, $tag_body, "$title_string $tag", '../../')
+        or return 0;
 
       # Report success:
       print "Created $file\n" if $verbose > 1;
@@ -1265,7 +1275,8 @@ sub generate_tags {
                                  : catfile($destdir, 'tags', "index.$ext");
 
     # Write the file:
-    write_page($file, $data, $taglist_body, '../') or return 0;
+    write_page($file, $data, $taglist_body, $tags_string, '../')
+      or return 0;
 
     # Report success:
     print "Created $file\n" if $verbose > 1;
@@ -1299,7 +1310,7 @@ sub generate_pages {
                                  : catfile($destdir, $url, "index.$ext");
 
     # Write the index file:
-    write_page($file, $data, $body, '../') or return 0;
+    write_page($file, $data, $body, $title, '../') or return 0;
 
     # Report success:
     print "Created $file\n" if $verbose > 1;

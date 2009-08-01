@@ -53,6 +53,10 @@ The Stylesheet LINK tag.
 
 The RSS feed LINK tag.
 
+=item B<<!-- page-title -->>
+
+Current page title, usually used inside TITLE element.
+
 =back
 
 =head3 List of Body Placeholders

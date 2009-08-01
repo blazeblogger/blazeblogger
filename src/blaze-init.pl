@@ -227,7 +227,7 @@ sub create_theme {
   <!-- date -->
   <!-- stylesheet -->
   <!-- rss -->
-  <title><!-- title --> - <!-- subtitle --></title>
+  <title><!-- page-title --></title>
 </head>
 
 <body>
