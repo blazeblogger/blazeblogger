@@ -1,4 +1,4 @@
-# makefile for blazeblogger, a CMS without boundaries
+# makefile for BlazeBlogger, a CMS without boundaries
 # Copyright (C) 2009 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it

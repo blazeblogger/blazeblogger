@@ -1,6 +1,6 @@
 =head1 NAME
 
-blazeblogger - a CMS without boundaries
+BlazeBlogger - a CMS without boundaries
 
 =head1 SYNOPSIS
 
