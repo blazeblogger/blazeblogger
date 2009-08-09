@@ -309,6 +309,9 @@ sub make_record {
       # Strip forbidden characters:
       $url =~ s/[^\w\s\-]//g;
 
+      # Strip trailing spaces:
+      $url =~ s/\s+$//;
+
       # Substitute spaces:
       $url =~ s/\s+/-/g;
     }
@@ -320,12 +323,19 @@ sub make_record {
     # Strip forbidden characters:
     $url =~ s/[^\w\s\-]//g;
 
+    # Strip trailing spaces:
+    $url =~ s/\s+$//;
+
     # Substitute spaces:
     $url =~ s/\s+/-/g;
   }
 
   # Check whether the title is specified:
-  unless ($title) {
+  if ($title) {
+    # Strip trailing spaces:
+    $title =~ s/\s+$//;
+  }
+  else {
     # Display the appropriate warning:
     display_warning("Missing title in the $type with ID $id.");
 
