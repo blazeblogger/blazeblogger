@@ -173,33 +173,37 @@ sub read_conf {
   }
 }
 
-# Fix the erroneous or missing header data:
-sub fix_header {
-  my $data   = shift || die 'Missing argument';
-  my @fields = qw( title author date tags url );
+# Compose a post/page record:
+sub make_record {
+  my $type = shift || die 'Missing argument';
+  my $id   = shift || die 'Missing argument';
+  my ($title, $author, $date, $tags, $url) = @_;
 
-  # Process each field separately:
-  foreach my $field (@fields) {
-    # Strip forbidden characters:
-    $data->{header}->{$field} =~ s/://g if $data->{header}->{$field};
-  }
+  # Supplement missing items:
+  $title  ||= '';
+  $author ||= 'admin';
+  $date   ||= 'XXXX-XX-XX';
+  $tags   ||= '';
+  $url    ||= '';
 
-  # Supplement missing fields:
-  $data->{header}->{date}   ||= 'XXXX-XX-XX';
-  $data->{header}->{tags}   ||= '';
-  $data->{header}->{author} ||= 'admin';
-  $data->{header}->{url}    ||= '';
-  $data->{header}->{title}  ||= '';
-
-  # Return success:
-  return 1;
+  # Return the composed record:
+  return {
+    'id'     => $id,
+    'title'  => $title,
+    'author' => $author,
+    'date'   => $date,
+    'tags'   => $tags,
+    'url'    => $url,
+  };
 }
 
 # Return the list of posts/pages header records:
 sub collect_headers {
   my $type    = shift || 'post';
-  my $head    = catdir($blogdir, '.blaze', "${type}s", 'head');
   my @records = ();
+
+  # Prepare the file name:
+  my $head    = catdir($blogdir, '.blaze', "${type}s", 'head');
 
   # Open the headers directory:
   opendir(HEAD, $head) or return @records;
@@ -211,23 +215,25 @@ sub collect_headers {
 
     # Parse the header data:
     my $data = read_ini(catfile($head, $id)) or next;
+    my $date   = $data->{header}->{date};
+    my $tags   = $data->{header}->{tags};
+    my $author = $data->{header}->{author};
+    my $url    = $data->{header}->{url};
+    my $title  = $data->{header}->{title};
 
-    # Fix the erroneous or missing header data:
-    fix_header($data);
+    # Create the record:
+    my $record = make_record($type, $id, $title, $author, $date,
+                             $tags, $url);
 
     # Add the record to the beginning of the list:
-    push(@records, $data->{header}->{date}   . ':' . $id . ':' .
-                   $data->{header}->{tags}   . ':' .
-                   $data->{header}->{author} . ':' .
-                   $data->{header}->{url}    . ':' .
-                   $data->{header}->{title});
+    push(@records, $record);
   }
 
   # Close the directory:
   closedir(HEAD);
 
   # Return the result:
-  return sort { $b cmp $a } @records;
+  return sort { "$b->{date}:$b->{id}" cmp "$a->{date}:$a->{id}" } @records;
 }
 
 # Display the list of matching records:
@@ -245,21 +251,14 @@ sub display_records {
   my @headers = collect_headers($type);
 
   # Process each header:
-  foreach(@headers) {
-    # Decompose the header record:
-    $_ =~ /^([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)$/;
-    my $record_date   = $1;
-    my $record_id     = $2;
-    my $record_tags   = $3;
-    my $record_author = $4;
-    my $record_title  = $6;
+  foreach my $record (@headers) {
 
     # Check whether the record matches the pattern:
-    unless ($record_date   =~ /^$year-$month-$day$/i &&
-            $record_title  =~ /^.*$title.*$/i &&
-            $record_tags   =~ /^(|.*, *)$tag(,.*|)$/i &&
-            $record_author =~ /^$author$/i &&
-            $record_id     =~ /^$id$/i) {
+    unless ($record->{date}   =~ /^$year-$month-$day$/i &&
+            $record->{title}  =~ /^.*$title.*$/i &&
+            $record->{tags}   =~ /^(|.*, *)$tag(,.*|)$/i &&
+            $record->{author} =~ /^$author$/i &&
+            $record->{id}     =~ /^$id$/i) {
       # Skip the record:
       next;
     }
@@ -269,24 +268,25 @@ sub display_records {
       # Check whether to use colours:
       unless ($coloured) {
         # Display the plain record header:
-        print "ID: $record_id | $record_date | $record_author\n\n";
+        print "ID: $record->{id} | $record->{date} | " .
+              "$record->{author}\n\n";
       }
       else {
         # Display the coloured record header:
-        print colored ("ID: $record_id | $record_date | $record_author",
-                       'yellow');
+        print colored ("ID: $record->{id} | $record->{date} | " .
+                       "$record->{author}", 'yellow');
         print "\n\n";
       }
 
       # Display the record body:
-      print wrap('    ', ' ' x 11, "Title: $record_title\n");
-      print wrap('    ', ' ' x 11, "Tags:  $record_tags\n")
+      print wrap('    ', ' ' x 11, "Title: $record->{title}\n");
+      print wrap('    ', ' ' x 11, "Tags:  $record->{tags}\n")
         if ($type eq 'post');
       print "\n";
     }
     else {
       # Display the short record:
-      print "ID: $record_id | $record_date | $record_title\n";
+      print "ID: $record->{id} | $record->{date} | $record->{title}\n";
     }
   }
 
@@ -303,8 +303,8 @@ sub display_statistics {
   # Get desired values:
   my $pages_count = scalar @pages;
   my $posts_count = scalar @posts;
-  my $first_post  = substr($posts[$#posts], 0, 10) if @posts;
-  my $last_post   = substr($posts[0],       0, 10) if @posts;
+  my $first_post  = ${posts[$#posts]}->{date} if @posts;
+  my $last_post   = ${posts[0]}->{date}       if @posts;
 
   # Check whether to use compact listing:
   unless ($compact) {
@@ -383,7 +383,7 @@ unless ($type eq 'stats') {
   $tag    =~ s/($reserved)/\\$1/g if $tag;
   $year   =~ s/($reserved)/\\$1/g if $year;
   $month  =~ s/($reserved)/\\$1/g if $month;
-  $month  =~ s/($reserved)/\\$1/g if $day;
+  $day    =~ s/($reserved)/\\$1/g if $day;
 
   # Display the list of matching records:
   display_records($type, $id, $author, $title, $tag, $year, $month, $day)

@@ -225,11 +225,31 @@ sub read_lang {
 
 # Compose a post/page record:
 sub make_record {
-  my ($type, $date, $id, $tags, $author, $url, $title) = @_;
+  my $type = shift || die 'Missing argument';
+  my $id   = shift || die 'Missing argument';
+  my ($title, $author, $date, $tags, $url) = @_;
 
-  # Make sure the certain data are provided:
-  die 'Missing argument' unless $type;
-  die 'Missing argument' unless $id;
+  # Check whether the title is specified:
+  if ($title) {
+    # Strip trailing spaces:
+    $title =~ s/\s+$//;
+  }
+  else {
+    # Display the appropriate warning:
+    display_warning("Missing title in the $type with ID $id.");
+
+    # Assign the default value:
+    $title = $id;
+  }
+
+  # Check whether the author is specified:
+  unless ($author) {
+    # Report missing author:
+    display_warning("Missing author in the $type with ID $id.");
+
+    # Assign the default value:
+    $author = 'admin';
+  }
 
   # Check whether the date is specified:
   if ($date) {
@@ -252,15 +272,6 @@ sub make_record {
 
   # Check whether the tags are specified:
   if ($tags) {
-    # Check whether they contain forbidden characters:
-    if ($tags =~ /:/) {
-      # Report invalid tags:
-      display_warning("Invalid tags in the $type with ID $id.");
-
-      # Strip forbidded characters:
-      $tags =~ s/://g;
-    }
-
     # Make all tags lower case:
     $tags = lc($tags);
 
@@ -278,25 +289,6 @@ sub make_record {
   else {
     # Assign the default value:
     $tags = '';
-  }
-
-  # Check whether the author is specified:
-  if ($author) {
-    # Check whether it contains forbidded charset:
-    if ($author =~ /:/) {
-      # Report invalid author:
-      display_warning("Invalid author in the $type with ID $id.");
-
-      # Strip forbidden characters:
-      $author =~ s/://g;
-    }
-  }
-  else {
-    # Report missing author:
-    display_warning("Missing author in the $type with ID $id.");
-
-    # Assign the default value:
-    $author = 'admin';
   }
 
   # Check whether the URL is specified:
@@ -330,32 +322,15 @@ sub make_record {
     $url =~ s/\s+/-/g;
   }
 
-  # Check whether the title is specified:
-  if ($title) {
-    # Strip trailing spaces:
-    $title =~ s/\s+$//;
-  }
-  else {
-    # Display the appropriate warning:
-    display_warning("Missing title in the $type with ID $id.");
-
-    # Assign the default value:
-    $title = $id;
-  }
-
   # Return the composed record:
-  return "$date:$id:$tags:$author:$url:$title";
-}
-
-# Decompose a post/page record:
-sub read_record {
-  my $record = shift || die 'Missing argument';
-
-  # Decompose the record:
-  my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
-
-  # Return the resulting data:
-  return $date, $id, $tags, $author, $url, $title;
+  return {
+    'id'     => $id,
+    'title'  => $title,
+    'author' => $author,
+    'date'   => $date,
+    'tags'   => $tags,
+    'url'    => $url,
+  };
 }
 
 # Return the list of posts/pages header records:
@@ -383,7 +358,8 @@ sub collect_headers {
     my $title  = $data->{header}->{title};
 
     # Create the record:
-    my $record = make_record($type, $date, $id, $tags, $author, $url, $title);
+    my $record = make_record($type, $id, $title, $author, $date,
+                             $tags, $url);
 
     # Add the record to the beginning of the list:
     push(@records, $record);
@@ -393,7 +369,7 @@ sub collect_headers {
   closedir(HEAD);
 
   # Return the result:
-  return sort { $b cmp $a } @records;
+  return sort { "$b->{date}:$b->{id}" cmp "$a->{date}:$a->{id}" } @records;
 }
 
 # Collect the necessary metadata:
@@ -413,15 +389,12 @@ sub collect_metadata {
 
   # Process each post header:
   foreach my $record (@posts) {
-    # Decompose the post record:
-    my ($full_date, undef, $tag_list) = read_record($record);
-
     # Prepare the information:
-    my @tags = split(/,\s*/, $tag_list);
-    my $date = substr($full_date, 0, 7);
-    my $temp = $month[int(substr($full_date, 5, 2)) - 1];
+    my @tags = split(/,\s*/, $record->{tags});
+    my $date = substr($record->{date}, 0, 7);
+    my $temp = $month[int(substr($record->{date}, 5, 2)) - 1];
     my $name = ($locale->{lang}->{$temp} || "\u$temp") . " " .
-               substr($full_date, 0, 4);
+               substr($record->{date}, 0, 4);
 
     # Check whether the month is already present:
     if ($months->{$name}) {
@@ -541,8 +514,9 @@ sub list_of_pages {
 
   # Process each page separately:
   foreach my $record (sort @$pages) {
-    # Decompose the page record:
-    my (undef, undef, undef, undef, $url, $title) = read_record($record);
+    # Decompose the record:
+    my $title = $record->{title};
+    my $url   = $record->{url};
 
     # Add the page link to the list:
     $list .= "<li><a href=\"".fix_url("$root$url")."\">$title</a></li>\n";
@@ -574,8 +548,10 @@ sub list_of_posts {
     last if $count == $max;
 
     # Decompose the record:
-    my ($date, $id, undef, undef, $url, $title) = read_record($record);
-    my ($year, $month) = split(/-/, $date);
+    my $id    = $record->{id};
+    my $url   = $record->{url};
+    my $title = $record->{title};
+    my ($year, $month) = split(/-/, $record->{date});
 
     # Add the post link to the list:
     $list .= "<li><a href=\"" . fix_url("$root$year/$month/$id-$url") .
@@ -835,8 +811,12 @@ sub generate_rss {
     last if $count == $max_posts;
 
     # Decompose the record:
-    my ($date, $id, $tags, $author, $url, $title) = read_record($record);
-    my ($year, $month, $day) = split(/-/, $date);
+    my $id     = $record->{id};
+    my $title  = $record->{title};
+    my $author = $record->{author};
+    my $tags   = $record->{tags};
+    my $url    = $record->{url};
+    my ($year, $month, $day) = split(/-/, $record->{date});
 
     # Strip HTML elements:
     my $post_title = strip_html($title);
@@ -891,7 +871,12 @@ sub generate_index {
       last if $count == $max_posts;
 
       # Decompose the record:
-      my ($date, $id, $tags, $author, $url, $title) = read_record($record);
+      my $id     = $record->{id};
+      my $title  = $record->{title};
+      my $author = $record->{author};
+      my $date   = $record->{date};
+      my $tags   = $record->{tags};
+      my $url    = $record->{url};
       my ($year, $month) = split(/-/, $date);
 
       # Add the post heading with excerpt:
@@ -959,7 +944,12 @@ sub generate_posts {
   # Process each record:
   foreach my $record (@{$data->{posts}}) {
     # Decompose the record:
-    ($date, $id, $tags, $author, $url, $title) = read_record($record);
+    $id     = $record->{id};
+    $title  = $record->{title};
+    $author = $record->{author};
+    $date   = $record->{date};
+    $tags   = $record->{tags};
+    $url    = $record->{url};
     ($year, $month) = split(/-/, $date);
 
     # Prepare the post body:
@@ -1166,7 +1156,12 @@ sub generate_tags {
     # Process each record:
     foreach my $record (@{$data->{posts}}) {
       # Decompose the record:
-      ($date, $id, $tags, $author, $url, $title) = read_record($record);
+      $id     = $record->{id};
+      $title  = $record->{title};
+      $author = $record->{author};
+      $date   = $record->{date};
+      $tags   = $record->{tags};
+      $url    = $record->{url};
       ($year, $month) = split(/-/, $date);
 
       # Check whether the post contains the current tag:
@@ -1306,8 +1301,12 @@ sub generate_pages {
 
   # Process each record:
   foreach my $record (@{$data->{pages}}) {
-    my ($date, $id, $tags, $author, $url, $title) = split(/:/, $record, 6);
-    my ($year, $month) = split(/-/, $date);
+    my $id     = $record->{id};
+    my $title  = $record->{title};
+    my $author = $record->{author};
+    my $tags   = $record->{tags};
+    my $url    = $record->{url};
+    my ($year, $month) = split(/-/, $record->{date});
 
     # Prepare the page body:
     $body = "<h2 class=\"post\">$title</h2>\n\n".read_body($id, 'page', 0);
