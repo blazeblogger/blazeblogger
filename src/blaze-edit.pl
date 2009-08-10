@@ -185,14 +185,7 @@ sub check_header {
   }
 
   # Check whether the author is specified:
-  if (my $author = $data->{header}->{author}) {
-    # Check whether it contains forbidden characters:
-    if ($author =~ /:/) {
-      # Report invalid author:
-      display_warning("Invalid author in the $type with ID $id.");
-    }
-  }
-  else {
+  unless ($data->{header}->{author}) {
     # Report missing author:
     display_warning("Missing author in the $type with ID $id.");
   }
@@ -208,15 +201,6 @@ sub check_header {
   else {
     # Report missing date:
     display_warning("Missing date in the $type with ID $id.");
-  }
-
-  # Check whether the tags are specified:
-  if (my $tags = $data->{header}->{tags}) {
-    # Check whether they contain forbidden characters:
-    if ($tags =~ /:/) {
-      # Report invalid tags:
-      display_warning("Invalid tags in the $type with ID $id.");
-    }
   }
 
   # Check whether the URL is specified:
