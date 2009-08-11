@@ -374,12 +374,14 @@ sub collect_headers {
 
 # Collect the necessary metadata:
 sub collect_metadata {
-  my $tags   = {};
-  my $months = {};
+  my $post_links  = {};
+  my $page_links  = {};
+  my $month_links = {};
+  my $tag_links   = {};
 
   # Prepare the list of month names:
-  my @month  = qw( january february march april may june july
-                   august september october november december );
+  my @month_name  = qw( january february march april may june july
+                        august september october november december );
 
   # Collect the pages headers:
   my @pages  = collect_headers('page');
@@ -389,55 +391,68 @@ sub collect_metadata {
 
   # Process each post header:
   foreach my $record (@posts) {
-    # Prepare the information:
-    my @tags = split(/,\s*/, $record->{tags});
-    my $date = substr($record->{date}, 0, 7);
-    my $temp = $month[int(substr($record->{date}, 5, 2)) - 1];
-    my $name = ($locale->{lang}->{$temp} || "\u$temp") . " " .
-               substr($record->{date}, 0, 4);
+    # Decompose the record:
+    my ($year, $month) = split(/-/, $record->{date});
+    my @tags           = split(/,\s*/, $record->{tags});
+    my $temp           = $month_name[int($month) - 1];
+    my $name           = ($locale->{lang}->{$temp} || "\u$temp") ." $year";
+    my $url            = $record->{url};
+    my $id             = $record->{id};
+
+    # Set up the post URL:
+    $post_links->{$id}->{url} = "$year/$month/$id-$url";
 
     # Check whether the month is already present:
-    if ($months->{$name}) {
+    if ($month_links->{$name}) {
       # Increase the counter:
-      $months->{$name}->{count}++;
+      $month_links->{$name}->{count}++;
     }
     else {
-      # Prepare the URL:
-      (my $url = $date) =~ s/-/\//;
-
       # Set up the URL:
-      $months->{$name}->{url}   = $url;
+      $month_links->{$name}->{url}   = "$year/$month";
 
       # Set up the counter:
-      $months->{$name}->{count} = 1;
+      $month_links->{$name}->{count} = 1;
     }
 
     # Process each tag separately:
     foreach my $tag (@tags) {
       # Check whether the tag is already present:
-      if ($tags->{$tag}) {
+      if ($tag_links->{$tag}) {
         # Increase the counter:
-        $tags->{$tag}->{count}++;
+        $tag_links->{$tag}->{count}++;
       }
       else {
         # Prepare an URL:
-        (my $url = $tag) =~ s/[^\w\s\-]//g; $url =~ s/\s/-/g;
+        (my $tag_url = $tag) =~ s/[^\w\s\-]//g; $tag_url =~ s/\s/-/g;
 
         # Set up the URL:
-        $tags->{$tag}->{url}   = $url;
+        $tag_links->{$tag}->{url}   = $tag_url;
 
         # Set up the counter:
-        $tags->{$tag}->{count} = 1;
+        $tag_links->{$tag}->{count} = 1;
       }
     }
   }
 
+  # Process each page header:
+  foreach my $record (@pages) {
+    # Set up the page URL:
+    $page_links->{$record->{id}}->{url} = $record->{url};
+  }
+
   # Return the result:
   return {
-    'posts'  => \@posts,
-    'pages'  => \@pages,
-    'tags'   => $tags,
-    'months' => $months,
+    'headers' => {
+      'posts'   => \@posts,
+      'pages'   => \@pages,
+    },
+    'links'   => {
+      'posts'   => $post_links,
+      'pages'   => $page_links,
+      'months'  => $month_links,
+      'tags'    => $tag_links,
+    },
   };
 }
 
@@ -591,10 +606,10 @@ sub write_page {
     my $ext      = $conf->{core}->{extension} || 'html';
 
     # Prepare the pages, tags and months lists:
-    my $tags     = list_of_tags($data->{tags}, $root);
-    my $archive  = list_of_months($data->{months}, $root);
-    my $pages    = list_of_pages($data->{pages}, $root);
-    my $posts    = list_of_posts($data->{posts}, $root);
+    my $tags     = list_of_tags($data->{links}->{tags}, $root);
+    my $archive  = list_of_months($data->{links}->{months}, $root);
+    my $pages    = list_of_pages($data->{headers}->{pages}, $root);
+    my $posts    = list_of_posts($data->{headers}->{posts}, $root);
 
     # Get the current year:
     my $year     = substr(date_to_string(time), 0, 4);
@@ -658,6 +673,18 @@ sub write_page {
 
   # Substitute the home page placeholder:
   $template   =~ s/%home%/$home/ig;
+
+  # Substitute the post with selected ID placeholder:
+  while ($template =~ /%post\[(\d+)\]%/i) {
+    my $link = fix_url($root . $data->{links}->{posts}->{$1}->{url});
+    $template =~ s/%post\[$1\]%/$link/ig;
+  }
+
+  # Substitute the page with selected ID placeholder:
+  while ($template =~ /%page\[(\d+)\]%/i) {
+    my $link = fix_url($root . $data->{links}->{pages}->{$1}->{url});
+    $template =~ s/%page\[$1\]%/$link/ig;
+  }
 
   # Write the line to the file:
   print FILE $template;
@@ -806,7 +833,7 @@ sub generate_rss {
             "  <generator>BlazeBlogger " . VERSION . "</generator>\n";
 
   # Process the requested number of posts:
-  foreach my $record (@{$data->{posts}}) {
+  foreach my $record (@{$data->{headers}->{posts}}) {
     # Stop when the post count reaches the limit:
     last if $count == $max_posts;
 
@@ -866,7 +893,7 @@ sub generate_index {
   # Check whether the posts are enabled:
   if ($with_posts) {
     # Process the requested number of posts:
-    foreach my $record (@{$data->{posts}}) {
+    foreach my $record (@{$data->{headers}->{posts}}) {
       # Stop when the post count reaches the limit:
       last if $count == $max_posts;
 
@@ -883,7 +910,7 @@ sub generate_index {
       $body.=format_heading("<a href=\"" .fix_url("$year/$month/$id-$url").
                             "\">$title</a>",
                             $date, $author,
-                            format_tags('./', $data->{tags}, $tags)) .
+                            format_tags('./',$data->{links}->{tags},$tags)).
              read_body($id, 'post', 1, "$year/$month/$id-$url");
 
       # Increase the number of listed items:
@@ -942,7 +969,7 @@ sub generate_posts {
   my ($date, $id, $tags, $author, $url, $title, $year, $month, $file);
 
   # Process each record:
-  foreach my $record (@{$data->{posts}}) {
+  foreach my $record (@{$data->{headers}->{posts}}) {
     # Decompose the record:
     $id     = $record->{id};
     $title  = $record->{title};
@@ -954,7 +981,8 @@ sub generate_posts {
 
     # Prepare the post body:
     $post_body  = format_heading($title, $date, $author,
-                                 format_tags('../../../', $data->{tags},
+                                 format_tags('../../../',
+                                             $data->{links}->{tags},
                                              $tags)) .
                   read_body($id, 'post', 0);
 
@@ -986,7 +1014,8 @@ sub generate_posts {
     if ($year_last ne $year_curr) {
       # Prepare this year's archive body:
       $year_body = "<div class=\"section\">$title_string $year</div>\n\n" .
-                   "<ul>\n" .list_of_months($data->{months}, '../', $year).
+                   "<ul>\n" .list_of_months($data->{links}->{months},
+                                            '../', $year) .
                    "</ul>";
 
       # Prepare this year's archive file name:
@@ -1080,7 +1109,8 @@ sub generate_posts {
     $month_body .= format_heading("<a href=\"" . fix_url("$id-$url") .
                                   "\">$title</a>",
                                   $date, $author,
-                                  format_tags('../../', $data->{tags},
+                                  format_tags('../../',
+                                              $data->{links}->{tags},
                                               $tags)) .
                    read_body($id, 'post', 1, "$id-$url");
 
@@ -1144,7 +1174,7 @@ sub generate_tags {
   my $next_string  = $locale->{lang}->{next}     || 'Next &raquo;';
 
   # Process each tag separately:
-  foreach my $tag (keys %{$data->{tags}}) {
+  foreach my $tag (keys %{$data->{links}->{tags}}) {
     # Initialize tag related variables:
     my $tag_body  = '';                             # List of posts.
     my $tag_count = 0;                              # Post counter.
@@ -1154,7 +1184,7 @@ sub generate_tags {
     my ($date, $id, $tags, $author, $url, $title, $year, $month, $file);
 
     # Process each record:
-    foreach my $record (@{$data->{posts}}) {
+    foreach my $record (@{$data->{headers}->{posts}}) {
       # Decompose the record:
       $id     = $record->{id};
       $title  = $record->{title};
@@ -1187,16 +1217,17 @@ sub generate_tags {
         # Create the directory tree:
         make_directories [
           catdir($destdir, 'tags'),
-          catdir($destdir, 'tags', $data->{tags}->{$tag}->{url}),
+          catdir($destdir, 'tags', $data->{links}->{tags}->{$tag}->{url}),
         ];
 
         # Prepare the tag file name:
         if ($destdir eq '.') {
-          $file = catfile('tags', $data->{tags}->{$tag}->{url},
+          $file = catfile('tags', $data->{links}->{tags}->{$tag}->{url},
                           "index$index.$ext");
         }
         else {
-          $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
+          $file = catfile($destdir, 'tags',
+                          $data->{links}->{tags}->{$tag}->{url},
                           "index$index.$ext");
         }
 
@@ -1221,7 +1252,8 @@ sub generate_tags {
       $tag_body .= format_heading("<a href=\"" .
                                   fix_url("../../$year/$month/$id-$url") .
                                   "\">$title</a>", $date, $author,
-                                  format_tags('../../', $data->{tags},
+                                  format_tags('../../',
+                                              $data->{links}->{tags},
                                               $tags)) .
                    read_body($id, 'post', 1,"../../$year/$month/$id-$url");
 
@@ -1246,16 +1278,17 @@ sub generate_tags {
       # Create the directory tree:
       make_directories [
         catdir($destdir, 'tags'),
-        catdir($destdir, 'tags', $data->{tags}->{$tag}->{url}),
+        catdir($destdir, 'tags', $data->{links}->{tags}->{$tag}->{url}),
       ];
 
       # Prepare the tag file name:
       if ($destdir eq '.') {
-        $file = catfile('tags', $data->{tags}->{$tag}->{url},
+        $file = catfile('tags', $data->{links}->{tags}->{$tag}->{url},
                         "index$index.$ext");
       }
       else {
-        $file = catfile($destdir, 'tags', $data->{tags}->{$tag}->{url},
+        $file = catfile($destdir, 'tags',
+                        $data->{links}->{tags}->{$tag}->{url},
                         "index$index.$ext");
       }
 
@@ -1269,10 +1302,10 @@ sub generate_tags {
   }
 
   # Create the tag list if any:
-  if (%{$data->{tags}}) {
+  if (%{$data->{links}->{tags}}) {
     # Prepare the tag list body:
     my $taglist_body = "<div class=\"section\">$tags_string</div>\n\n" .
-                       "<ul>\n" . list_of_tags($data->{tags}, '../') .
+                       "<ul>\n".list_of_tags($data->{links}->{tags},'../').
                        "</ul>";
 
     # Prepare the tag list file name:
@@ -1300,7 +1333,7 @@ sub generate_pages {
   my $ext  = $conf->{core}->{extension} || 'html';
 
   # Process each record:
-  foreach my $record (@{$data->{pages}}) {
+  foreach my $record (@{$data->{headers}->{pages}}) {
     my $id     = $record->{id};
     my $title  = $record->{title};
     my $author = $record->{author};
