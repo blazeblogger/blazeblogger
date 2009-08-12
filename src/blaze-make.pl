@@ -495,8 +495,8 @@ sub list_of_tags {
   if (my %tags = %$tags) {
     # Return the list of tags:
     return join("\n", map {
-      "<li><a href=\"" . fix_url("${root}tags/" . $tags{$_}->{url}) .
-      "\">$_</a> (" . $tags{$_}->{count} . ")</li>"
+      "<li><a class=\"taglink\" href=\"" . fix_url("${root}tags/" . $tags{$_}->{url}) .
+      "\">$_ (" . $tags{$_}->{count} . ")</a></li>"
     } sort(keys(%tags)));
   }
   else {
@@ -519,7 +519,7 @@ sub list_of_months {
     # Return the list of months:
     return join("\n", sort { $b cmp $a } (map {
       "<li><a href=\"" . fix_url($root . $months{$_}->{url}) .
-      "\">$_</a> (" . $months{$_}->{count} . ")</li>"
+      "\">$_ (" . $months{$_}->{count} . ")</a></li>"
     } grep(/$year$/, keys(%months))));
   }
   else {
