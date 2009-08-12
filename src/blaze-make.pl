@@ -235,39 +235,43 @@ sub make_record {
     $title =~ s/\s+$//;
   }
   else {
-    # Display the appropriate warning:
-    display_warning("Missing title in the $type with ID $id.");
-
     # Assign the default value:
-    $title = $id;
+    $title = 'Untitled';
+
+    # Display the appropriate warning:
+    display_warning("Missing title in the $type with ID $id. " .
+                    "Using `$title' instead.");
   }
 
   # Check whether the author is specified:
   unless ($author) {
-    # Report missing author:
-    display_warning("Missing author in the $type with ID $id.");
-
     # Assign the default value:
-    $author = 'admin';
+    $author = $conf->{user}->{name} || 'admin';
+
+    # Report missing author:
+    display_warning("Missing author in the $type with ID $id. " .
+                    "Using `$author' instead.");
   }
 
   # Check whether the date is specified:
   if ($date) {
     # Check whether the format is valid:
     unless ($date =~ /\d{4}-[01]\d-[0-3]\d/) {
-      # Report invalid date:
-      display_warning("Invalid date in the $type with ID $id.");
-
       # Use current date instead:
       $date = date_to_string(time);
+
+      # Report invalid date:
+      display_warning("Invalid date in the $type with ID $id. " .
+                      "Using `$date' instead.");
     }
   }
   else {
-    # Report missing date:
-    display_warning("Missing date in the $type with ID $id.");
-
-    # Assign the default value:
+    # Use current date instead:
     $date = date_to_string(time);
+
+    # Report missing date:
+    display_warning("Missing date in the $type with ID $id. " .
+                    "Using `$date' instead.");
   }
 
   # Check whether the tags are specified:
@@ -295,9 +299,6 @@ sub make_record {
   if ($url) {
     # Check whether it contains forbidded characters:
     if ($url =~ /[^\w\-]/) {
-      # Report invalid URL:
-      display_warning("Invalid URL in the $type with ID $id.");
-
       # Strip forbidden characters:
       $url =~ s/[^\w\s\-]//g;
 
@@ -306,6 +307,10 @@ sub make_record {
 
       # Substitute spaces:
       $url =~ s/\s+/-/g;
+
+      # Report invalid URL:
+      display_warning("Invalid URL in the $type with ID $id. " .
+                      "Stripping to `$url'.");
     }
   }
   else {
