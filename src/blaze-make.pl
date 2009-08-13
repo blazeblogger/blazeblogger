@@ -310,10 +310,13 @@ sub make_record {
 
       # Report invalid URL:
       display_warning("Invalid URL in the $type with ID $id. " .
-                      "Stripping to `$url'.");
+                      ($url ? "Stripping to `$url'."
+                            : "Deriving from title."));
     }
   }
-  else {
+
+  # Unless already created, derive URL from the post/page title:
+  unless ($url) {
     # Derive URL from the post/page title:
     $url = lc($title);
 
@@ -325,6 +328,23 @@ sub make_record {
 
     # Substitute spaces:
     $url =~ s/\s+/-/g;
+  }
+
+  # Finalise the URL:
+  if ($type eq 'post') {
+    # Prepend ID to the post URL:
+    $url = $url ? "$id-$url" : $id;
+  }
+  else {
+    # Make sure the page URL is not empty:
+    unless ($url) {
+      # Base URL on ID:
+      $url = "page$id";
+
+      # Report missing URL:
+      display_warning("Empty URL in the $type with ID $id. " .
+                      "Using `$url' instead.");
+    }
   }
 
   # Return the composed record:
@@ -410,7 +430,7 @@ sub collect_metadata {
     my $id             = $record->{id};
 
     # Set up the post URL:
-    $post_links->{$id}->{url} = "$year/$month/$id-$url";
+    $post_links->{$id}->{url} = "$year/$month/$url";
 
     # Check whether the month is already present:
     if ($month_links->{$name}) {
@@ -579,7 +599,7 @@ sub list_of_posts {
     my ($year, $month) = split(/-/, $record->{date});
 
     # Add the post link to the list:
-    $list .= "<li><a href=\"" . fix_url("$root$year/$month/$id-$url") .
+    $list .= "<li><a href=\"" . fix_url("$root$year/$month/$url") .
              "\">$title</a></li>\n";
 
     # Increase the counter:
@@ -865,7 +885,7 @@ sub generate_rss {
 
     # Add the post item:
     print RSS "  <item>\n    <title>$post_title</title>\n  " .
-              "  <link>$base/$year/$month/$id-$url/</link>\n  " .
+              "  <link>$base/$year/$month/$url/</link>\n  " .
               "  <description>$post_desc    </description>\n  " .
               "  <pubDate>$date_time</pubDate>\n" .
               "  </item>\n";
@@ -917,11 +937,11 @@ sub generate_index {
       my ($year, $month) = split(/-/, $date);
 
       # Add the post heading with excerpt:
-      $body.=format_heading("<a href=\"" .fix_url("$year/$month/$id-$url").
+      $body.=format_heading("<a href=\"" .fix_url("$year/$month/$url").
                             "\">$title</a>",
                             $date, $author,
                             format_tags('./',$data->{links}->{tags},$tags)).
-             read_body($id, 'post', 1, "$year/$month/$id-$url");
+             read_body($id, 'post', 1, "$year/$month/$url");
 
       # Increase the number of listed items:
       $count++;
@@ -1000,15 +1020,15 @@ sub generate_posts {
     make_directories [
       catdir($destdir, $year),                      # Year directory.
       catdir($destdir, $year, $month),              # Month directory.
-      catdir($destdir, $year, $month, "$id-$url"),  # Post directory.
+      catdir($destdir, $year, $month, "$url"),      # Post directory.
     ];
 
     # Prepare the post file name:
     if ($destdir eq '.') {
-      $file = catfile($year, $month, "$id-$url", "index.$ext");
+      $file = catfile($year, $month, "$url", "index.$ext");
     }
     else {
-      $file = catfile($destdir, $year, $month, "$id-$url", "index.$ext");
+      $file = catfile($destdir, $year, $month, "$url", "index.$ext");
     }
 
     # Write the post:
@@ -1116,13 +1136,13 @@ sub generate_posts {
     }
 
     # Add the post heading with excerpt:
-    $month_body .= format_heading("<a href=\"" . fix_url("$id-$url") .
+    $month_body .= format_heading("<a href=\"" . fix_url("$url") .
                                   "\">$title</a>",
                                   $date, $author,
                                   format_tags('../../',
                                               $data->{links}->{tags},
                                               $tags)) .
-                   read_body($id, 'post', 1, "$id-$url");
+                   read_body($id, 'post', 1, "$url");
 
     # Increase the number of listed posts:
     $month_count++;
@@ -1260,12 +1280,12 @@ sub generate_tags {
 
       # Add the post heading with excerpt:
       $tag_body .= format_heading("<a href=\"" .
-                                  fix_url("../../$year/$month/$id-$url") .
+                                  fix_url("../../$year/$month/$url") .
                                   "\">$title</a>", $date, $author,
                                   format_tags('../../',
                                               $data->{links}->{tags},
                                               $tags)) .
-                   read_body($id, 'post', 1,"../../$year/$month/$id-$url");
+                   read_body($id, 'post', 1,"../../$year/$month/$url");
 
       # Increase the number of listed posts:
       $tag_count++;

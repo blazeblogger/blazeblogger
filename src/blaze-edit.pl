@@ -266,7 +266,30 @@ sub fix_header {
 
       # Report invalid URL:
       display_warning("Invalid URL in the $type with ID $id. " .
-                      "Stripping to `$url'.");
+                      ($url ? "Stripping to `$url'."
+                            : "It will be derived from title."));
+    }
+  }
+
+  # Make sure the URL can be derived from title if necessary:
+  unless ($data->{header}->{url}) {
+    # Derive URL from the post/page title:
+    my $url = lc($data->{header}->{title});
+
+    # Strip forbidden characters:
+    $url =~ s/[^\w\s\-]//g;
+
+    # Strip trailing spaces:
+    $url =~ s/\s+$//;
+
+    # Substitute spaces:
+    $url =~ s/\s+/-/g;
+
+    # Check whether the URL is not empty:
+    if (!$url && ($type eq 'page')) {
+      # Report missing URL:
+      display_warning("Unable to derive URL in the $type with ID $id. " .
+                      "Please, specify it yourself.");
     }
   }
 
