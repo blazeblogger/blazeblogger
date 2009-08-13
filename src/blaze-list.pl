@@ -32,6 +32,8 @@ our $blogdir    = '.';                              # Repository location.
 our $verbose    = 1;                                # Verbosity level.
 our $compact    = 0;                                # Use compact listing?
 our $coloured   = undef;                            # Use coloured listing?
+our $reverse    = 0;                                # Use reverse order?
+our $number     = 0;                                # Listed records limit.
 
 # Global variables:
 our $conf       = {};                               # Configuration.
@@ -74,8 +76,9 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-cpqsCPSV] [-b directory] [-I id] [-a author] [-t title]
-                  [-T tag] [-d day] [-m month] [-y year]
+Usage: $NAME [-cpqrsCPSV] [-b directory] [-I id] [-a author]
+                  [-t title] [-T tag] [-d day] [-m month] [-y year]
+                  [-n number]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
@@ -87,10 +90,12 @@ Usage: $NAME [-cpqsCPSV] [-b directory] [-I id] [-a author] [-t title]
   -d, --day day               list records from the day in the DD form
   -m, --month month           list records from the month in the MM form
   -y, --year year             list records from the year in the YYYY form
+  -n, --number number         list selected number of records only
   -p, --pages                 list pages instead of blog posts
   -P, --posts                 list blog posts; the default option
   -S, --stats                 show repository statistics instead of posts
   -s, --short                 display each record on a single line
+  -r, --reverse               display records in reverse order
   -c, --color                 enable coloured output
   -C, --no-color              disable coloured output
   -q, --quiet                 avoid displaying unnecessary messages
@@ -259,6 +264,17 @@ sub make_record {
   };
 }
 
+# Compare two records:
+sub compare_records {
+  # Check whether to use reverse order:
+  unless ($reverse) {
+    return "$b->{date}:$b->{id}" cmp "$a->{date}:$a->{id}";
+  }
+  else {
+    return "$a->{date}:$a->{id}" cmp "$b->{date}:$b->{id}";
+  }
+}
+
 # Return the list of posts/pages header records:
 sub collect_headers {
   my $type    = shift || 'post';
@@ -295,8 +311,43 @@ sub collect_headers {
   closedir(HEAD);
 
   # Return the result:
-  return sort { "$b->{date}:$b->{id}" cmp "$a->{date}:$a->{id}" } @records;
+  return sort compare_records @records;
 }
+
+# Display given record:
+sub display_record {
+  my $record = shift || die 'Missing argument';
+
+  # Check whether to use compact listing:
+  unless ($compact) {
+    # Check whether to use colours:
+    unless ($coloured) {
+      # Display the plain record header:
+      print "ID: $record->{id} | $record->{date} | " .
+            "$record->{author}\n\n";
+    }
+    else {
+      # Display the coloured record header:
+      print colored ("ID: $record->{id} | $record->{date} | " .
+                     "$record->{author}", 'yellow');
+      print "\n\n";
+    }
+
+    # Display the record body:
+    print wrap('    ', ' ' x 11, "Title: $record->{title}\n");
+    print wrap('    ', ' ' x 11, "Tags:  $record->{tags}\n")
+      if ($type eq 'post');
+    print "\n";
+  }
+  else {
+    # Display the short record:
+    print "ID: $record->{id} | $record->{date} | $record->{title}\n";
+  }
+
+  # Return success:
+  return 1;
+}
+
 
 # Display the list of matching records:
 sub display_records {
@@ -308,13 +359,13 @@ sub display_records {
   my $year    = shift || '....';
   my $month   = shift || '..';
   my $day     = shift || '..';
+  my $count   = 0;
 
   # Collect the pages/posts headers:
   my @headers = collect_headers($type);
 
   # Process each header:
   foreach my $record (@headers) {
-
     # Check whether the record matches the pattern:
     unless ($record->{date}   =~ /^$year-$month-$day$/i &&
             $record->{title}  =~ /^.*$title.*$/i &&
@@ -325,30 +376,16 @@ sub display_records {
       next;
     }
 
-    # Check whether to use compact listing:
-    unless ($compact) {
-      # Check whether to use colours:
-      unless ($coloured) {
-        # Display the plain record header:
-        print "ID: $record->{id} | $record->{date} | " .
-              "$record->{author}\n\n";
-      }
-      else {
-        # Display the coloured record header:
-        print colored ("ID: $record->{id} | $record->{date} | " .
-                       "$record->{author}", 'yellow');
-        print "\n\n";
-      }
+    # Display the record:
+    display_record($record);
 
-      # Display the record body:
-      print wrap('    ', ' ' x 11, "Title: $record->{title}\n");
-      print wrap('    ', ' ' x 11, "Tags:  $record->{tags}\n")
-        if ($type eq 'post');
-      print "\n";
-    }
-    else {
-      # Display the short record:
-      print "ID: $record->{id} | $record->{date} | $record->{title}\n";
+    # Check whether the limited number of displayed records is requested:
+    if ($number > 0) {
+      # Increase displayed records counter:
+      $count++;
+
+      # End loop when counter reaches the limit:
+      last if $count == $number;
     }
   }
 
@@ -398,13 +435,15 @@ GetOptions(
   'page|pages|p'         => sub { $type     = 'page';  },
   'post|posts|P'         => sub { $type     = 'post';  },
   'stats|S'              => sub { $type     = 'stats'; },
-  'id|I=s'               => sub { $id       = $_[1];   },
+  'number|n=i'           => sub { $number   = $_[1];   },
+  'id|I=i'               => sub { $id       = $_[1];   },
   'author|a=s'           => sub { $author   = $_[1];   },
   'title|t=s'            => sub { $title    = $_[1];   },
   'tags|tag|T=s'         => sub { $tag      = $_[1];   },
   'year|y=i'             => sub { $year     = sprintf("%04d", $_[1]); },
   'month|m=i'            => sub { $month    = sprintf("%02d", $_[1]); },
   'day|d=i'              => sub { $day      = sprintf("%02d", $_[1]); },
+  'reverse|r'            => sub { $reverse  = 1;       },
   'short|s'              => sub { $compact  = 1;       },
   'no-color|no-colour|C' => sub { $coloured = 0;       },
   'color|colour|c'       => sub { $coloured = 1;       },
@@ -468,9 +507,9 @@ blaze-list - browse the content of the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-list> [B<-cpqsCPSV>] [B<-b> I<directory>] [B<-I> I<id>]
+B<blaze-list> [B<-cpqrsCPSV>] [B<-b> I<directory>] [B<-I> I<id>]
 [B<-a> I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>]
-[B<-m> I<month>] [B<-y> I<year>]
+[B<-m> I<month>] [B<-y> I<year>] [B<-n> I<number>]
 
 B<blaze-list> B<-h> | B<-v>
 
@@ -521,6 +560,10 @@ list all july records.
 
 List records from the specified year where I<year> is in the YYYY format.
 
+=item B<-n>, B<--number> I<number>
+
+List selected I<number> of records only.
+
 =item B<-p>, B<--pages>
 
 List pages instead of blog posts.
@@ -536,6 +579,10 @@ Show repository statistics instead of blog posts.
 =item B<-s>, B<--short>
 
 Display each record on a single line.
+
+=item B<-r>, B<--reverse>
+
+Display records in reverse order.
 
 =item B<-c>, B<--color>, B<--colour>
 

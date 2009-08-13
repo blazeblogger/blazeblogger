@@ -32,6 +32,8 @@ our $blogdir    = '.';                              # Repository location.
 our $verbose    = 1;                                # Verbosity level.
 our $compact    = 0;                                # Use compact listing?
 our $coloured   = undef;                            # Use coloured listing?
+our $reverse    = 0;                                # Use reverse order?
+our $number     = 0;                                # Listed records limit.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -61,12 +63,14 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-cqsCV] [-b directory]
+Usage: $NAME [-cqrsCV] [-b directory] [-n number]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
+  -n, --number number         list selected number of log records only
   -s, --short                 display each log record on a single line
+  -r, --reverse               display log records in reverse order
   -c, --color                 enable coloured output
   -C, --no-color              disable coloured output
   -q, --quiet                 avoid displaying unnecessary messages
@@ -146,43 +150,93 @@ sub read_conf {
   }
 }
 
+# Display given log record:
+sub display_record {
+  my $record = shift || die 'Missing argument';
+
+  # Check whether to use compact listing:
+  unless ($compact) {
+    # Decompose the record:
+    my ($date, $message) = split(/\s+-\s+/, $record, 2);
+
+    # Check whether to use colours:
+    unless ($coloured) {
+      # Display the plain record header:
+      print "Date: $date\n\n";
+    }
+    else {
+      # Display the coloured record header:
+      print colored ("Date: $date", 'yellow');
+      print "\n\n";
+    }
+
+    # Display the record body:
+    print wrap('    ', '    ', $message);
+    print "\n";
+  }
+  else {
+    # Display the short record:
+    print $record;
+  }
+
+  # Return success:
+  return 1;
+}
+
 # Display log records:
 sub display_log {
-  my $file     = catfile($blogdir, '.blaze', 'log');
+  my @lines = ();
+  my $count = 0;
+
+  # Prepare the file name:
+  my $file  = catfile($blogdir, '.blaze', 'log');
 
   # Open the log file for reading:
   open(LOG, "$file") or return 0;
 
   # Process each record:
   while (my $record = <LOG>) {
-    # Check whether to use compact listing:
-    unless ($compact) {
-      # Decompose the record:
-      my ($date, $message) = split(/\s+-\s+/, $record, 2);
+    # Check whether to use reverse order:
+    if ($reverse) {
+      # Display the log record immediately:
+      display_record($record);
 
-      # Check whether to use colours:
-      unless ($coloured) {
-        # Display the plain record header:
-        print "Date: $date\n\n";
-      }
-      else {
-        # Display the coloured record header:
-        print colored ("Date: $date", 'yellow');
-        print "\n\n";
-      }
+      # Check whether the limited number of displayed records is requested:
+      if ($number > 0) {
+        # Increase displayed records counter:
+        $count++;
 
-      # Display the record body:
-      print wrap('    ', '    ', $message);
-      print "\n";
+        # End loop when counter reaches the limit:
+        last if $count == $number;
+      }
     }
     else {
-      # Display the short record:
-      print $record;
+      # Prepend the log record to the list to be displayed later:
+      unshift(@lines, $record);
     }
   }
 
   # Close the file:
   close(LOG);
+
+  # Unless  the reverse order was requested and therefore records have been
+  # already displayed, display them now:
+  unless ($reverse) {
+    # Process each log record:
+    foreach my $record (@lines) {
+      # Display the log record:
+      display_record($record);
+
+      # Check whether the limited number of displayed records is requested:
+      if ($number > 0) {
+        # Increase displayed records counter:
+        $count++;
+
+        # End loop when counter reaches the limit:
+        last if $count == $number;
+      }
+    }
+  }
 
   # Return success:
   return 1;
@@ -195,12 +249,14 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 GetOptions(
   'help|h'               => sub { display_help();    exit 0; },
   'version|v'            => sub { display_version(); exit 0; },
+  'reverse|r'            => sub { $reverse  = 1;      },
   'short|s'              => sub { $compact  = 1;      },
   'no-color|no-colour|C' => sub { $coloured = 0;      },
   'color|colour|c'       => sub { $coloured = 1;      },
   'quiet|q'              => sub { $verbose  = 0;      },
   'verbose|V'            => sub { $verbose  = 1;      },
   'blogdir|b=s'          => sub { $blogdir  = $_[1];  },
+  'number|n=i'           => sub { $number   = $_[1];  },
 );
 
 # Detect superfluous options:
@@ -238,7 +294,7 @@ blaze-log - display the BlazeBlogger repository log
 
 =head1 SYNOPSIS
 
-B<blaze-log> [B<-cqsCV>] [B<-b> I<directory>]
+B<blaze-log> [B<-cqrsCV>] [B<-b> I<directory>] [B<-n> I<number>]
 
 B<blaze-log> B<-h> | B<-v>
 
@@ -255,9 +311,17 @@ B<blaze-log> displays the content of the BlazeBlogger repository log.
 Specify the I<directory> where the BlazeBlogger repository is placed. The
 default option is the current working directory.
 
+=item B<-n>, B<--number> I<number>
+
+List selected number of log records only.
+
 =item B<-s>, B<--short>
 
 Display each log record on a single line.
+
+=item B<-r>, B<--reverse>
+
+Display log records in reverse order.
 
 =item B<-c>, B<--color>, B<--colour>
 
