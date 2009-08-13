@@ -495,7 +495,7 @@ sub list_of_tags {
   if (my %tags = %$tags) {
     # Return the list of tags:
     return join("\n", map {
-      "<li><a class=\"taglink\" href=\"" . fix_url("${root}tags/" . $tags{$_}->{url}) .
+      "<li><a href=\"" . fix_url("${root}tags/" . $tags{$_}->{url}) .
       "\">$_ (" . $tags{$_}->{count} . ")</a></li>"
     } sort(keys(%tags)));
   }
