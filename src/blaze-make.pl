@@ -374,7 +374,12 @@ sub collect_headers {
   closedir(HEAD);
 
   # Return the result:
-  return sort { "$b->{date}:$b->{id}" cmp "$a->{date}:$a->{id}" } @records;
+  if ($type eq 'post') {
+    return sort {"$b->{date}:$b->{id}" cmp "$a->{date}:$a->{id}"} @records;
+  }
+  else {
+    return sort {"$a->{date}:$a->{id}" cmp "$b->{date}:$b->{id}"} @records;
+  }
 }
 
 # Collect the necessary metadata:
@@ -533,7 +538,7 @@ sub list_of_pages {
   return '' unless $with_pages;
 
   # Process each page separately:
-  foreach my $record (sort @$pages) {
+  foreach my $record (@$pages) {
     # Decompose the record:
     my $title = $record->{title};
     my $url   = $record->{url};
