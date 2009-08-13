@@ -30,6 +30,9 @@ use constant VERSION => '0.9.0';                    # Script version.
 our $blogdir = '.';                                 # Repository location.
 our $verbose = 1;                                   # Verbosity level.
 
+# Global variables:
+our $conf    = {};                                  # Configuration.
+
 # Command-line options:
 my  $type = 'post';                                 # Type: post or page.
 
@@ -95,6 +98,12 @@ END_VERSION
 
   # Return success:
   return 1;
+}
+
+# Translate given date to YYYY-MM-DD string:
+sub date_to_string {
+  my @date = localtime(shift);
+  return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
 }
 
 # Read data from the INI file:
@@ -172,43 +181,92 @@ sub read_conf {
   }
 }
 
-# Check the header for the erroneous or missing data:
-sub check_header {
+# Fix the erroneous or missing header data:
+sub fix_header {
   my $data = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
   my $type = shift || die 'Missing argument';
 
   # Check whether the title is specified:
-  unless ($data->{header}->{title}) {
-    # Report missing title:
-    display_warning("Missing title in the $type with ID $id.");
+  if ($data->{header}->{title}) {
+    # Strip trailing spaces:
+    $data->{header}->{title} =~ s/\s+$//;
+  }
+  else {
+    # Assign the default value:
+    my $title = $data->{header}->{title} = 'Untitled';
+
+    # Display the appropriate warning:
+    display_warning("Missing title in the $type with ID $id. " .
+                    "Using `$title' instead.");
   }
 
   # Check whether the author is specified:
   unless ($data->{header}->{author}) {
+    # Assign the default value:
+    my $author = $data->{header}->{author}
+               = $conf->{user}->{name} || 'admin';
+
     # Report missing author:
-    display_warning("Missing author in the $type with ID $id.");
+    display_warning("Missing author in the $type with ID $id. " .
+                    "Using `$author' instead.");
   }
 
   # Check whether the date is specified:
   if (my $date = $data->{header}->{date}) {
     # Check whether the format is valid:
-    if ($date !~ /\d{4}-[01]\d-[0-3]\d/) {
+    unless ($date =~ /\d{4}-[01]\d-[0-3]\d/) {
+      # Use current date instead:
+      $date = $data->{header}->{date} = date_to_string(time);
+
       # Report invalid date:
-      display_warning("Invalid date in the $type with ID $id.");
+      display_warning("Invalid date in the $type with ID $id. " .
+                      "Using `$date' instead.");
     }
   }
   else {
+    # Use current date instead:
+    my $date = $data->{header}->{date} = date_to_string(time);
+
     # Report missing date:
-    display_warning("Missing date in the $type with ID $id.");
+    display_warning("Missing date in the $type with ID $id. " .
+                    "Using `$date' instead.");
+  }
+
+  # Check whether the tags are specified:
+  if (my $tags = $data->{header}->{tags}) {
+    # Make all tags lower case:
+    $tags = lc($tags);
+
+    # Strip superfluous spaces:
+    $tags =~ s/\s{2,}/ /g;
+    $tags =~ s/\s+$//;
+
+    # Strip trailing commas:
+    $tags =~ s/^,+|,+$//g;
+
+    # Remove duplicates:
+    my %temp = map { $_, 1 } split(/,+\s*/, $tags);
+    $data->{header}->{tags} = join(', ', sort(keys %temp));
   }
 
   # Check whether the URL is specified:
   if (my $url = $data->{header}->{url}) {
     # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
+      # Strip forbidden characters:
+      $url =~ s/[^\w\s\-]//g;
+
+      # Strip trailing spaces:
+      $url =~ s/\s+$//;
+
+      # Substitute spaces:
+      $url =~ s/\s+/-/g;
+      $data->{header}->{url} = $url;
+
       # Report invalid URL:
-      display_warning("Invalid URL in the $type with ID $id.");
+      display_warning("Invalid URL in the $type with ID $id. " .
+                      "Stripping to `$url'.");
     }
   }
 
@@ -308,8 +366,8 @@ sub save_record {
     }
   }
 
-  # Check the header for the erroneous or missing data:
-  check_header($data, $id, $type);
+  # Fix the erroneous or missing header data:
+  fix_header($data, $id, $type);
 
   # Write the record header:
   write_ini($head, $data) or return 0;
@@ -341,9 +399,6 @@ sub edit_record {
 
   # Prepare the temporary file name:
   my $temp = catfile($blogdir, '.blaze', 'temp');
-
-  # Read the configuration file:
-  my $conf = read_conf();
 
   # Decide which editor to use:
   my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
@@ -450,6 +505,9 @@ exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 1);
 # Check the repository is present (however naive this method is):
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
+
+# Read the configuration file:
+$conf = read_conf();
 
 # Edit given record:
 edit_record($ARGV[0], $type)

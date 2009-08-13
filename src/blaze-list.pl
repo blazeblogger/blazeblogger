@@ -33,6 +33,9 @@ our $verbose    = 1;                                # Verbosity level.
 our $compact    = 0;                                # Use compact listing?
 our $coloured   = undef;                            # Use coloured listing?
 
+# Global variables:
+our $conf       = {};                               # Configuration.
+
 # Command-line options:
 my  $type       = 'post';                           # Type: post or page.
 my  $id         = '';                               # ID search pattern.
@@ -179,12 +182,71 @@ sub make_record {
   my $id   = shift || die 'Missing argument';
   my ($title, $author, $date, $tags, $url) = @_;
 
-  # Supplement missing items:
-  $title  ||= '';
-  $author ||= 'admin';
-  $date   ||= 'XXXX-XX-XX';
-  $tags   ||= '';
-  $url    ||= '';
+  # Check whether the title is specified:
+  if ($title) {
+    # Strip trailing spaces:
+    $title =~ s/\s+$//;
+  }
+  else {
+    # Assign the default value:
+    $title = 'Untitled';
+
+    # Display the appropriate warning:
+    display_warning("Missing title in the $type with ID $id. " .
+                    "Using `$title' instead.");
+  }
+
+  # Check whether the author is specified:
+  unless ($author) {
+    # Assign the default value:
+    $author = $conf->{user}->{name} || 'admin';
+
+    # Report missing author:
+    display_warning("Missing author in the $type with ID $id. " .
+                    "Using `$author' instead.");
+  }
+
+  # Check whether the date is specified:
+  if ($date) {
+    # Check whether the format is valid:
+    unless ($date =~ /\d{4}-[01]\d-[0-3]\d/) {
+      # Use current date instead:
+      $date = date_to_string(time);
+
+      # Report invalid date:
+      display_warning("Invalid date in the $type with ID $id. " .
+                      "Using `$date' instead.");
+    }
+  }
+  else {
+    # Use current date instead:
+    $date = date_to_string(time);
+
+    # Report missing date:
+    display_warning("Missing date in the $type with ID $id. " .
+                    "Using `$date' instead.");
+  }
+
+  # Check whether the tags are specified:
+  if ($tags) {
+    # Make all tags lower case:
+    $tags = lc($tags);
+
+    # Strip superfluous spaces:
+    $tags =~ s/\s{2,}/ /g;
+    $tags =~ s/\s+$//;
+
+    # Strip trailing commas:
+    $tags =~ s/^,+|,+$//g;
+
+    # Remove duplicates:
+    my %temp = map { $_, 1 } split(/,+\s*/, $tags);
+    $tags = join(', ', sort(keys(%temp)));
+  }
+  else {
+    # Assign the default value:
+    $tags = '';
+  }
 
   # Return the composed record:
   return {
@@ -358,12 +420,12 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
+# Read the configuration:
+$conf = read_conf();
+
 # Unless specified on the command line, read the colour setup from the
 # configuration:
 unless (defined $coloured) {
-  # Read the configuration file:
-  my $conf  = read_conf();
-
   # Read required data from the configuration:
   my $temp  = $conf->{color}->{list} || 'false';
 
