@@ -191,6 +191,23 @@ sub read_conf {
   }
 }
 
+# Make proper URL from given string, stripping all forbidden characters:
+sub make_url {
+  my $url = shift || return '';
+
+  # Strip forbidden characters:
+  $url =~ s/[^\w\s\-]//g;
+
+  # Strip trailing spaces:
+  $url =~ s/\s+$//;
+
+  # Substitute spaces:
+  $url =~ s/\s+/-/g;
+
+  # Return the result:
+  return $url;
+}
+
 # Fix the erroneous or missing header data:
 sub fix_header {
   my $data = shift || die 'Missing argument';
@@ -258,6 +275,19 @@ sub fix_header {
     # Remove duplicates:
     my %temp = map { $_, 1 } split(/,+\s*/, $tags);
     $data->{header}->{tags} = join(', ', sort(keys %temp));
+
+    # Make sure non of the tags will have empty URL:
+    foreach my $tag (keys %temp) {
+      # Derive URL from tag name:
+      my $tag_url = make_url($tag);
+
+      # Make sure the result is not empty:
+      unless ($tag_url) {
+        # Report missing tag URL:
+        display_warning("Unable to derive URL from tag `$tag'. " .
+                        "You might want to use ASCII only.");
+      }
+    }
   }
 
   # Check whether the URL is specified:
@@ -265,14 +295,7 @@ sub fix_header {
     # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
       # Strip forbidden characters:
-      $url =~ s/[^\w\s\-]//g;
-
-      # Strip trailing spaces:
-      $url =~ s/\s+$//;
-
-      # Substitute spaces:
-      $url =~ s/\s+/-/g;
-      $data->{header}->{url} = $url;
+      $data->{header}->{url} = $url = make_url($url);
 
       # Report invalid URL:
       display_warning("Invalid URL in the $type with ID $id. " .
@@ -284,22 +307,13 @@ sub fix_header {
   # Make sure the URL can be derived from title if necessary:
   unless ($data->{header}->{url}) {
     # Derive URL from the post/page title:
-    my $url = lc($data->{header}->{title});
-
-    # Strip forbidden characters:
-    $url =~ s/[^\w\s\-]//g;
-
-    # Strip trailing spaces:
-    $url =~ s/\s+$//;
-
-    # Substitute spaces:
-    $url =~ s/\s+/-/g;
+    my $url = make_url(lc($data->{header}->{title}));
 
     # Check whether the URL is not empty:
-    if (!$url && ($type eq 'page')) {
+    unless ($url) {
       # Report missing URL:
       display_warning("Unable to derive URL in the $type with ID $id. " .
-                      "Please, specify it yourself.");
+                      "You might want to specify it yourself.");
     }
   }
 
