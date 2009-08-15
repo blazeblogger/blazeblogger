@@ -20,6 +20,7 @@ use warnings;
 use File::Basename;
 use File::Copy;
 use File::Spec::Functions;
+use Digest::MD5;
 use Getopt::Long;
 use Time::Local 'timelocal_nocheck';
 
@@ -223,6 +224,23 @@ sub read_lang {
   }
 }
 
+# Make proper URL from given string, stripping all forbidden characters:
+sub make_url {
+  my $url = shift || return '';
+
+  # Strip forbidden characters:
+  $url =~ s/[^\w\s\-]//g;
+
+  # Strip trailing spaces:
+  $url =~ s/\s+$//;
+
+  # Substitute spaces:
+  $url =~ s/\s+/-/g;
+
+  # Return the result:
+  return $url;
+}
+
 # Compose a post/page record:
 sub make_record {
   my $type = shift || die 'Missing argument';
@@ -300,13 +318,7 @@ sub make_record {
     # Check whether it contains forbidded characters:
     if ($url =~ /[^\w\-]/) {
       # Strip forbidden characters:
-      $url =~ s/[^\w\s\-]//g;
-
-      # Strip trailing spaces:
-      $url =~ s/\s+$//;
-
-      # Substitute spaces:
-      $url =~ s/\s+/-/g;
+      $url = make_url($url);
 
       # Report invalid URL:
       display_warning("Invalid URL in the $type with ID $id. " .
@@ -318,33 +330,21 @@ sub make_record {
   # Unless already created, derive URL from the post/page title:
   unless ($url) {
     # Derive URL from the post/page title:
-    $url = lc($title);
-
-    # Strip forbidden characters:
-    $url =~ s/[^\w\s\-]//g;
-
-    # Strip trailing spaces:
-    $url =~ s/\s+$//;
-
-    # Substitute spaces:
-    $url =~ s/\s+/-/g;
+    $url = make_url(lc($title));
   }
 
   # Finalise the URL:
-  if ($type eq 'post') {
+  if ($url) {
     # Prepend ID to the post URL:
-    $url = $url ? "$id-$url" : $id;
+    $url = "$id-$url" if $type eq 'post';
   }
   else {
-    # Make sure the page URL is not empty:
-    unless ($url) {
-      # Base URL on ID:
-      $url = "page$id";
+    # Base URL on ID:
+    $url = ($type eq 'post') ? $id : "page$id";
 
-      # Report missing URL:
-      display_warning("Empty URL in the $type with ID $id. " .
-                      "Using `$url' instead.");
-    }
+    # Report missing URL:
+    display_warning("Empty URL in the $type with ID $id. " .
+                    "Using `$url' instead.");
   }
 
   # Return the composed record:
@@ -453,8 +453,18 @@ sub collect_metadata {
         $tag_links->{$tag}->{count}++;
       }
       else {
-        # Prepare an URL:
-        (my $tag_url = $tag) =~ s/[^\w\s\-]//g; $tag_url =~ s/\s/-/g;
+        # Derive URL from tag name:
+        my $tag_url = make_url($tag);
+
+        # Make sure the URL is not empty:
+        unless ($tag_url) {
+          # Use MD5 checksum instead:
+          $tag_url = Digest::MD5->new->add($tag)->hexdigest;
+
+          # Report missing URL:
+          display_warning("Unable to derive URL from tag `$tag'. " .
+                          "Using `$tag_url' instead.");
+        }
 
         # Set up the URL:
         $tag_links->{$tag}->{url}   = $tag_url;
@@ -486,21 +496,21 @@ sub collect_metadata {
   };
 }
 
-# Append proper index file name to the end of the URL if requested:
-sub fix_url {
-  my $url = shift || die 'Missing argument';
+# Append proper index file name to the end of the link if requested:
+sub fix_link {
+  my $link = shift || die 'Missing argument';
 
   # Check whether the full path is enabled:
   if ($full_paths) {
     # Append slash if missing:
-    $url .= "/" unless $url =~ /\/$/;
+    $link .= "/" unless $link =~ /\/$/;
 
     # Append index file name:
-    $url .= "index." . ($conf->{core}->{extension} || 'html');
+    $link .= "index." . ($conf->{core}->{extension} || 'html');
   }
 
-  # Return the correct URL:
-  return $url;
+  # Return the correct link:
+  return $link;
 }
 
 # Return the list of tags:
@@ -515,7 +525,7 @@ sub list_of_tags {
   if (my %tags = %$tags) {
     # Return the list of tags:
     return join("\n", map {
-      "<li><a href=\"" . fix_url("${root}tags/" . $tags{$_}->{url}) .
+      "<li><a href=\"" . fix_link("${root}tags/" . $tags{$_}->{url}) .
       "\">$_ (" . $tags{$_}->{count} . ")</a></li>"
     } sort(keys(%tags)));
   }
@@ -538,7 +548,7 @@ sub list_of_months {
   if (my %months = %$months) {
     # Return the list of months:
     return join("\n", sort { $b cmp $a } (map {
-      "<li><a href=\"" . fix_url($root . $months{$_}->{url}) .
+      "<li><a href=\"" . fix_link($root . $months{$_}->{url}) .
       "\">$_ (" . $months{$_}->{count} . ")</a></li>"
     } grep(/$year$/, keys(%months))));
   }
@@ -564,7 +574,7 @@ sub list_of_pages {
     my $url   = $record->{url};
 
     # Add the page link to the list:
-    $list .= "<li><a href=\"".fix_url("$root$url")."\">$title</a></li>\n";
+    $list .= "<li><a href=\"".fix_link("$root$url")."\">$title</a></li>\n";
   }
 
   # Strip trailing line break:
@@ -599,7 +609,7 @@ sub list_of_posts {
     my ($year, $month) = split(/-/, $record->{date});
 
     # Add the post link to the list:
-    $list .= "<li><a href=\"" . fix_url("$root$year/$month/$url") .
+    $list .= "<li><a href=\"" . fix_link("$root$year/$month/$url") .
              "\">$title</a></li>\n";
 
     # Increase the counter:
@@ -620,7 +630,7 @@ sub write_page {
   my $content  = shift || '';
   my $heading  = shift || $conf->{blog}->{title} || 'My Blog';
   my $root     = shift || '/';
-  my $home     = fix_url($root);
+  my $home     = fix_link($root);
   my $template = '';
 
   # Check whether the theme is not already cached:
@@ -706,13 +716,13 @@ sub write_page {
 
   # Substitute the post with selected ID placeholder:
   while ($template =~ /%post\[(\d+)\]%/i) {
-    my $link = fix_url($root . $data->{links}->{posts}->{$1}->{url});
+    my $link = fix_link($root . $data->{links}->{posts}->{$1}->{url});
     $template =~ s/%post\[$1\]%/$link/ig;
   }
 
   # Substitute the page with selected ID placeholder:
   while ($template =~ /%page\[(\d+)\]%/i) {
-    my $link = fix_url($root . $data->{links}->{pages}->{$1}->{url});
+    my $link = fix_link($root . $data->{links}->{pages}->{$1}->{url});
     $template =~ s/%page\[$1\]%/$link/ig;
   }
 
@@ -750,7 +760,7 @@ sub read_body {
         my $more = $locale->{lang}->{more} || 'Read more &raquo;';
 
         # Add the `read more' link:
-        $result .= "<p><a href=\"" . fix_url($link) . "\" class=\"more\">".
+        $result .= "<p><a href=\"" .fix_link($link). "\" class=\"more\">".
                    "$more</a></p>\n";
       }
 
@@ -777,7 +787,7 @@ sub format_tags {
 
   # Return the list of tag links:
   return join(', ', map {
-    "<a href=\"" . fix_url("${root}tags/" . $tags->{$_}->{url}) .
+    "<a href=\"" . fix_link("${root}tags/" . $tags->{$_}->{url}) .
     "\">$_</a>"
   } split(/,\s*/, $tagged_as));
 }
@@ -937,7 +947,7 @@ sub generate_index {
       my ($year, $month) = split(/-/, $date);
 
       # Add the post heading with excerpt:
-      $body.=format_heading("<a href=\"" .fix_url("$year/$month/$url").
+      $body.=format_heading("<a href=\"" .fix_link("$year/$month/$url").
                             "\">$title</a>",
                             $date, $author,
                             format_tags('./',$data->{links}->{tags},$tags)).
@@ -1136,7 +1146,7 @@ sub generate_posts {
     }
 
     # Add the post heading with excerpt:
-    $month_body .= format_heading("<a href=\"" . fix_url("$url") .
+    $month_body .= format_heading("<a href=\"" . fix_link("$url") .
                                   "\">$title</a>",
                                   $date, $author,
                                   format_tags('../../',
@@ -1280,7 +1290,7 @@ sub generate_tags {
 
       # Add the post heading with excerpt:
       $tag_body .= format_heading("<a href=\"" .
-                                  fix_url("../../$year/$month/$url") .
+                                  fix_link("../../$year/$month/$url") .
                                   "\">$title</a>", $date, $author,
                                   format_tags('../../',
                                               $data->{links}->{tags},
