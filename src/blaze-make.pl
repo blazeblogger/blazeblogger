@@ -19,6 +19,7 @@ use strict;
 use warnings;
 use File::Basename;
 use File::Copy;
+use File::Path;
 use File::Spec::Functions;
 use Digest::MD5;
 use Getopt::Long;
@@ -137,22 +138,32 @@ sub rfc_822_date {
                  $date[2], $date[1], $date[0]);
 }
 
-# Create given directories:
-sub make_directories {
-  my $dirs = shift || die 'Missing argument';
-  my $mask = shift || 0777;
+# Append proper index file name to the end of the link if requested:
+sub fix_link {
+  my $link = shift || '';
 
-  # Process each directory:
-  foreach my $dir (sort @$dirs) {
-    # Skip existing directories:
-    unless (-d $dir) {
-      # Create the directory:
-      mkdir($dir, $mask) || exit_with_error("Creating `$dir': $!", 13);
-    }
+  # Check whether the full path is enabled:
+  if ($full_paths) {
+    # Append slash if missing:
+    $link .= '/' if ($link && $link !~ /\/$/);
+
+    # Append index file name:
+    $link .= 'index.' . ($conf->{core}->{extension} || 'html');
   }
 
-  # Return success:
-  return 1;
+  # Return the correct link:
+  return $link;
+}
+
+# Strip HTML elements:
+sub strip_html {
+  my $string = shift || return '';
+
+  # Strip HTML elements and forbidded characters:
+  $string =~ s/(<[^>]*>|&[^;]*;|<|>|&)//g;
+
+  # Return the result:
+  return $string;
 }
 
 # Read data from the INI file:
@@ -496,27 +507,10 @@ sub collect_metadata {
   };
 }
 
-# Append proper index file name to the end of the link if requested:
-sub fix_link {
-  my $link = shift || die 'Missing argument';
-
-  # Check whether the full path is enabled:
-  if ($full_paths) {
-    # Append slash if missing:
-    $link .= "/" unless $link =~ /\/$/;
-
-    # Append index file name:
-    $link .= "index." . ($conf->{core}->{extension} || 'html');
-  }
-
-  # Return the correct link:
-  return $link;
-}
-
 # Return the list of tags:
 sub list_of_tags {
   my $tags = shift || die 'Missing argument';
-  my $root = shift || '/';
+  my $root = shift || '';
 
   # Check whether the tags generation is eneabled:
   return '' unless $with_tags;
@@ -538,7 +532,7 @@ sub list_of_tags {
 # Return the list of months:
 sub list_of_months {
   my $months = shift || die 'Missing argument';
-  my $root   = shift || '/';
+  my $root   = shift || '';
   my $year   = shift || '';
 
   # Check whether the posts generation is enabled:
@@ -561,7 +555,7 @@ sub list_of_months {
 # Return the list of pages:
 sub list_of_pages {
   my $pages = shift || die 'Missing argument';
-  my $root  = shift || '/';
+  my $root  = shift || '';
   my $list  = '';
 
   # Check whether the pages generation is enabled:
@@ -587,7 +581,7 @@ sub list_of_pages {
 # Return the list of posts:
 sub list_of_posts {
   my $posts = shift || die 'Missing argument';
-  my $root  = shift || '/';
+  my $root  = shift || '';
   my $max   = shift || 5;
   my $list  = '';
 
@@ -623,18 +617,149 @@ sub list_of_posts {
   return $list;
 }
 
+# Return post/page body or excerpt:
+sub read_entry {
+  my $id      = shift || die 'Missing argument';
+  my $type    = shift || 'post';
+  my $link    = shift || '';
+  my $excerpt = shift || 0;
+
+  # Prepare the file name:
+  my $file    = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
+
+  # Initialize other required variables:
+  my $result  = '';
+
+  # Open the post/page body file for reading:
+  open (FILE, $file) or return '';
+
+  # Read the content of the file:
+  while (my $line = <FILE>) {
+    # When excerpt is requested, look for a break mark:
+    if ($excerpt && $line =~ /<!--\s*break\s*-->/i) {
+      # Check whether the link is provided:
+      if ($link) {
+        # Read required data from the language file:
+        my $more = $locale->{lang}->{more} || 'Read more &raquo;';
+
+        # Add the `Read more' link to the end of the excerpt:
+        $result .= "<p><a href=\"$link\" class=\"more\">$more</a></p>\n";
+      }
+
+      # Stop reading here:
+      last;
+    }
+
+    # Add the line to the result:
+    $result .= $line;
+  }
+
+  # Close the file:
+  close(FILE);
+
+  # Return the result:
+  return $result;
+}
+
+# Return formatted post/page heading:
+sub format_heading {
+  my $title = shift || die 'Missing argument';
+  my $link  = shift || '';
+
+  # Return the result:
+  return $link ? "<h2 class=\"post\"><a href=\"$link\">$title</a></h2>\n"
+               : "<h2 class=\"post\">$title</h2>\n";
+}
+
+# Return formatted post/page information:
+sub format_information {
+  my $record = shift || die 'Missing argument';
+  my $tags   = shift || die 'Missing argument';
+  my $root   = shift || '';
+
+  # Read required data from the language file:
+  my $posted_by = $locale->{lang}->{postedby} || 'by';
+  my $tagged_as = $locale->{lang}->{taggedas} || 'tagged as';
+
+  # Format the information:
+  my $date    = "<span class=\"date\">$record->{date}</span> ";
+  my $author  = "$posted_by <span class=\"author\">$record->{author}</span>";
+  my $taglist = "";
+
+  # Check whether tags are enabled and present:
+  if ($with_tags && $record->{tags}) {
+    # Create the tag links:
+    $taglist  = join(', ', map {
+      "<a href=\"". fix_link("${root}tags/$tags->{$_}->{url}") ."\">$_</a>"
+    } split(/,\s*/, $record->{tags}));
+
+    # Format the tag links:
+    $taglist = ", $tagged_as <span class=\"tags\">$taglist</span>";
+  }
+
+  # Return the result:
+  return "<div class=\"information\">\n  $date$author$taglist\n</div>\n";
+}
+
+# Return formatted entry:
+sub format_entry {
+  my $data    = shift || die 'Missing argument';
+  my $record  = shift || die 'Missing argument';
+  my $root    = shift || '';
+  my $type    = shift || 'post';
+  my $excerpt = shift || 0;
+
+  # Initialize other required variables:
+  my $tags    = $data->{links}->{tags};
+  my $title   = $record->{title};
+  my $id      = $record->{id};
+  my $link    = '';
+
+  # If the excerpt is requested, prepare the entry link:
+  if ($excerpt) {
+    # Check whether the entry is post or page:
+    if ($type eq 'post') {
+      # Decompose the record:
+      my ($year, $month) = split(/-/, $record->{date});
+
+      # Compose the link:
+      $link = fix_link("$root$year/$month/$record->{url}")
+    }
+    else {
+      # Compose the link:
+      $link = fix_link("$root$record->{url}");
+    }
+  }
+
+  # Prepare the post/page heading:
+  my $body        = read_entry($id, $type, $link, $excerpt);
+  my $heading     = format_heading($title, $link);
+  my $information = ($type eq 'post')
+                  ? format_information($record, $tags, $root)
+                  : '';
+
+  # Return the result:
+  return "\n$heading\n$information\n$body";
+}
+
 # Write a single page:
 sub write_page {
-  my $file     = shift || die 'Missing argument';
-  my $data     = shift || return 0;
-  my $content  = shift || '';
-  my $heading  = shift || $conf->{blog}->{title} || 'My Blog';
-  my $root     = shift || '/';
-  my $home     = fix_link($root);
-  my $template = '';
+  my $data    = shift || die 'Missing argument';
+  my $target  = shift || '';
+  my $root    = shift || '';
+  my $content = shift || '';
+  my $heading = shift || $conf->{blog}->{title} || 'My Blog';
+  my $index   = shift || '';
 
-  # Check whether the theme is not already cached:
-  unless ($cache->{theme}->{$root}) {
+  # Read required data from the configuration:
+  my $ext     = $conf->{core}->{extension}      || 'html';
+
+  # Initialize other required variables:
+  my $home    = fix_link($root);
+  my $temp    = $root || '#';
+
+  # Check whether the template is not already cached:
+  unless ($cache->{theme}->{$temp}) {
     # Read required data from the configuration:
     my $encoding = $conf->{core}->{encoding}  || 'UTF-8';
     my $name     = $conf->{user}->{name}      || 'admin';
@@ -643,9 +768,8 @@ sub write_page {
     my $subtitle = $conf->{blog}->{subtitle}  || 'yet another blog';
     my $theme    = $conf->{blog}->{theme}     || 'default.html';
     my $title    = $conf->{blog}->{title}     || 'My Blog';
-    my $ext      = $conf->{core}->{extension} || 'html';
 
-    # Prepare the pages, tags and months lists:
+    # Prepare the posts, pages, tags and months lists:
     my $tags     = list_of_tags($data->{links}->{tags}, $root);
     my $archive  = list_of_months($data->{links}->{months}, $root);
     my $pages    = list_of_pages($data->{headers}->{pages}, $root);
@@ -669,7 +793,7 @@ sub write_page {
     open(THEME, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
 
     # Read the theme file:
-    $template = do { local $/; <THEME> };
+    my $template = do { local $/; <THEME> };
 
     # Close the theme file:
     close(THEME);
@@ -694,16 +818,15 @@ sub write_page {
     $template =~ s/<!--\s*name\s*-->/$name/ig;
     $template =~ s/<!--\s*year\s*-->/$year/ig;
 
-    # Store the theme to the cache:
-    $cache->{theme}->{$root} = $template;
+    # Store the template to the cache:
+    $cache->{theme}->{$temp} = $template;
   }
 
-  # Open the file for writing:
-  open(FILE, ">$file") or return 0;
+  # Load the template from the cache:
+  my $template = $cache->{theme}->{$temp};
 
   # Substitute page title:
-  ($template  = $cache->{theme}->{$root})
-              =~ s/<!--\s*page-title\s*-->/$heading/ig;
+  $template   =~ s/<!--\s*page-title\s*-->/$heading/ig;
 
   # Add page content:
   $template   =~ s/<!--\s*content\s*-->/$content/ig;
@@ -714,17 +837,31 @@ sub write_page {
   # Substitute the home page placeholder:
   $template   =~ s/%home%/$home/ig;
 
-  # Substitute the post with selected ID placeholder:
+  # Substitute the `page with selected ID' placeholder:
+  while ($template =~ /%page\[(\d+)\]%/i) {
+    my $link  = fix_link("$root$data->{links}->{pages}->{$1}->{url}");
+    $template =~ s/%page\[$1\]%/$link/ig;
+  }
+
+  # Substitute the `post with selected ID' placeholder:
   while ($template =~ /%post\[(\d+)\]%/i) {
-    my $link = fix_link($root . $data->{links}->{posts}->{$1}->{url});
+    my $link  = fix_link("$root$data->{links}->{posts}->{$1}->{url}");
     $template =~ s/%post\[$1\]%/$link/ig;
   }
 
-  # Substitute the page with selected ID placeholder:
-  while ($template =~ /%page\[(\d+)\]%/i) {
-    my $link = fix_link($root . $data->{links}->{pages}->{$1}->{url});
-    $template =~ s/%page\[$1\]%/$link/ig;
-  }
+  # Create the target directory tree:
+  eval { mkpath($target, { verbose => 0 }) };
+
+  # Make sure the directory creation was successful:
+  exit_with_error("Creating `$target': $@", 13) if $@;
+
+  # Prepare the file name:
+  my $file = $target
+           ? catfile($target, "index$index.$ext")
+           : "index$index.$ext";
+
+  # Open the file for writing:
+  open(FILE, ">$file") or return 0;
 
   # Write the line to the file:
   print FILE $template;
@@ -732,97 +869,28 @@ sub write_page {
   # Close the file:
   close(FILE);
 
+  # Report success:
+  print "Created $file\n" if $verbose > 1;
+
   # Return success:
   return 1;
 }
 
-# Read the post/page body/excerpt:
-sub read_body {
-  my $id      = shift || die 'Missing argument';
-  my $type    = shift || 'post';
-  my $excerpt = shift || 0;
-  my $link    = shift || '';
-  my $result  = '';
+# Copy the stylesheet:
+sub copy_stylesheet {
+  # Prepare the file names:
+  my $style = $conf->{blog}->{style} || 'default.css';
+  my $from  = catfile($blogdir, '.blaze', 'style', $style);
+  my $to    = ($destdir eq '.') ? $style : catfile($destdir, $style);
 
-  # Prepare the file name:
-  my $file    = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
+  # Copy the file:
+  copy($from, $to) or return 0;
 
-  # Open the body file for reading:
-  open(FILE, $file) or return '';
+  # Report success:
+  print "Created $to\n" if $verbose > 1;
 
-  # Read the content of the file:
-  while (my $line = <FILE>) {
-    # When excerpt is requested, look for a break mark to stop reading:
-    if ($line =~ /<!--\s*break\s*-->/ && $excerpt) {
-      # Check whether the link is provided:
-      if ($link) {
-        # Read required data from the language file:
-        my $more = $locale->{lang}->{more} || 'Read more &raquo;';
-
-        # Add the `read more' link:
-        $result .= "<p><a href=\"" .fix_link($link). "\" class=\"more\">".
-                   "$more</a></p>\n";
-      }
-
-      # Exit the loop:
-      last;
-    }
-
-    # Add the line to the result:
-    $result .= $line;
-  }
-
-  # Close the file:
-  close(FILE);
-
-  # Return the result:
-  return $result;
-}
-
-# Return the tag links:
-sub format_tags {
-  my $root      = shift || die 'Missing argument';
-  my $tags      = shift || die 'Missing argument';
-  my $tagged_as = shift || return '';
-
-  # Return the list of tag links:
-  return join(', ', map {
-    "<a href=\"" . fix_link("${root}tags/" . $tags->{$_}->{url}) .
-    "\">$_</a>"
-  } split(/,\s*/, $tagged_as));
-}
-
-# Return the formatted post heading:
-sub format_heading {
-  my $title  = shift || die 'Missing argument';
-  my $date   = shift || die 'Missing argument';
-  my $author = shift || die 'Missing argument';
-  my $tags   = shift;
-
-  # Read required data from the language file:
-  my $posted_by = $locale->{lang}->{postedby} || 'by';
-  my $tagged_as = $locale->{lang}->{taggedas} || 'tagged as';
-
-  # Return the formatted post heading:
-  return "<h2 class=\"post\">$title</h2>\n\n" .
-         "<div class=\"information\">\n  " .
-         "<span class=\"date\">$date</span> " .
-         "$posted_by <span class=\"author\">$author</span>" .
-         (($with_tags && $tags)
-           ? ", $tagged_as <span class=\"tags\">$tags</span>.\n"
-           : ".\n"
-         ) . "</div>\n\n";
-}
-
-# Strip HTML elements:
-sub strip_html {
-  my $string = shift || return '';
-
-  # Strip HTML elements and forbidded characters:
-  $string =~ s/(<[^>]*>|&[^;]*;|<|>|&)//g;
-
-  # Return the result:
-  return $string;
+  # Return success:
+  return 1;
 }
 
 # Generate RSS feed:
@@ -887,7 +955,7 @@ sub generate_rss {
 
     # Strip HTML elements:
     my $post_title = strip_html($title);
-    my $post_desc  = strip_html(substr(read_body($id, 'post', 1), 0, 500));
+    my $post_desc  = strip_html(substr(read_entry($id,'post','',1),0,500));
 
     # Get the RFC 822 date-time string:
     my $time       = timelocal_nocheck(1, 0, 0, $day, ($month - 1), $year);
@@ -920,14 +988,13 @@ sub generate_rss {
 # Generate index page:
 sub generate_index {
   my $data       = shift || die 'Missing argument';
-  my $body       = '';
 
   # Read required data from the configuration:
-  my $ext        = $conf->{core}->{extension} || 'html';
   my $max_posts  = $conf->{blog}->{posts}     || 10;
   my $blog_title = $conf->{blog}->{title}     || 'My Blog';
 
-  # Initialize necessary variables:
+  # Initialize other required variables:
+  my $body       = '';
   my $count      = 0;
 
   # Check whether the posts are enabled:
@@ -937,41 +1004,23 @@ sub generate_index {
       # Stop when the post count reaches the limit:
       last if $count == $max_posts;
 
-      # Decompose the record:
-      my $id     = $record->{id};
-      my $title  = $record->{title};
-      my $author = $record->{author};
-      my $date   = $record->{date};
-      my $tags   = $record->{tags};
-      my $url    = $record->{url};
-      my ($year, $month) = split(/-/, $date);
-
-      # Add the post heading with excerpt:
-      $body.=format_heading("<a href=\"" .fix_link("$year/$month/$url").
-                            "\">$title</a>",
-                            $date, $author,
-                            format_tags('./',$data->{links}->{tags},$tags)).
-             read_body($id, 'post', 1, "$year/$month/$url");
+      # Add the post excerpt to the listing:
+      $body .= format_entry($data, $record, '', 'post', 1);
 
       # Increase the number of listed items:
       $count++;
     }
   }
 
-  # Prepare the index file name:
-  my $file = ($destdir eq '.') ? "index.$ext"
-                               : catfile($destdir, "index.$ext");
+  # Prepare the target directory name:
+  my $target = ($destdir eq '.') ? '' : $destdir;
 
   # Write the index file:
-  write_page($file, $data, $body, $blog_title, './') or return 0;
-
-  # Report success:
-  print "Created $file\n" if $verbose > 1;
+  write_page($data, $target, '', $body, $blog_title) or return 0;
 
   # Return success:
   return 1;
 }
-
 
 # Generate posts:
 sub generate_posts {
@@ -1006,46 +1055,24 @@ sub generate_posts {
   my $month_page   = 0;                             # Page counter.
 
   # Declare other necessary variables:
-  my ($date, $id, $tags, $author, $url, $title, $year, $month, $file);
+  my ($year, $month, $target);
 
   # Process each record:
   foreach my $record (@{$data->{headers}->{posts}}) {
     # Decompose the record:
-    $id     = $record->{id};
-    $title  = $record->{title};
-    $author = $record->{author};
-    $date   = $record->{date};
-    $tags   = $record->{tags};
-    $url    = $record->{url};
-    ($year, $month) = split(/-/, $date);
+    ($year, $month) = split(/-/, $record->{date});
 
     # Prepare the post body:
-    $post_body  = format_heading($title, $date, $author,
-                                 format_tags('../../../',
-                                             $data->{links}->{tags},
-                                             $tags)) .
-                  read_body($id, 'post', 0);
+    $post_body = format_entry($data, $record, '../../../', 'post', 0);
 
-    # Create the directory tree:
-    make_directories [
-      catdir($destdir, $year),                      # Year directory.
-      catdir($destdir, $year, $month),              # Month directory.
-      catdir($destdir, $year, $month, "$url"),      # Post directory.
-    ];
-
-    # Prepare the post file name:
-    if ($destdir eq '.') {
-      $file = catfile($year, $month, "$url", "index.$ext");
-    }
-    else {
-      $file = catfile($destdir, $year, $month, "$url", "index.$ext");
-    }
+    # Prepare the target directory name:
+    $target    = ($destdir eq '.')
+               ? catdir($year, $month, $record->{url})
+               : catdir($destdir, $year, $month, $record->{url});
 
     # Write the post:
-    write_page($file, $data, $post_body, $title, '../../../') or return 0;
-
-    # Report success:
-    print "Created $file\n" if $verbose > 1;
+    write_page($data, $target, '../../../', $post_body, $record->{title})
+      or return 0;
 
     # Set the current year:
     $year_curr = $year;
@@ -1054,27 +1081,19 @@ sub generate_posts {
     if ($year_last ne $year_curr) {
       # Prepare this year's archive body:
       $year_body = "<div class=\"section\">$title_string $year</div>\n\n" .
-                   "<ul>\n" .list_of_months($data->{links}->{months},
-                                            '../', $year) .
+                   "<ul>\n" . list_of_months($data->{links}->{months},
+                                             '../', $year) .
                    "</ul>";
 
-      # Prepare this year's archive file name:
-      if ($destdir eq '.') {
-        $file = catfile($year, "index.$ext");
-      }
-      else {
-        $file = catfile($destdir, $year, "index.$ext");
-      }
+      # Prepare this year's archive target directory name:
+      $target = ($destdir eq '.') ? $year : catdir($destdir, $year);
 
-      # Write the file:
-      write_page($file, $data, $year_body, "$title_string $year", '../')
+      # Write this year's archive index page:
+      write_page($data, $target, '../', $year_body, "$title_string $year")
         or return 0;
 
-      # Make the previous year be the current one:
+      # Make the previous year the current one:
       $year_last = $year_curr;
-
-      # Report success:
-      print "Created $file\n" if $verbose > 1;
     }
 
     # If this is the first loop, fake the previous month as the current:
@@ -1110,17 +1129,14 @@ sub generate_posts {
                      ">$next_string</a></div>\n"
                      if $month_page;
 
-      # Prepare the monthly archive file name:
-      if ($destdir eq '.') {
-        $file = catfile($year, $month, "index$index.$ext");
-      }
-      else {
-        $file = catfile($destdir, $year, $month, "index$index.$ext");
-      }
+      # Prepare this month's archive target directory name:
+      $target = ($destdir eq '.')
+              ? catdir($year, $month)
+              : catdir($destdir, $year, $month);
 
-      # Write the file:
-      write_page($file, $data, $month_body, "$title_string $name",'../../')
-        or return 0;
+      # Write this month's archive index page:
+      write_page($data, $target, '../../', $month_body,
+                 "$title_string $name", $index) or return 0;
 
       # Check whether the month has changed:
       if ($month_curr ne $month_last) {
@@ -1132,7 +1148,7 @@ sub generate_posts {
         $month_page++;
       }
 
-      # Make the previous month be the current one:
+      # Make the previous month the current one:
       $month_last = $month_curr;
 
       # Clear the monthly archive body:
@@ -1140,19 +1156,10 @@ sub generate_posts {
 
       # Reset the post counter:
       $month_count = 0;
-
-      # Report success:
-      print "Created $file\n" if $verbose > 1;
     }
 
-    # Add the post heading with excerpt:
-    $month_body .= format_heading("<a href=\"" . fix_link("$url") .
-                                  "\">$title</a>",
-                                  $date, $author,
-                                  format_tags('../../',
-                                              $data->{links}->{tags},
-                                              $tags)) .
-                   read_body($id, 'post', 1, "$url");
+    # Add the post excerpt:
+    $month_body .= format_entry($data, $record, '../../', 'post', 1);
 
     # Increase the number of listed posts:
     $month_count++;
@@ -1179,20 +1186,14 @@ sub generate_posts {
     $month_body .= "<div class=\"next\"><a href=\"index$next.$ext\">" .
                    "$next_string</a></div>\n" if $month_page;
 
-    # Prepare the monthly archive file name:
-    if ($destdir eq '.') {
-      $file = catfile($year, $month, "index$index.$ext");
-    }
-    else {
-      $file = catfile($destdir, $year, $month, "index$index.$ext");
-    }
+    # Prepare this month's archive target directory name:
+    $target = ($destdir eq '.')
+            ? catdir($year, $month)
+            : catdir($destdir, $year, $month);
 
-    # Write the file:
-    write_page($file, $data, $month_body, "$title_string $name", '../../')
-      or return 0;
-
-    # Report success:
-    print "Created $file\n" if $verbose > 1;
+    # Write this month's archive index page:
+    write_page($data, $target, '../../', $month_body,
+               "$title_string $name", $index) or return 0;
   }
 
   # Return success:
@@ -1221,21 +1222,12 @@ sub generate_tags {
     my $tag_page  = 0;                              # Page counter.
 
     # Declare other necessary variables:
-    my ($date, $id, $tags, $author, $url, $title, $year, $month, $file);
+    my $target;
 
     # Process each record:
     foreach my $record (@{$data->{headers}->{posts}}) {
-      # Decompose the record:
-      $id     = $record->{id};
-      $title  = $record->{title};
-      $author = $record->{author};
-      $date   = $record->{date};
-      $tags   = $record->{tags};
-      $url    = $record->{url};
-      ($year, $month) = split(/-/, $date);
-
       # Check whether the post contains the current tag:
-      next unless $tags =~ /(^|,\s*)$tag(,\s*|$)/;
+      next unless $record->{tags} =~ /(^|,\s*)$tag(,\s*|$)/;
 
       # Check whether the number of listed posts reached the limit:
       if ($tag_count == $max_posts) {
@@ -1254,26 +1246,15 @@ sub generate_tags {
         $tag_body .= "<div class=\"next\"><a href=\"index$next.$ext\"".
                      ">$next_string</a></div>\n" if $tag_page;
 
-        # Create the directory tree:
-        make_directories [
-          catdir($destdir, 'tags'),
-          catdir($destdir, 'tags', $data->{links}->{tags}->{$tag}->{url}),
-        ];
+        # Prepare this tag's target directory name:
+        $target = ($destdir eq '.')
+                ? catdir('tags', $data->{links}->{tags}->{$tag}->{url})
+                : catdir($destdir, 'tags',
+                         $data->{links}->{tags}->{$tag}->{url});
 
-        # Prepare the tag file name:
-        if ($destdir eq '.') {
-          $file = catfile('tags', $data->{links}->{tags}->{$tag}->{url},
-                          "index$index.$ext");
-        }
-        else {
-          $file = catfile($destdir, 'tags',
-                          $data->{links}->{tags}->{$tag}->{url},
-                          "index$index.$ext");
-        }
-
-        # Write the file:
-        write_page($file, $data, $tag_body, "$title_string $tag", '../../')
-          or return 0;
+        # Write this tag's index page:
+        write_page($data, $target, '../../', $tag_body,
+                   "$title_string $tag", $index) or return 0;
 
         # Clear the tag body:
         $tag_body  = '';
@@ -1283,19 +1264,10 @@ sub generate_tags {
 
         # Increase the page counter:
         $tag_page++;
-
-        # Report success:
-        print "Created $file\n" if $verbose > 1;
       }
 
-      # Add the post heading with excerpt:
-      $tag_body .= format_heading("<a href=\"" .
-                                  fix_link("../../$year/$month/$url") .
-                                  "\">$title</a>", $date, $author,
-                                  format_tags('../../',
-                                              $data->{links}->{tags},
-                                              $tags)) .
-                   read_body($id, 'post', 1,"../../$year/$month/$url");
+      # Add the post excerpt:
+      $tag_body .= format_entry($data, $record, '../../', 'post', 1);
 
       # Increase the number of listed posts:
       $tag_count++;
@@ -1315,29 +1287,15 @@ sub generate_tags {
       $tag_body .= "<div class=\"next\"><a href=\"index$next.$ext\">" .
                    "$next_string</a></div>\n" if $tag_page;
 
-      # Create the directory tree:
-      make_directories [
-        catdir($destdir, 'tags'),
-        catdir($destdir, 'tags', $data->{links}->{tags}->{$tag}->{url}),
-      ];
+      # Prepare this tag's target directory name:
+      $target = ($destdir eq '.')
+              ? catdir('tags', $data->{links}->{tags}->{$tag}->{url})
+              : catdir($destdir, 'tags',
+                       $data->{links}->{tags}->{$tag}->{url});
 
-      # Prepare the tag file name:
-      if ($destdir eq '.') {
-        $file = catfile('tags', $data->{links}->{tags}->{$tag}->{url},
-                        "index$index.$ext");
-      }
-      else {
-        $file = catfile($destdir, 'tags',
-                        $data->{links}->{tags}->{$tag}->{url},
-                        "index$index.$ext");
-      }
-
-      # Write the file:
-      write_page($file, $data, $tag_body, "$title_string $tag", '../../')
-        or return 0;
-
-      # Report success:
-      print "Created $file\n" if $verbose > 1;
+      # Write this tag's index page:
+      write_page($data, $target, '../../', $tag_body,
+                 "$title_string $tag", $index) or return 0;
     }
   }
 
@@ -1348,16 +1306,12 @@ sub generate_tags {
                        "<ul>\n".list_of_tags($data->{links}->{tags},'../').
                        "</ul>";
 
-    # Prepare the tag list file name:
-    my $file = ($destdir eq '.') ? catfile('tags', "index.$ext")
-                                 : catfile($destdir, 'tags', "index.$ext");
+    # Prepare the tag list target directory name:
+    my $target = ($destdir eq '.') ? 'tags' : catdir($destdir, 'tags');
 
-    # Write the file:
-    write_page($file, $data, $taglist_body, $tags_string, '../')
+    # Write the tag list index page:
+    write_page($data, $target, '../', $taglist_body, $tags_string)
       or return 0;
-
-    # Report success:
-    print "Created $file\n" if $verbose > 1;
   }
 
   # Return success:
@@ -1367,53 +1321,20 @@ sub generate_tags {
 # Generate pages:
 sub generate_pages {
   my $data = shift || die 'Missing argument';
-  my $body = '';
-
-  # Read required data from the configuration:
-  my $ext  = $conf->{core}->{extension} || 'html';
 
   # Process each record:
   foreach my $record (@{$data->{headers}->{pages}}) {
-    my $id     = $record->{id};
-    my $title  = $record->{title};
-    my $author = $record->{author};
-    my $tags   = $record->{tags};
-    my $url    = $record->{url};
-    my ($year, $month) = split(/-/, $record->{date});
-
     # Prepare the page body:
-    $body = "<h2 class=\"post\">$title</h2>\n\n".read_body($id, 'page', 0);
+    my $body   = format_entry($data, $record, '../', 'page', 0);
 
-    # Create the directories:
-    make_directories [ catdir($destdir, $url) ];
+    # Prepare the target directory name:
+    my $target = ($destdir eq '.')
+               ? catdir($record->{url})
+               : catdir($destdir, $record->{url});
 
-    # Prepare the index file name:
-    my $file = ($destdir eq '.') ? catfile($url, "index.$ext")
-                                 : catfile($destdir, $url, "index.$ext");
-
-    # Write the index file:
-    write_page($file, $data, $body, $title, '../') or return 0;
-
-    # Report success:
-    print "Created $file\n" if $verbose > 1;
+    # Write the page:
+    write_page($data, $target, '../', $body, $record->{title}) or return 0;
   }
-
-  # Return success:
-  return 1;
-}
-
-# Copy the stylesheet:
-sub copy_stylesheet {
-  # Prepare the file names:
-  my $style = $conf->{blog}->{style} || 'default.css';
-  my $from  = catfile($blogdir, '.blaze', 'style', $style);
-  my $to    = ($destdir eq '.') ? $style : catfile($destdir, $style);
-
-  # Copy the file:
-  copy($from, $to) or return 0;
-
-  # Report success:
-  print "Created $to\n" if $verbose > 1;
 
   # Return success:
   return 1;
@@ -1477,15 +1398,15 @@ $locale  = read_lang($conf->{blog}->{lang});
 # Collect the necessary metadata:
 my $data = collect_metadata();
 
-# Generate RSS feed:
-generate_rss($data)
-  or exit_with_error("An error has occurred while creating RSS feed.", 1)
-  if $with_rss;
-
 # Copy the stylesheet:
 copy_stylesheet()
   or exit_with_error("An error has occurred while creating stylesheet.", 1)
   if $with_css;
+
+# Generate RSS feed:
+generate_rss($data)
+  or exit_with_error("An error has occurred while creating RSS feed.", 1)
+  if $with_rss;
 
 # Generate index page:
 generate_index($data)
