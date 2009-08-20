@@ -678,11 +678,12 @@ sub format_information {
   my $root   = shift || '';
 
   # Read required data from the language file:
+  my $posted_on = $locale->{lang}->{postedon} || '';
   my $posted_by = $locale->{lang}->{postedby} || 'by';
   my $tagged_as = $locale->{lang}->{taggedas} || 'tagged as';
 
   # Format the information:
-  my $date    = "<span class=\"date\">$record->{date}</span> ";
+  my $date    = "$posted_on <span class=\"date\">$record->{date}</span> ";
   my $author  = "$posted_by <span class=\"author\">$record->{author}</span>";
   my $taglist = "";
 
