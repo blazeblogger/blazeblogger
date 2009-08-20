@@ -701,7 +701,7 @@ sub format_information {
   return "<div class=\"information\">\n  $date$author$taglist\n</div>\n";
 }
 
-# Return formatted entry:
+# Return formatted post/page entry:
 sub format_entry {
   my $data    = shift || die 'Missing argument';
   my $record  = shift || die 'Missing argument';
@@ -740,6 +740,14 @@ sub format_entry {
 
   # Return the result:
   return "\n$heading\n$information\n$body";
+}
+
+# Return formatted section heading:
+sub format_section {
+  my $title = shift || die 'Missing argument';
+
+  # Return the result:
+  return "<div class=\"section\">$title</div>\n";
 }
 
 # Write a single page:
@@ -1079,18 +1087,21 @@ sub generate_posts {
 
     # Check whether the year has changed:
     if ($year_last ne $year_curr) {
-      # Prepare this year's archive body:
-      $year_body = "<div class=\"section\">$title_string $year</div>\n\n" .
-                   "<ul>\n" . list_of_months($data->{links}->{months},
-                                             '../', $year) .
-                   "</ul>";
+      # Prepare the section title:
+      my $title   = "$title_string $year";
+
+      # Add this year's archive section title:
+      $year_body  = format_section($title);
+
+      # Add this year's archive list of months:
+      $year_body .= "<ul>\n" . list_of_months($data->{links}->{months},
+                                              '../', $year) . "\n</ul>";
 
       # Prepare this year's archive target directory name:
       $target = ($destdir eq '.') ? $year : catdir($destdir, $year);
 
       # Write this year's archive index page:
-      write_page($data, $target, '../', $year_body, "$title_string $year")
-        or return 0;
+      write_page($data, $target, '../', $year_body, $title) or return 0;
 
       # Make the previous year the current one:
       $year_last = $year_curr;
@@ -1113,13 +1124,13 @@ sub generate_posts {
       # Get information about the last processed month:
       ($year, $month) = split(/\//, $month_last);
 
-      # Get information for the heading:
-      my $temp = $names[int($month) - 1];
-      my $name = ($locale->{lang}->{$temp} || $temp) . " $year";
+      # Prepare the section tile:
+      my $temp  = $names[int($month) - 1];
+      my $name  = ($locale->{lang}->{$temp} || $temp) . " $year";
+      my $title = "$title_string $name";
 
-      # Add heading:
-      $month_body  ="<div class=\"section\">$title_string $name</div>\n\n".
-                     "$month_body";
+      # Add section title:
+      $month_body  = format_section($title) . $month_body;
 
       # Add navigation:
       $month_body .= "<div class=\"previous\"><a href=\"index$prev.$ext\"".
@@ -1135,8 +1146,8 @@ sub generate_posts {
               : catdir($destdir, $year, $month);
 
       # Write this month's archive index page:
-      write_page($data, $target, '../../', $month_body,
-                 "$title_string $name", $index) or return 0;
+      write_page($data, $target, '../../', $month_body, $title, $index)
+        or return 0;
 
       # Check whether the month has changed:
       if ($month_curr ne $month_last) {
@@ -1174,13 +1185,13 @@ sub generate_posts {
     # Get information about the last processed month:
     ($year, $month) = split(/\//, $month_curr);
 
-    # Get information for the heading:
-    my $temp = $names[int($month) - 1];
-    my $name = ($locale->{lang}->{$temp} || $temp) . " $year";
+    # Get information for the title:
+    my $temp  = $names[int($month) - 1];
+    my $name  = ($locale->{lang}->{$temp} || $temp) . " $year";
+    my $title = "$title_string $name";
 
-    # Add heading:
-    $month_body  = "<div class=\"section\">$title_string $name</div>\n\n" .
-                   "$month_body";
+    # Add section title:
+    $month_body  = format_section($title) . $month_body;
 
     # Add navigation:
     $month_body .= "<div class=\"next\"><a href=\"index$next.$ext\">" .
@@ -1192,8 +1203,8 @@ sub generate_posts {
             : catdir($destdir, $year, $month);
 
     # Write this month's archive index page:
-    write_page($data, $target, '../../', $month_body,
-               "$title_string $name", $index) or return 0;
+    write_page($data, $target, '../../', $month_body, $title, $index)
+      or return 0;
   }
 
   # Return success:
@@ -1236,9 +1247,11 @@ sub generate_tags {
         my $next  = $tag_page - 1 || '';
         my $prev  = $tag_page + 1;
 
-        # Add heading:
-        $tag_body  = "<div class=\"section\">$title_string $tag</div>\n\n".
-                     "$tag_body";
+        # Prepare the section title:
+        my $title = "$title_string $tag";
+
+        # Add section title:
+        $tag_body  = format_section($title) . $tag_body;
 
         # Add navigation:
         $tag_body .= "<div class=\"previous\"><a href=\"index$prev.$ext\"".
@@ -1253,8 +1266,8 @@ sub generate_tags {
                          $data->{links}->{tags}->{$tag}->{url});
 
         # Write this tag's index page:
-        write_page($data, $target, '../../', $tag_body,
-                   "$title_string $tag", $index) or return 0;
+        write_page($data, $target, '../../', $tag_body, $title, $index)
+          or return 0;
 
         # Clear the tag body:
         $tag_body  = '';
@@ -1279,9 +1292,11 @@ sub generate_tags {
       my $index = $tag_page     || '';
       my $next  = $tag_page - 1 || '';
 
-      # Add heading:
-      $tag_body  = "<div class=\"section\">$title_string $tag</div>\n\n" .
-                   "$tag_body";
+      # Prepare the section title:
+      my $title = "$title_string $tag";
+
+      # Add section title:
+      $tag_body  = format_section($title) . $tag_body;
 
       # Add navigation:
       $tag_body .= "<div class=\"next\"><a href=\"index$next.$ext\">" .
@@ -1294,17 +1309,19 @@ sub generate_tags {
                        $data->{links}->{tags}->{$tag}->{url});
 
       # Write this tag's index page:
-      write_page($data, $target, '../../', $tag_body,
-                 "$title_string $tag", $index) or return 0;
+      write_page($data, $target, '../../', $tag_body, $title, $index)
+        or return 0;
     }
   }
 
   # Create the tag list if any:
   if (%{$data->{links}->{tags}}) {
-    # Prepare the tag list body:
-    my $taglist_body = "<div class=\"section\">$tags_string</div>\n\n" .
-                       "<ul>\n".list_of_tags($data->{links}->{tags},'../').
-                       "</ul>";
+    # Add the tag list section title:
+    my $taglist_body = format_section($tags_string);
+
+    # Add the tag list:
+    $taglist_body   .= "<ul>\n".list_of_tags($data->{links}->{tags},'../').
+                       "\n</ul>";
 
     # Prepare the tag list target directory name:
     my $target = ($destdir eq '.') ? 'tags' : catdir($destdir, 'tags');
