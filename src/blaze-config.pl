@@ -50,6 +50,11 @@ our %opt = (
   'core.encoding'  => 'UTF-8',                      # Posts/pages codepage.
   'core.extension' => 'html',                       # File extension.
 
+  # Post related settings:
+  'post.author'    => 'top',                        # Post author location.
+  'post.date'      => 'top',                        # Post date location.
+  'post.tags'      => 'top',                        # Post tags location.
+
   # User related settings:
   'user.name'      => 'admin',                      # User's name.
   'user.email'     => 'admin@localhost',            # User's e-mail.
@@ -240,6 +245,11 @@ sub create_temp {
   my $core_encoding  = $conf->{core}->{encoding}  || $opt{'core.encoding'};
   my $core_extension = $conf->{core}->{extension} || $opt{'core.extension'};
 
+  # Prepare the post related settings:
+  my $post_author    = $conf->{post}->{author}    || $opt{'post.author'};
+  my $post_date      = $conf->{post}->{date}      || $opt{'post.date'};
+  my $post_tags      = $conf->{post}->{tags}      || $opt{'post.tags'};
+
   # Prepare the user related settings:
   my $user_name      = $conf->{user}->{name}      || $opt{'user.name'};
   my $user_email     = $conf->{user}->{email}     || $opt{'user.email'};
@@ -298,6 +308,20 @@ log=$color_log
 editor=$core_editor
 encoding=$core_encoding
 extension=$core_extension
+
+## The following are the post related settings, making it possible to alter
+## the look of a single post even further. The options are as follows:
+##
+##  author - Location of the author; available  options are top, bottom, or
+##           none.
+##  date   - Location of the date of publishing; available options are top,
+##           bottom, or none.
+##  tags   - Location of tags;  available options are top, bottom, or none.
+##
+[post]
+author=$post_author
+date=$post_date
+tags=$post_tags
 
 ## The following are the user related settings. The options are as follows:
 ##

@@ -184,6 +184,20 @@ log=false
 #encoding=UTF-8
 #extension=html
 
+## The following are the post related settings, making it possible to alter
+## the look of a single post even further. The options are as follows:
+##
+##  author - Location of the author; available  options are top, bottom, or
+##           none.
+##  date   - Location of the date of publishing; available options are top,
+##           bottom, or none.
+##  tags   - Location of tags;  available options are top, bottom, or none.
+##
+[post]
+#author=top
+#date=top
+#tags=top
+
 ## The following are the user related settings. The options are as follows:
 ##
 ##   user  - User's name  to be used as a default posts' author  and in the
@@ -193,7 +207,6 @@ log=false
 [user]
 #name=admin
 #email=admin@localhost
-
 END_CONFIG
 
   # Close the file:
