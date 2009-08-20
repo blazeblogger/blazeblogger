@@ -742,12 +742,32 @@ sub format_entry {
   return "\n$heading\n$information\n$body";
 }
 
-# Return formatted section heading:
+# Return formatted section title:
 sub format_section {
   my $title = shift || die 'Missing argument';
 
   # Return the result:
   return "<div class=\"section\">$title</div>\n";
+}
+
+# Return formatted navigation:
+sub format_navigation {
+  my $type  = shift || die 'Missing argument';
+  my $index = shift || '';
+
+  # Read required data from the configuration:
+  my $ext   = $conf->{core}->{extension} || 'html';
+
+  # Read required data from the localization:
+  my $prev_string = $locale->{lang}->{previous} || '&laquo; Previous';
+  my $next_string = $locale->{lang}->{next}     || 'Next &raquo;';
+
+  # Prepare the label:
+  my $label = ($type eq 'previous') ? $prev_string : $next_string;
+
+  # Return the result:
+  return "<div class=\"$type\"><a href=\"index$index.$ext\">$label</a>" .
+         "</div>\n";
 }
 
 # Write a single page:
@@ -1040,8 +1060,6 @@ sub generate_posts {
 
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{archive}  || 'Archive for';
-  my $prev_string  = $locale->{lang}->{previous} || '&laquo; Previous';
-  my $next_string  = $locale->{lang}->{next}     || 'Next &raquo;';
 
   # Prepare the list of month names:
   my @names        = qw( january february march april may june july
@@ -1133,11 +1151,9 @@ sub generate_posts {
       $month_body  = format_section($title) . $month_body;
 
       # Add navigation:
-      $month_body .= "<div class=\"previous\"><a href=\"index$prev.$ext\"".
-                     ">$prev_string</a></div>\n"
+      $month_body .= format_navigation('previous', $prev)
                      if $month_curr eq $month_last;
-      $month_body .= "<div class=\"next\"><a href=\"index$next.$ext\"".
-                     ">$next_string</a></div>\n"
+      $month_body .= format_navigation('next', $next)
                      if $month_page;
 
       # Prepare this month's archive target directory name:
@@ -1194,8 +1210,7 @@ sub generate_posts {
     $month_body  = format_section($title) . $month_body;
 
     # Add navigation:
-    $month_body .= "<div class=\"next\"><a href=\"index$next.$ext\">" .
-                   "$next_string</a></div>\n" if $month_page;
+    $month_body .= format_navigation('next', $next) if $month_page;
 
     # Prepare this month's archive target directory name:
     $target = ($destdir eq '.')
@@ -1222,8 +1237,6 @@ sub generate_tags {
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{tags}     || 'Posts tagged as';
   my $tags_string  = $locale->{lang}->{taglist}  || 'List of tags';
-  my $prev_string  = $locale->{lang}->{previous} || '&laquo; Previous';
-  my $next_string  = $locale->{lang}->{next}     || 'Next &raquo;';
 
   # Process each tag separately:
   foreach my $tag (keys %{$data->{links}->{tags}}) {
@@ -1254,10 +1267,8 @@ sub generate_tags {
         $tag_body  = format_section($title) . $tag_body;
 
         # Add navigation:
-        $tag_body .= "<div class=\"previous\"><a href=\"index$prev.$ext\"".
-                     ">$prev_string</a></div>\n";
-        $tag_body .= "<div class=\"next\"><a href=\"index$next.$ext\"".
-                     ">$next_string</a></div>\n" if $tag_page;
+        $tag_body .= format_navigation('previous', $prev);
+        $tag_body .= format_navigation('next', $next) if $tag_page;
 
         # Prepare this tag's target directory name:
         $target = ($destdir eq '.')
@@ -1299,8 +1310,7 @@ sub generate_tags {
       $tag_body  = format_section($title) . $tag_body;
 
       # Add navigation:
-      $tag_body .= "<div class=\"next\"><a href=\"index$next.$ext\">" .
-                   "$next_string</a></div>\n" if $tag_page;
+      $tag_body .= format_navigation('next', $next) if $tag_page;
 
       # Prepare this tag's target directory name:
       $target = ($destdir eq '.')
