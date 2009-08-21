@@ -908,16 +908,23 @@ sub write_page {
   # Substitute the home page placeholder:
   $template   =~ s/%home%/$home/ig;
 
-  # Substitute the `page with selected ID' placeholder:
-  while ($template =~ /%page\[(\d+)\]%/i) {
-    my $link  = fix_link("$root$data->{links}->{pages}->{$1}->{url}");
-    $template =~ s/%page\[$1\]%/$link/ig;
-  }
+  # Substitute the `post/page with selected ID' placeholder:
+  while ($template =~ /%(post|page)\[(\d+)\]%/i) {
+    # Check whether the selected post/page exists:
+    if (my $link = $data->{links}->{"$1s"}->{$2}->{url}) {
+      # Compose the URL:
+      $link = fix_link("$root$link");
 
-  # Substitute the `post with selected ID' placeholder:
-  while ($template =~ /%post\[(\d+)\]%/i) {
-    my $link  = fix_link("$root$data->{links}->{posts}->{$1}->{url}");
-    $template =~ s/%post\[$1\]%/$link/ig;
+      # Substitute the placeholder:
+      $template =~ s/%$1\[$2\]%/$link/ig;
+    }
+    else {
+      # Report invalid reference:
+      display_warning("Invalid reference to $1 with ID $2.");
+
+      # Disable the placeholder:
+      $template =~ s/%$1\[$2\]%/#/ig;
+    }
   }
 
   # Create the target directory tree:
