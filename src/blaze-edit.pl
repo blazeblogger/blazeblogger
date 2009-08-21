@@ -577,6 +577,34 @@ B<blaze-edit> B<-h> | B<-v>
 B<blaze-edit> enables you to edit a blog post or a page in your favourite
 text editor.
 
+Note that inside your posts and pages, you can use several special
+placeholders to be replaced by appropriate data later, when the static
+content is being generated; the case is not significant, and supported
+placeholders are as follows:
+
+=over
+
+=item B<%root%>
+
+Relative path to the root directory of the blog; to be used inside links.
+
+=item B<%home%>
+
+Relative path to the website home (index) page; to be used inside links.
+
+=item B<%page[>I<id>B<]%>
+
+Relative path to the page with given I<id>; to be used inside links.
+
+=item B<%post[>I<id>B<]%>
+
+Relative path to the post with given I<id>; to be used inside links.
+
+=back
+
+You can also use a special form, B<<!-- break -->>, to mark the end of a
+part to be displayed on index page.
+
 =head1 OPTIONS
 
 =over
