@@ -68,8 +68,7 @@ HTML/XHTML document.
 
 =item B<<!-- title -->>
 
-The blog title, see C<blog.title> in the BlazeBlogger configuration. You
-can use this placeholder in the TITLE element as well.
+The blog title, see C<blog.title> in the BlazeBlogger configuration.
 
 =item B<<!-- subtitle -->>
 
@@ -110,14 +109,26 @@ Main content (e.g. post or page body, posts listing etc.).
 =item B<%root%>
 
 Relative path to the root directory of the blog; to be used inside links.
-Note that this is one of two placeholders that can safely appear in the
-post/page body as well and will be still taken into account.
+Note that this placeholder can safely appear in the post/page body as well
+and will be still taken into account.
 
 =item B<%home%>
 
 Relative path to the website home (index) page; to be used inside links.
-Note that this is one of two placeholders that can safely appear in the
-post/page body as well and will be still taken into account.
+Note that this placeholder can safely appear in the post/page body as well
+and will be still taken into account.
+
+=item B<%page[I<id>]%>
+
+Relative path to the page with given I<id>; to be used inside links. Note
+that this placeholder can safely appear in the post/page body as well and
+will be still taken into account.
+
+=item B<%post[I<id>]%>
+
+Relative path to the post with given I<id>; to be used inside links. Note
+that this placeholder can safely appear in the post/page body as well and
+will be still taken into account.
 
 =back
 
