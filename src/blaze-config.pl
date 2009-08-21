@@ -648,6 +648,23 @@ the default UTF-8).
 File extension for the generated pages. By default, the C<html> is used as
 a reasonable choice.
 
+=item B<post.author>
+
+Location of the post author information; available options are C<top>,
+C<bottom>, or C<none>. Author is placed above the post (below its heading)
+by default.
+
+=item B<post.date>
+
+Location of the post date of publishing information; available options are
+C<top>, C<bottom>, or C<none>. Date of publishing is placed above the post
+(below its heading) by default.
+
+=item B<post.tags>
+
+Location of the post tags; available options are C<top>, C<bottom>, or
+C<none>. Tags are placed above the post (below its heading) by default.
+
 =item B<user.name>
 
 User's name to be used as a default posts' author and optionally anywhere
