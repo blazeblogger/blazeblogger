@@ -169,6 +169,8 @@ sub strip_html {
 # Read data from the INI file:
 sub read_ini {
   my $file    = shift || die 'Missing argument';
+
+  # Initialize required variables:
   my $hash    = {};
   my $section = 'default';
 
@@ -372,6 +374,8 @@ sub make_record {
 # Return the list of posts/pages header records:
 sub collect_headers {
   my $type    = shift || 'post';
+
+  # Initialize required variables:
   my @records = ();
 
   # Prepare the file name:
@@ -415,6 +419,7 @@ sub collect_headers {
 
 # Collect the necessary metadata:
 sub collect_metadata {
+  # Initialize required variables:
   my $post_links  = {};
   my $page_links  = {};
   my $month_links = {};
@@ -556,6 +561,8 @@ sub list_of_months {
 sub list_of_pages {
   my $pages = shift || die 'Missing argument';
   my $root  = shift || '';
+
+  # Initialize required variables:
   my $list  = '';
 
   # Check whether the pages generation is enabled:
@@ -583,6 +590,8 @@ sub list_of_posts {
   my $posts = shift || die 'Missing argument';
   my $root  = shift || '';
   my $max   = shift || 5;
+
+  # Initialize required variables:
   my $list  = '';
 
   # Check whether the posts generation is enabled:
@@ -627,7 +636,7 @@ sub read_entry {
   # Prepare the file name:
   my $file    = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
 
-  # Initialize other required variables:
+  # Initialize required variables:
   my $result  = '';
 
   # Open the post/page body file for reading:
@@ -676,30 +685,60 @@ sub format_information {
   my $record = shift || die 'Missing argument';
   my $tags   = shift || die 'Missing argument';
   my $root   = shift || '';
+  my $type   = shift || 'top';
+
+  # Initialize required variables:
+  my $class  = ($type eq 'top') ? 'information' : 'post-footer';
+  my ($date, $author, $taglist) = ('', '', '');
+
+  # Read required data from the configuration:
+  my $author_location = $conf->{post}->{author} || 'top';
+  my $date_location   = $conf->{post}->{date}   || 'top';
+  my $tags_location   = $conf->{post}->{tags}   || 'top';
 
   # Read required data from the language file:
-  my $posted_on = $locale->{lang}->{postedon} || '';
-  my $posted_by = $locale->{lang}->{postedby} || 'by';
-  my $tagged_as = $locale->{lang}->{taggedas} || 'tagged as';
+  my $posted_on = $locale->{lang}->{postedon}   || '';
+  my $posted_by = $locale->{lang}->{postedby}   || 'by';
+  my $tagged_as = $locale->{lang}->{taggedas}   || 'tagged as';
 
-  # Format the information:
-  my $date    = "$posted_on <span class=\"date\">$record->{date}</span> ";
-  my $author  = "$posted_by <span class=\"author\">$record->{author}</span>";
-  my $taglist = "";
-
-  # Check whether tags are enabled and present:
-  if ($with_tags && $record->{tags}) {
-    # Create the tag links:
-    $taglist  = join(', ', map {
-      "<a href=\"". fix_link("${root}tags/$tags->{$_}->{url}") ."\">$_</a>"
-    } split(/,\s*/, $record->{tags}));
-
-    # Format the tag links:
-    $taglist = ", $tagged_as <span class=\"tags\">$taglist</span>";
+  # Check whether the date of publishing is to be included:
+  if ($date_location eq $type) {
+    # Format the date of publishing:
+    $date   = "$posted_on <span class=\"date\">$record->{date}</span>";
   }
 
-  # Return the result:
-  return "<div class=\"information\">\n  $date$author$taglist\n</div>\n";
+  # Check whether the author is to be included:
+  if ($author_location eq $type) {
+    # Format the author:
+    $author = "$posted_by <span class=\"author\">$record->{author}</span>";
+
+    # Prepend a space if the date of publishing is included:
+    $author = " $author" if $date;
+  }
+
+  # Check whether the tags are to be included (and there are any):
+  if ($tags_location eq $type && $with_tags && $record->{tags}) {
+    # Convert tags to proper links:
+    $taglist = join(', ', map {
+      "<a href=\"". fix_link("${root}tags/$tags->{$_}->{url}") ."\">$_</a>"
+      } split(/,\s*/, $record->{tags}));
+
+    # Format the tags:
+    $taglist = "$tagged_as <span class=\"tags\">$taglist</span>";
+
+    # Prepend a comma if the date of publishing or author are included:
+    $taglist = ", $taglist" if $date || $author;
+  }
+
+  # Check whether there is anything to return:
+  if ($date || $author || $taglist) {
+    # Return the result:
+    return "<div class=\"$class\">\n  \u$date$author$taglist\n</div>\n";
+  }
+  else {
+    # Return empty string:
+    return '';
+  }
 }
 
 # Return formatted post/page entry:
@@ -710,11 +749,11 @@ sub format_entry {
   my $type    = shift || 'post';
   my $excerpt = shift || 0;
 
-  # Initialize other required variables:
+  # Initialize required variables:
   my $tags    = $data->{links}->{tags};
   my $title   = $record->{title};
   my $id      = $record->{id};
-  my $link    = '';
+  my ($link, $information, $post_footer) = ('', '', '');
 
   # If the excerpt is requested, prepare the entry link:
   if ($excerpt) {
@@ -732,15 +771,18 @@ sub format_entry {
     }
   }
 
-  # Prepare the post/page heading:
-  my $body        = read_entry($id, $type, $link, $excerpt);
-  my $heading     = format_heading($title, $link);
-  my $information = ($type eq 'post')
-                  ? format_information($record, $tags, $root)
-                  : '';
+  # Prepare the post/page heading and body/excerpt:
+  my $heading = format_heading($title, $link);
+  my $body    = read_entry($id, $type, $link, $excerpt);
+
+  # For posts, prepare its additional information:
+  if ($type eq 'post') {
+    $information = format_information($record, $tags, $root, 'top');
+    $post_footer = format_information($record, $tags, $root, 'bottom');
+  }
 
   # Return the result:
-  return "\n$heading\n$information\n$body";
+  return "\n$heading$information$body$post_footer";
 }
 
 # Return formatted section title:
@@ -780,12 +822,12 @@ sub write_page {
   my $heading = shift || $conf->{blog}->{title} || 'My Blog';
   my $index   = shift || '';
 
-  # Read required data from the configuration:
-  my $ext     = $conf->{core}->{extension}      || 'html';
-
-  # Initialize other required variables:
+  # Initialize required variables:
   my $home    = fix_link($root);
   my $temp    = $root || '#';
+
+  # Read required data from the configuration:
+  my $ext     = $conf->{core}->{extension}      || 'html';
 
   # Check whether the template is not already cached:
   unless ($cache->{theme}->{$temp}) {
@@ -925,6 +967,8 @@ sub copy_stylesheet {
 # Generate RSS feed:
 sub generate_rss {
   my $data          = shift || die 'Missing argument';
+
+  # Initialize required variables:
   my $max_posts     = 10;
 
   # Read required data from the configuration:
@@ -1018,13 +1062,13 @@ sub generate_rss {
 sub generate_index {
   my $data       = shift || die 'Missing argument';
 
+  # Initialize required variables:
+  my $body       = '';
+  my $count      = 0;
+
   # Read required data from the configuration:
   my $max_posts  = $conf->{blog}->{posts}     || 10;
   my $blog_title = $conf->{blog}->{title}     || 'My Blog';
-
-  # Initialize other required variables:
-  my $body       = '';
-  my $count      = 0;
 
   # Check whether the posts are enabled:
   if ($with_posts) {
@@ -1056,7 +1100,6 @@ sub generate_posts {
   my $data         = shift || die 'Missing argument';
 
   # Read required data from the configuration:
-  my $ext          = $conf->{core}->{extension}  || 'html';
   my $max_posts    = $conf->{blog}->{posts}      || 10;
 
   # Read required data from the localization:
@@ -1232,7 +1275,6 @@ sub generate_tags {
   my $data         = shift || die 'Missing argument';
 
   # Read required data from the configuration:
-  my $ext          = $conf->{core}->{extension}  || 'html';
   my $max_posts    = $conf->{blog}->{posts}      || 10;
 
   # Read required data from the localization:
