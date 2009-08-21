@@ -118,13 +118,13 @@ Relative path to the website home (index) page; to be used inside links.
 Note that this placeholder can safely appear in the post/page body as well
 and will be still taken into account.
 
-=item B<%page[I<id>]%>
+=item B<%page[>I<id>B<]%>
 
 Relative path to the page with given I<id>; to be used inside links. Note
 that this placeholder can safely appear in the post/page body as well and
 will be still taken into account.
 
-=item B<%post[I<id>]%>
+=item B<%post[>I<id>B<]%>
 
 Relative path to the post with given I<id>; to be used inside links. Note
 that this placeholder can safely appear in the post/page body as well and
@@ -156,8 +156,15 @@ archive, tag listing etc.).
 
 =item B<information>
 
-C<DIV> element containing the additional information about the post, i.e.
-the date of publishing, the post author and the list of attached tags.
+C<DIV> element, optionally containing the additional information about the
+post, such as the date of publishing, the post author, or the list of
+attached tags. It is placed above the post, right below its heading.
+
+=item B<post-footer>
+
+C<DIV> element, optionally containing the additional information about the
+post, such as the date of publishing, the post author, or the list of
+attached tags. It is placed right below the post itself.
 
 =item B<date>
 
