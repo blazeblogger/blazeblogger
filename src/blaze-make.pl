@@ -159,8 +159,17 @@ sub fix_link {
 sub strip_html {
   my $string = shift || return '';
 
-  # Strip HTML elements and forbidded characters:
+  # Substitute most common HTML entities:
+  $string =~ s/&[mn]dash;/--/ig;
+  $string =~ s/&[lrb]dquo;/"/ig;
+  $string =~ s/&[lr]squo;/'/ig;
+  $string =~ s/&nbsp;/ /ig;
+
+  # Strip other HTML elements and forbidded characters:
   $string =~ s/(<[^>]*>|&[^;]*;|<|>|&)//g;
+
+  # Strip superfluous whitespace characters:
+  $string =~ s/\s{2,}/ /g;
 
   # Return the result:
   return $string;
@@ -1026,16 +1035,15 @@ sub generate_rss {
     last if $count == $max_posts;
 
     # Decompose the record:
-    my $id     = $record->{id};
-    my $title  = $record->{title};
-    my $author = $record->{author};
-    my $tags   = $record->{tags};
-    my $url    = $record->{url};
+    my $url        = $record->{url};
     my ($year, $month, $day) = split(/-/, $record->{date});
 
+    # Read the post excerpt:
+    my $post_body  = read_entry($record->{id}, 'post', '', 1);
+
     # Strip HTML elements:
-    my $post_title = strip_html($title);
-    my $post_desc  = strip_html(substr(read_entry($id,'post','',1),0,500));
+    my $post_title = strip_html($record->{title});
+    my $post_desc  = substr(strip_html($post_body), 0, 500);
 
     # Get the RFC 822 date-time string:
     my $time       = timelocal_nocheck(1, 0, 0, $day, ($month - 1), $year);
