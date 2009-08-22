@@ -163,6 +163,7 @@ sub strip_html {
   $string =~ s/&[mn]dash;/--/ig;
   $string =~ s/&[lrb]dquo;/"/ig;
   $string =~ s/&[lr]squo;/'/ig;
+  $string =~ s/&hellip;/.../ig;
   $string =~ s/&nbsp;/ /ig;
 
   # Strip other HTML elements and forbidded characters:
