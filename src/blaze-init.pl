@@ -168,8 +168,8 @@ sub create_conf {
 ##          to be either true, or false.
 ##
 [color]
-list=false
-log=false
+#list=false
+#log=false
 
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
@@ -265,7 +265,7 @@ sub create_theme {
   </div>
 
   <div id="sidebar">
-    <h2>Tags</h2>
+    <h2>Categories</h2>
     <ul>
 <!-- tags -->
     </ul>
@@ -275,9 +275,9 @@ sub create_theme {
 <!-- archive -->
     </ul>
 
-    <h2>Blogroll</h2>
+    <h2>Links</h2>
     <ul>
-<li><a href="http://blaze.blackened.cz">BlazeBlogger Homepage</a></li>
+<li><a href="http://blaze.blackened.cz">BlazeBlogger</a></li>
     </ul>
   </div>
 
@@ -446,6 +446,24 @@ body {
 }
 
 #content .information a:hover {
+  text-decoration: none;
+}
+
+#content .post-footer {
+  font-size: x-small;
+  color: #4e4e4e;
+  padding: 4px 2px 4px 2px;
+  border-top: 1px solid #e7e7e7;
+  border-bottom: 1px solid #e7e7e7;
+  background-color: #f8f8f8;
+}
+
+#content .post-footer a {
+  color: #4e9a06;
+  text-decoration: underline;
+}
+
+#content .post-footer a:hover {
   text-decoration: none;
 }
 
