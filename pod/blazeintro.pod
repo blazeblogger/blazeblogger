@@ -93,7 +93,7 @@ To add a new blog post to the repository, type:
 
   $ blaze-add
 
-This will open the external editor with a preformatted header and empty
+This will open the external editor with a pre-formatted header and empty
 body for you to write. Although the most of the header lines are devoted
 to the exhaustive explanation of what exactly you should and should not
 fill in, let's take a closer look at the five header options once again
@@ -108,8 +108,7 @@ The title of your post; you do not want to omit that one, do you?
 =item author
 
 The post author. The user name specified in the configuration is used by
-default, but you are free to change it to whatever name you wish. The only
-limitation is that it should not contain a semicolon.
+default, but you are free to change it to whatever name you wish.
 
 =item date
 
@@ -121,8 +120,8 @@ filled. The default option is current date.
 
 Comma separated list of categories the post belongs to. The exact number of
 attached tags is not limited as long as they are all listed on the same
-line and they do not contain a semicolon inside. Since tags are completely
-optional, you can safely leave this option empty, or fill it any time later.
+line. Since tags are completely optional, you can safely leave this option
+empty, or fill it any time later.
 
 =item url
 
