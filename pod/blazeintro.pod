@@ -239,7 +239,7 @@ You can also narrow the results by providing the additional specifications
 like date, tag or author. For example, to find all posts from 19 December
 2008 written by David, type:
 
-  $ blaze-list --author admin --year 2008 --month 12 --day 19
+  $ blaze-list --author David --year 2008 --month 12 --day 19
 
 To browse pages instead of blog posts, simply add the C<--pages> option:
 
