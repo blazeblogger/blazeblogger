@@ -130,6 +130,12 @@ Relative path to the post with given I<id>; to be used inside links. Note
 that this placeholder can safely appear in the post/page body as well and
 will be still taken into account.
 
+=item B<%tag[>I<name>B<]%>
+
+Relative path to the tag with given I<name>; to be used inside links. Note
+that this placeholder can safely appear in the post/page body as well and
+will be still taken into account.
+
 =back
 
 =head2 Creating the Stylesheet

@@ -600,6 +600,10 @@ Relative path to the page with given I<id>; to be used inside links.
 
 Relative path to the post with given I<id>; to be used inside links.
 
+=item B<%tag[>I<name>B<]%>
+
+Relative path to the tag with given I<name>; to be used inside links.
+
 =back
 
 You can also use a special form, B<<!-- break -->>, to mark the end of a
