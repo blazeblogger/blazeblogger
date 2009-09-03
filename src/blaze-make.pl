@@ -534,7 +534,7 @@ sub list_of_tags {
   if (my %tags = %$tags) {
     # Return the list of tags:
     return join("\n", map {
-      "<li><a href=\"" . fix_link("${root}tags/" . $tags{$_}->{url}) .
+      "<li><a href=\"" . fix_link("${root}tags/$tags{$_}->{url}") .
       "\">$_ (" . $tags{$_}->{count} . ")</a></li>"
     } sort(keys(%tags)));
   }
@@ -918,22 +918,31 @@ sub write_page {
   # Substitute the home page placeholder:
   $template   =~ s/%home%/$home/ig;
 
-  # Substitute the `post/page with selected ID' placeholder:
-  while ($template =~ /%(post|page)\[(\d+)\]%/i) {
-    # Check whether the selected post/page exists:
-    if (my $link = $data->{links}->{"$1s"}->{$2}->{url}) {
+  # Substitute the `post/page/tag with selected ID' placeholder:
+  while ($template =~ /%(post|page|tag)\[([^\]]+)\]%/i) {
+    # Decompose the placeholder:
+    my $type = $1;
+    my $id   = lc($2);
+
+    # Check whether the selected post/page/tag exists:
+    if (defined $data->{links}->{"${type}s"}->{$id}) {
+      # Get the post/page/tag link:
+      my $link = $data->{links}->{"${type}s"}->{$id}->{url};
+
       # Compose the URL:
-      $link = fix_link("$root$link");
+      $link    = ($type ne 'tag')
+               ? fix_link("$root$link")
+               : fix_link("${root}tags/$link");
 
       # Substitute the placeholder:
-      $template =~ s/%$1\[$2\]%/$link/ig;
+      $template =~ s/%$type\[$id\]%/$link/ig;
     }
     else {
       # Report invalid reference:
-      display_warning("Invalid reference to $1 with ID $2.");
+      display_warning("Invalid reference to $type with ID $id.");
 
       # Disable the placeholder:
-      $template =~ s/%$1\[$2\]%/#/ig;
+      $template =~ s/%$type\[$id\]%/#/ig;
     }
   }
 
