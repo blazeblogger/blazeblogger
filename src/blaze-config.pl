@@ -469,6 +469,10 @@ sub display_option {
     # Display the value:
     print "$value\n";
   }
+  else {
+    # Display the default value:
+    print $opt{"$section.$key"}, "\n";
+  }
 
   # Return success:
   return 1;
