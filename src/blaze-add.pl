@@ -17,10 +17,11 @@
 
 use strict;
 use warnings;
+use Digest::MD5;
 use File::Basename;
+use File::Path;
 use File::Spec::Functions;
 use Getopt::Long;
-use Digest::MD5;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -119,6 +120,8 @@ sub date_to_string {
 # Read data from the INI file:
 sub read_ini {
   my $file    = shift || die 'Missing argument';
+
+  # Initialize required variables:
   my $hash    = {};
   my $section = 'default';
 
@@ -327,11 +330,26 @@ sub save_record {
   my $id   = shift || die 'Missing argument';
   my $type = shift || 'post';
   my $data = shift || {};
+
+  # Initialize required variables:
   my $line = '';
 
+  # Prepare the record directory names:
+  my $head_dir = catdir($blogdir, '.blaze', "${type}s", 'head');
+  my $body_dir = catdir($blogdir, '.blaze', "${type}s", 'body');
+
   # Prepare the record file names:
-  my $head = catfile($blogdir, '.blaze', "${type}s", 'head', $id);
-  my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
+  my $head = catfile($head_dir, $id);
+  my $body = catfile($body_dir, $id);
+
+  # Make sure the directories exist:
+  unless (-d $head_dir && -d $body_dir) {
+    # Create the target directory tree:
+    eval { mkpath($head_dir, $body_dir, { verbose => 0 }); };
+
+    # Make sure the directory creation was successfull:
+    exit_with_error("Creating directory tree: $@", 13) if $@;
+  }
 
   # Open the file for reading:
   open(FILE, "$file") or return 0;
@@ -424,6 +442,8 @@ sub add_files {
   my $type  = shift || 'post';
   my $data  = shift || {};
   my $files = shift || die 'Missing argument';
+
+  # Initialize required variables:
   my @list  = ();
 
   # Process each file:
@@ -537,6 +557,8 @@ END_HEAD
 # Add given string to the log file
 sub add_to_log {
   my $text = shift || 'Something miraculous has just happened!';
+
+  # Prepare the log file name:
   my $file = catfile($blogdir, '.blaze', 'log');
 
   # Open the log file for appending:
