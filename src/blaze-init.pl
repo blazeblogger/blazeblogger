@@ -621,6 +621,9 @@ GetOptions(
 # Detect superfluous options:
 exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 
+# Decide whether to create or recover the repository:
+my $action = (-d catdir($blogdir, '.blaze')) ? 'Recovered' : 'Created';
+
 # Create the directory tree:
 make_directories [
   catdir($blogdir, '.blaze'),                       # Root directory.
@@ -652,11 +655,11 @@ create_lang()
   or display_warning("Unable to create the default language file.");
 
 # Write to / create the log file:
-add_to_log("Created/recovered a BlazeBlogger repository.")
+add_to_log("$action a BlazeBlogger repository.")
   or display_warning("Unable to log the event.");
 
 # Report success:
-print "Created/recovered a BlazeBlogger repository in " .
+print "$action a BlazeBlogger repository in " .
       catdir($blogdir, '.blaze') . ".\n" if $verbose;
 
 # Return success:
