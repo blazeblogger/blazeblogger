@@ -35,7 +35,7 @@ be placed, you can create a new one typing:
 
 If nothing goes wrong, you should get a response similar to this:
 
-  Created/recovered a BlazeBlogger repository in .blaze.
+  Created a BlazeBlogger repository in .blaze.
 
 As the message suggests, you can use the same command any time later to
 return the repository to a consistent state while leaving the rest of your
