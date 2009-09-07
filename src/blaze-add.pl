@@ -550,6 +550,9 @@ END_HEAD
   # Add file to the repository:
   my @list = add_files($type, $data, [ $temp ]);
 
+  # Remove the temporary file:
+  unlink $temp;
+
   # Return the record ID:
   return shift(@list);
 }

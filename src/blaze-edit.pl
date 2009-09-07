@@ -520,6 +520,9 @@ sub edit_record {
     return 0
   }
 
+  # Remove the temporary file:
+  unlink $temp;
+
   # Return success:
   return 1;
 }

@@ -415,12 +415,18 @@ sub edit_options {
     # Save the configuration file:
     write_conf($conf) or return 0;
 
+    # Remove the temporary file:
+    unlink $temp;
+
     # Return success:
     return 1;
   }
   else {
     # Report failure:
     display_warning("Unable to read temporary file.");
+
+    # Remove the temporary file:
+    unlink $temp;
 
     # Return failure:
     return 0;
