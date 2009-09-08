@@ -664,6 +664,14 @@ the default UTF-8).
 File extension for the generated pages. By default, the C<html> is used as
 a reasonable choice.
 
+=item B<core.processor>
+
+Optional external application to be used to process the entries; use
+C<%in%> and C<%out%> in place of input and output file names (e.g.
+C<txt2tags -H -t html -o %out% %in%>). Nevertheless, if you intend to write
+your content in HTML directly, feel free to leave this option empty (the
+default setting).
+
 =item B<post.author>
 
 Location of the post author information; available options are C<top>,
