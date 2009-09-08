@@ -19,6 +19,7 @@ use strict;
 use warnings;
 use Digest::MD5;
 use File::Basename;
+use File::Copy;
 use File::Path;
 use File::Spec::Functions;
 use Getopt::Long;
@@ -335,27 +336,44 @@ sub save_record {
   my $line = '';
 
   # Prepare the record directory names:
-  my $head_dir = catdir($blogdir, '.blaze', "${type}s", 'head');
-  my $body_dir = catdir($blogdir, '.blaze', "${type}s", 'body');
+  my $head_dir  = catdir($blogdir, '.blaze', "${type}s", 'head');
+  my $body_dir  = catdir($blogdir, '.blaze', "${type}s", 'body');
+  my $raw_dir   = catdir($blogdir, '.blaze', "${type}s", 'raw');
 
   # Prepare the record file names:
-  my $head = catfile($head_dir, $id);
-  my $body = catfile($body_dir, $id);
+  my $head      = catfile($head_dir, $id);
+  my $body      = catfile($body_dir, $id);
+  my $raw       = catfile($raw_dir,  $id);
 
-  # Make sure the directories exist:
-  unless (-d $head_dir && -d $body_dir) {
-    # Create the target directory tree:
-    eval { mkpath($head_dir, $body_dir, { verbose => 0 }); };
+  # Prepare the temporary file names:
+  my $temp_head = catfile($blogdir, '.blaze', 'temp.head');
+  my $temp_body = catfile($blogdir, '.blaze', 'temp.body');
+  my $temp_raw  = catfile($blogdir, '.blaze', 'temp.raw');
 
-    # Make sure the directory creation was successfull:
-    exit_with_error("Creating directory tree: $@", 13) if $@;
+  # Read required data from the configuration:
+  my $processor = $conf->{core}->{processor} || '';
+
+  # Check whether the processor is enabled:
+  if ($processor) {
+    # Check whether the processor uses both input and output files:
+    unless ($processor =~ /%in%/i && $processor =~ /%out%/i) {
+      # Report failure:
+      display_warning("Missing %in% or %out% in core.processor option.");
+
+      # Return failure:
+      return 0;
+    }
+
+    # Substitute the placeholders with actual file names:
+    $processor =~ s/%in%/$temp_raw/ig;
+    $processor =~ s/%out%/$temp_body/ig;
   }
 
-  # Open the file for reading:
-  open(FILE, "$file") or return 0;
+  # Open the input file for reading:
+  open(FIN, "$file") or return 0;
 
   # Parse the file header:
-  while ($line = <FILE>) {
+  while ($line = <FIN>) {
     # Header ends with the first line not beginning with `#':
     last unless $line =~ /^#/;
 
@@ -365,26 +383,63 @@ sub save_record {
     }
   }
 
-  # Fix the erroneous or missing header data:
+  # Fix erroneous or missing header data:
   fix_header($data, $id, $type);
 
-  # Write the record header:
-  write_ini($head, $data) or return 0;
+  # Write the record header to the temporary file:
+  write_ini($temp_head, $data) or return 0;
 
-  # Open the record body for writing:
-  open(BODY, ">$body") or return 0;
+  # Open the proper output file:
+  open(FOUT, '>' . ($processor ? $temp_raw : $temp_body)) or return 0;
 
-  # Write the last read line to the body record:
-  print BODY $line if $line;
+  # Write the last read line to the output file:
+  print FOUT $line if $line;
 
-  # Add the rest of the file content to the body record:
-  while ($line = <FILE>) {
-    print BODY $line;
+  # Add the rest of the file content to the output file:
+  while ($line = <FIN>) {
+    print FOUT $line;
   }
 
-  # Close previously opened files:
-  close(BODY);
-  close(FILE);
+  # Close all opened files:
+  close(FIN);
+  close(FOUT);
+
+  # Check whether the processor is enabled:
+  if ($processor) {
+    # Process the raw input file:
+    unless (system("$processor") == 0) {
+      # Report failure:
+      display_warning("Unable to run `$processor'.");
+
+      # Return failure:
+      return 0;
+    }
+
+    # Make sure the raw record directory exists:
+    unless (-d $raw_dir) {
+      # Create the target directory tree:
+      eval { mkpath($raw_dir, { verbose => 0 }); };
+
+      # Make sure the directory creation was successfull:
+      exit_with_error("Creating directory tree: $@", 13) if $@;
+    }
+
+    # Create the raw record file:
+    move($temp_raw, $raw) or return 0;
+  }
+
+  # Make sure the record body and header directories exist:
+  unless (-d $head_dir && -d $body_dir) {
+    # Create the target directory tree:
+    eval { mkpath($head_dir, $body_dir, { verbose => 0 }); };
+
+    # Make sure the directory creation was successfull:
+    exit_with_error("Creating directory tree: $@", 13) if $@;
+  }
+
+  # Create the record body and header files:
+  move($temp_body, $body) or return 0;
+  move($temp_head, $head) or return 0;
 
   # Return success:
   return 1;
