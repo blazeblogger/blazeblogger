@@ -178,11 +178,15 @@ sub create_conf {
 ##   encoding  - Records  encoding in the form  recognised by the  W3C HTML
 ##               4.01 standard (e.g. the default UTF-8).
 ##   extension - File extension for the generated pages.
+##   processor - An optional external application to be used to process the
+##               entries;  use %in% and %out% in place of input and  output
+##               files, for example: txt2tags -H -t html -o %out% %in%
 ##
 [core]
 #editor=vi
 #encoding=UTF-8
 #extension=html
+#processor=
 
 ## The following are the post related settings, making it possible to alter
 ## the look of a single post even further. The options are as follows:
