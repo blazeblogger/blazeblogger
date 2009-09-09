@@ -355,18 +355,9 @@ sub save_record {
 
   # Check whether the processor is enabled:
   if ($processor) {
-    # Check whether the processor uses both input and output files:
-    unless ($processor =~ /%in%/i && $processor =~ /%out%/i) {
-      # Report failure:
-      display_warning("Missing %in% or %out% in core.processor option.");
-
-      # Return failure:
-      return 0;
-    }
-
     # Substitute the placeholders with actual file names:
-    $processor =~ s/%in%/$temp_raw/ig;
-    $processor =~ s/%out%/$temp_body/ig;
+    $processor  =~ s/%in%/$temp_raw/ig;
+    $processor  =~ s/%out%/$temp_body/ig;
   }
 
   # Open the input file for reading:
@@ -408,11 +399,8 @@ sub save_record {
   if ($processor) {
     # Process the raw input file:
     unless (system("$processor") == 0) {
-      # Report failure:
-      display_warning("Unable to run `$processor'.");
-
-      # Return failure:
-      return 0;
+      # Report failure and exit:
+      exit_with_error("Unable to run `$processor'.", 1);
     }
 
     # Make sure the raw record directory exists:
@@ -572,11 +560,8 @@ END_HEAD
 
   # Open the temporary file in the external editor:
   unless (system("$edit $temp") == 0) {
-    # Report failure:
-    display_warning("Unable to run `$edit'.");
-
-    # Return faulure:
-    return 0;
+    # Report failure and exit:
+    exit_with_error("Unable to run `$edit'.", 1);
   }
 
   # Opent the file for reading:
@@ -656,6 +641,12 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 
 # Read the configuration file:
 $conf = read_conf();
+
+# Make sure the processor specification is valid:
+if (my $processor = $conf->{core}->{processor}) {
+  exit_with_error("Invalid core.processor option.", 1)
+    unless ($processor =~ /%in%/i && $processor =~ /%out%/i);
+}
 
 # Check whether any file is supplied:
 if (scalar(@ARGV) == 0) {
