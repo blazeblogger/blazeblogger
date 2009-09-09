@@ -33,27 +33,27 @@ HTML/XHTML document.
 
 =over
 
-=item B<<!-- content-type -->>
+=item B<< <!-- content-type --> >>
 
 The Content-Type META tag.
 
-=item B<<!-- generator -->>
+=item B<< <!-- generator --> >>
 
 The Generator META tag.
 
-=item B<<!-- date -->>
+=item B<< <!-- date --> >>
 
 The Date META tag.
 
-=item B<<!-- stylesheet -->>
+=item B<< <!-- stylesheet --> >>
 
 The Stylesheet LINK tag.
 
-=item B<<!-- rss -->>
+=item B<< <!-- rss --> >>
 
 The RSS feed LINK tag.
 
-=item B<<!-- page-title -->>
+=item B<< <!-- page-title --> >>
 
 Current page title, usually used inside TITLE element.
 
@@ -66,43 +66,43 @@ HTML/XHTML document.
 
 =over
 
-=item B<<!-- title -->>
+=item B<< <!-- title --> >>
 
 The blog title, see C<blog.title> in the BlazeBlogger configuration.
 
-=item B<<!-- subtitle -->>
+=item B<< <!-- subtitle --> >>
 
 The blog title, see C<blog.subtitle> in the BlazeBlogger configuration.
 
-=item B<<!-- name -->>
+=item B<< <!-- name --> >>
 
 The user's name, see C<user.name> in the BlazeBlogger configuration.
 
-=item B<<!-- e-mail -->>
+=item B<< <!-- e-mail --> >>
 
 The user's e-mail, see C<user.email> in the BlazeBlogger configuration.
 
-=item B<<!-- year -->>
+=item B<< <!-- year --> >>
 
 The current year.
 
-=item B<<!-- tags -->>
+=item B<< <!-- tags --> >>
 
 List of tags.
 
-=item B<<!-- archive -->>
+=item B<< <!-- archive --> >>
 
 List of months.
 
-=item B<<!-- pages -->>
+=item B<< <!-- pages --> >>
 
 List of pages.
 
-=item B<<!-- posts -->>
+=item B<< <!-- posts --> >>
 
 List of recent blog posts.
 
-=item B<<!-- content -->>
+=item B<< <!-- content --> >>
 
 Main content (e.g. post or page body, posts listing etc.).
 

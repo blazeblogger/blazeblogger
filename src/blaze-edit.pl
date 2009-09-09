@@ -630,8 +630,8 @@ Relative path to the tag with given I<name>; to be used inside links.
 
 =back
 
-You can also use a special form, B<<!-- break -->>, to mark the end of a
-part to be displayed on index page.
+You can also use a special form, B<< <!-- break --> >>, to mark the end of
+a part to be displayed on index page.
 
 =head1 OPTIONS
 
