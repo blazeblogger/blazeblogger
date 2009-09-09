@@ -103,6 +103,8 @@ END_VERSION
 # Add given string to the log file
 sub add_to_log {
   my $text = shift || 'Something miraculous has just happened!';
+
+  # Prepare the log file name:
   my $file = catfile($blogdir, '.blaze', 'log');
 
   # Open the log file for appending:
@@ -121,6 +123,8 @@ sub add_to_log {
 # Read data from the INI file:
 sub read_ini {
   my $file    = shift || die 'Missing argument';
+
+  # Initialize required variables:
   my $hash    = {};
   my $section = 'default';
 
@@ -151,6 +155,8 @@ sub read_ini {
 sub remove_records {
   my $type = shift || 'post';
   my $ids  = shift || die 'Missing argument';
+
+  # Initialize required variables:
   my @list = ();
 
   # Process each record:
@@ -158,6 +164,7 @@ sub remove_records {
     # Prepare the file names:
     my $head = catfile($blogdir, '.blaze', "${type}s", 'head', $id);
     my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
+    my $raw  = catfile($blogdir, '.blaze', "${type}s", 'raw', $id);
 
     # Enter the interactive mode if requested:
     if ($prompt) {
@@ -181,10 +188,18 @@ sub remove_records {
       next unless (readline(*STDIN) =~ /^(y|yes)$/i);
     }
 
-    # Remove the record:
-    unlink($head) and unlink($body)
-      and push(@list, $id)
-      or  display_warning("Unable to remove the $type with ID $id.");
+    # Try to remove the record header:
+    if (unlink $head) {
+      # Remove the remaining record data:
+      unlink($body, $raw);
+
+      # Add record to the list of successfully removed IDs:
+      push(@list, $id);
+    }
+    else {
+      # Report failure:
+      display_warning("Unable to remove the $type with ID $id.");
+    }
   }
 
   # Return the list of removed IDs:
