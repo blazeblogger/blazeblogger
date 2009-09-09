@@ -94,10 +94,10 @@ To add a new blog post to the repository, type:
   $ blaze-add
 
 This will open the external editor with a pre-formatted header and empty
-body for you to write. Although the most of the header lines are devoted
-to the exhaustive explanation of what exactly you should and should not
-fill in, let's take a closer look at the five header options once again
-just to make sure everything is perfectly clear:
+body for you to write. Although the most of the header lines are devoted to
+the exhaustive explanation of what exactly you should and should not fill
+in, let's take a closer look at the five header options just to make sure
+everything is perfectly clear:
 
 =over
 
@@ -143,10 +143,10 @@ below:
   # This and following lines  beginning with `#'  are the post header.
   # Please take your time and replace these options with  desired val-
   # ues. Just remember  that the date has to be in an YYYY-MM-DD form,
-  # the tags  is a comma separated list of categories the post  (pages
-  # ignore these) belong and the  URL, if provided,  should consist of
-  # alphanumeric characters, hyphens and underscores only.  Specifying
-  # your own URL is especially recommended when you use non-ASCII cha-
+  # tags are  a comma separated list of categories the post (pages ig-
+  # nore these) belong to, and the url, if provided, should consist of
+  # alphanumeric characters,  hyphens and underscores only. Specifying
+  # your own url is especially recommended when you use non-ASCII cha-
   # racters in your post title.
   #
   #   title:  The Hobbit, or There and Back Again
@@ -155,9 +155,7 @@ below:
   #   tags:   childrens literature, fantasy
   #   url:    the-hobbit
   #
-  # The header ends here.  The rest  is the content  of your post. You
-  # can use <!-- break --> to mark the end of the part to be displayed
-  # on index page.
+  # The header ends here. The rest is the content of your post.
 
   <p>&ldquo;In a hole in the ground there lived a hobbit.&rdquo;
   &mdash; these are the words that introduces us to the incredible
@@ -169,9 +167,11 @@ below:
 
   <p><em>The Hobbit</em> is a story about Bilbo Baggins, a hobbit ...
 
-You can also use a special placeholder, C<%root%>, as a relative path to
-the base URL (directory where the blog is placed) in your links and images.
-For example, to link the RSS feed from your blog post, write:
+Note that you can use C<< <!-- break --> >> to mark the end of the part to
+be displayed on index page. You can also use a special placeholder,
+C<%root%>, as a relative path to the base URL (directory where the blog is
+placed) in your links and images. For example, to link the RSS feed from
+your blog post, write:
 
   <a href="%root%index.rss">RSS Feed</a>
 
@@ -193,12 +193,12 @@ following command:
 
   $ blaze-remove 3
 
-Note that the utility has no conscience and remorselessly deletes anything
-you tell it to, with no way to take it back (unless you have backup, of
-course). To prevent the accidental loss of potentially valuable data, you
-might want to consider running it in an interactive mode using the
-C<--interactive> (or shorter C<-i>) option and thus having to confirm every
-deletion.
+Do not forget that the utility has no conscience and remorselessly deletes
+anything you tell it to, with no way to take it back (unless you have
+backup, of course). To prevent the accidental loss of potentially valuable
+data, you might want to consider running it in an interactive mode using
+the C<--interactive> (or shorter C<-i>) option and thus having to confirm
+every deletion.
 
 =head2 Managing the Pages
 
