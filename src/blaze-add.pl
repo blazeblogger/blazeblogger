@@ -535,10 +535,10 @@ sub add_new {
   my $head = << "END_HEAD";
 # This and following lines beginning with  `#' are the $type header.  Please
 # take your time and replace these options with desired values. Just remem-
-# ber that the date has to be in an  YYYY-MM-DD  form,  the tags is a comma
-# separated list of categories the post (pages ignore these) belong and the
-# URL, if provided, should consist of alphanumeric characters,  hyphens and
-# underscores only. Specifying your own URL  is especially recommended when
+# ber that the date has to be in an YYYY-MM-DD form, tags are a comma sepa-
+# rated list of categories the post (pages ignore these) belong to, and the
+# url, if provided, should consist of alphanumeric characters,  hyphens and
+# underscores only. Specifying your own url  is especially recommended when
 # you use non-ASCII characters in your $type title.
 #
 #   title:  $title
@@ -547,8 +547,7 @@ sub add_new {
 #   tags:   $tags
 #   url:    $url
 #
-# The header ends here.  The rest is the content of your $type.  You can use
-# <!-- break --> to mark the end of the part to be displayed on index page.
+# The header ends here. The rest is the content of your $type.
 
 END_HEAD
 
