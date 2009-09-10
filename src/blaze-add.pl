@@ -30,6 +30,7 @@ use constant VERSION => '0.9.1';                    # Script version.
 
 # General script settings:
 our $blogdir  = '.';                                # Repository location.
+our $process  = 1;                                  # Use processor?
 our $verbose  = 1;                                  # Verbosity level.
 
 # Global variables:
@@ -70,7 +71,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqPV] [-b directory] [-a author] [-d date] [-t title]
+Usage: $NAME [-pqHPV] [-b directory] [-a author] [-d date] [-t title]
                  [-T tags] [-u url] [file...]
        $NAME -h | -v
 
@@ -83,6 +84,7 @@ Usage: $NAME [-pqPV] [-b directory] [-a author] [-d date] [-t title]
   -u, --url url               use given url; based on the title by default
   -p, --page                  add page instead of blog post
   -P, --post                  add blog post; the default option
+  -H, --html                  force writing the entry directly in HTML
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -351,10 +353,10 @@ sub save_record {
   my $temp_raw  = catfile($blogdir, '.blaze', 'temp.raw');
 
   # Read required data from the configuration:
-  my $processor = $conf->{core}->{processor} || '';
+  my $processor = $conf->{core}->{processor};
 
   # Check whether the processor is enabled:
-  if ($processor) {
+  if ($process) {
     # Substitute the placeholders with actual file names:
     $processor  =~ s/%in%/$temp_raw/ig;
     $processor  =~ s/%out%/$temp_body/ig;
@@ -381,7 +383,7 @@ sub save_record {
   write_ini($temp_head, $data) or return 0;
 
   # Open the proper output file:
-  open(FOUT, '>' . ($processor ? $temp_raw : $temp_body)) or return 0;
+  open(FOUT, '>' . ($process ? $temp_raw : $temp_body)) or return 0;
 
   # Write the last read line to the output file:
   print FOUT $line if $line;
@@ -396,7 +398,7 @@ sub save_record {
   close(FOUT);
 
   # Check whether the processor is enabled:
-  if ($processor) {
+  if ($process) {
     # Process the raw input file:
     unless (system("$processor") == 0) {
       # Report failure and exit:
@@ -625,6 +627,7 @@ GetOptions(
   'version|v'     => sub { display_version(); exit 0; },
   'page|pages|p'  => sub { $type    = 'page'; },
   'post|posts|P'  => sub { $type    = 'post'; },
+  'html|H'        => sub { $process = 0;      },
   'quiet|q'       => sub { $verbose = 0;      },
   'verbose|V'     => sub { $verbose = 1;      },
   'blogdir|b=s'   => sub { $blogdir = $_[1];  },
@@ -642,10 +645,15 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 # Read the configuration file:
 $conf = read_conf();
 
-# Make sure the processor specification is valid:
+# Check whether the processor is enabled in the configuration:
 if (my $processor = $conf->{core}->{processor}) {
+  # Make sure the processor specification is valid:
   exit_with_error("Invalid core.processor option.", 1)
     unless ($processor =~ /%in%/i && $processor =~ /%out%/i);
+}
+else {
+  # Disable the processor:
+  $process = 0;
 }
 
 # Check whether any file is supplied:
@@ -682,7 +690,7 @@ blaze-add - add a blog post or a page to the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-add> [B<-pqPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
+B<blaze-add> [B<-pqHPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
 I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
 
 B<blaze-add> B<-h> | B<-v>
@@ -766,6 +774,12 @@ Add page instead of blog post.
 =item B<-P>, B<--post>, B<--posts>
 
 Add blog post; this is the default option.
+
+=item B<-H>, B<--html>
+
+Force writing the blog post or page directly in HTML. Unless the
+C<core.processor> is enabled in the configuration, this is the default
+behaviour.
 
 =item B<-q>, B<--quiet>
 
