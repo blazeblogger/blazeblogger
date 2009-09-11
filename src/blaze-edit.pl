@@ -19,6 +19,7 @@ use strict;
 use warnings;
 use Digest::MD5;
 use File::Basename;
+use File::Copy;
 use File::Path;
 use File::Spec::Functions;
 use Getopt::Long;
@@ -29,6 +30,7 @@ use constant VERSION => '0.9.1';                    # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
+our $process = 1;                                   # Use processor?
 our $verbose = 1;                                   # Verbosity level.
 
 # Global variables:
@@ -323,6 +325,14 @@ sub read_record {
   # Prepare the record file names:
   my $head = catfile($blogdir, '.blaze', "${type}s", 'head', $id);
   my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
+  my $raw  = catfile($blogdir, '.blaze', "${type}s", 'raw',  $id);
+
+  # Check whether the processor is enabled:
+  if ($process) {
+    # Make sure the raw file exists:
+    exit_with_error("Raw file does not exist.", 1)
+      unless (-e $raw);
+  }
 
   # Parse the record header data:
   my $data = read_ini($head) or return 0;
@@ -335,9 +345,9 @@ sub read_record {
   my $url    = $data->{header}->{url}    || '';
 
   # Open the file for writing:
-  if (open(FILE, ">$file")) {
+  if (open(FOUT, ">$file")) {
     # Write the header:
-    print FILE << "END_HEADER";
+    print FOUT << "END_HEADER";
 # This and following lines beginning with  `#' are the $type header.  Please
 # take your time and replace these options with desired values. Just remem-
 # ber that the date has to be in an YYYY-MM-DD form, tags are a comma sepa-
@@ -355,17 +365,17 @@ sub read_record {
 # The header ends here. The rest is the content of your $type.
 END_HEADER
 
-    # Open the record body for the reading:
-    open(BODY, "$body") or return 0;
+    # Open the record for the reading:
+    open(FIN, ($process ? $raw : $body)) or return 0;
 
     # Add content of the record body to the file:
-    while (my $line = <BODY>) {
-      print FILE $line;
+    while (my $line = <FIN>) {
+      print FOUT $line;
     }
 
     # Close previously opened files:
-    close(BODY);
-    close(FILE);
+    close(FIN);
+    close(FOUT);
 
     # Return success:
     return 1;
@@ -390,27 +400,35 @@ sub save_record {
   my $line = '';
 
   # Prepare the record directory names:
-  my $head_dir = catdir($blogdir, '.blaze', "${type}s", 'head');
-  my $body_dir = catdir($blogdir, '.blaze', "${type}s", 'body');
+  my $head_dir  = catdir($blogdir, '.blaze', "${type}s", 'head');
+  my $body_dir  = catdir($blogdir, '.blaze', "${type}s", 'body');
+  my $raw_dir   = catdir($blogdir, '.blaze', "${type}s", 'raw');
 
   # Prepare the record file names:
-  my $head = catfile($head_dir, $id);
-  my $body = catfile($body_dir, $id);
+  my $head      = catfile($head_dir, $id);
+  my $body      = catfile($body_dir, $id);
+  my $raw       = catfile($raw_dir,  $id);
 
-  # Make sure the directories exist:
-  unless (-d $head_dir && -d $body_dir) {
-    # Create the target directory tree:
-    eval { mkpath($head_dir, $body_dir, { verbose => 0 }); };
+  # Prepare the temporary file names:
+  my $temp_head = catfile($blogdir, '.blaze', 'temp.head');
+  my $temp_body = catfile($blogdir, '.blaze', 'temp.body');
+  my $temp_raw  = catfile($blogdir, '.blaze', 'temp.raw');
 
-    # Make sure the directory creation was successfull:
-    exit_with_error("Creating directory tree: $@", 13) if $@;
+  # Read required data from the configuration:
+  my $processor = $conf->{core}->{processor};
+
+  # Check whether the processor is enabled:
+  if ($process) {
+    # Substitute the placeholders with actual file names:
+    $processor  =~ s/%in%/$temp_raw/ig;
+    $processor  =~ s/%out%/$temp_body/ig;
   }
 
-  # Open the file for reading:
-  open(FILE, "$file") or return 0;
+  # Open the input file for reading:
+  open(FIN, "$file") or return 0;
 
   # Parse the file header:
-  while ($line = <FILE>) {
+  while ($line = <FIN>) {
     # Header ends with the first line not beginning with `#':
     last unless $line =~ /^#/;
 
@@ -420,26 +438,60 @@ sub save_record {
     }
   }
 
-  # Fix the erroneous or missing header data:
+  # Fix erroneous or missing header data:
   fix_header($data, $id, $type);
 
-  # Write the record header:
-  write_ini($head, $data) or return 0;
+  # Write the record header to the temporary file:
+  write_ini($temp_head, $data) or return 0;
 
-  # Open the record body for writing:
-  open(BODY, ">$body") or return 0;
+  # Open the proper output file:
+  open(FOUT, '>' . ($process ? $temp_raw : $temp_body)) or return 0;
 
-  # Write the last read line to the body record:
-  print BODY $line if $line;
+  # Write the last read line to the output file:
+  print FOUT $line if $line;
 
-  # Add the rest of the file content to the body record:
-  while ($line = <FILE>) {
-    print BODY $line;
+  # Add the rest of the file content to the output file:
+  while ($line = <FIN>) {
+    print FOUT $line;
   }
 
-  # Close previously opened files:
-  close(BODY);
-  close(FILE);
+  # Close all opened files:
+  close(FIN);
+  close(FOUT);
+
+  # Check whether the processor is enabled:
+  if ($process) {
+    # Process the raw input file:
+    unless (system("$processor") == 0) {
+      # Report failure and exit:
+      exit_with_error("Unable to run `$processor'.", 1);
+    }
+
+    # Make sure the raw record directory exists:
+    unless (-d $raw_dir) {
+      # Create the target directory tree:
+      eval { mkpath($raw_dir, { verbose => 0 }); };
+
+      # Make sure the directory creation was successfull:
+      exit_with_error("Creating directory tree: $@", 13) if $@;
+    }
+
+    # Create the raw record file:
+    move($temp_raw, $raw) or return 0;
+  }
+
+  # Make sure the record body and header directories exist:
+  unless (-d $head_dir && -d $body_dir) {
+    # Create the target directory tree:
+    eval { mkpath($head_dir, $body_dir, { verbose => 0 }); };
+
+    # Make sure the directory creation was successfull:
+    exit_with_error("Creating directory tree: $@", 13) if $@;
+  }
+
+  # Create the record body and header files:
+  move($temp_body, $body) or return 0;
+  move($temp_head, $head) or return 0;
 
   # Return success:
   return 1;
@@ -569,6 +621,17 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 
 # Read the configuration file:
 $conf = read_conf();
+
+# Check whether the processor is enabled in the configuration:
+if ($process && (my $processor = $conf->{core}->{processor})) {
+  # Make sure the processor specification is valid:
+  exit_with_error("Invalid core.processor option.", 1)
+    unless ($processor =~ /%in%/i && $processor =~ /%out%/i);
+}
+else {
+  # Disable the processor:
+  $process = 0;
+}
 
 # Edit given record:
 edit_record($ARGV[0], $type)
