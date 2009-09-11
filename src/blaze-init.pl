@@ -160,7 +160,7 @@ sub create_conf {
 ##   extension - File extension for the generated pages.
 ##   processor - An optional external application to be used to process the
 ##               entries;  use %in% and %out% in place of input and  output
-##               files, for example: txt2tags -H -t html -o %out% %in%
+##               files, for example: markdown --html4tags %in% > %out%
 ##
 [core]
 #editor=vi

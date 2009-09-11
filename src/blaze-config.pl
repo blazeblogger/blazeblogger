@@ -307,7 +307,7 @@ log=$color_log
 ##   extension - File extension for the generated pages.
 ##   processor - An optional external application to be used to process the
 ##               entries;  use %in% and %out% in place of input and  output
-##               files, for example: txt2tags -H -t html -o %out% %in%
+##               files, for example: markdown --html4tags %in% > %out%
 ##
 [core]
 editor=$core_editor
@@ -668,9 +668,9 @@ a reasonable choice.
 
 Optional external application to be used to process the entries; use
 C<%in%> and C<%out%> in place of input and output file names (e.g.
-C<txt2tags -H -t html -o %out% %in%>). Nevertheless, if you intend to write
-your content in HTML directly, feel free to leave this option empty (the
-default setting).
+C<< markdown --html4tags %in% > %out% >>). Nevertheless, if you intend to
+write your content in HTML directly, feel free to leave this option empty
+(the default setting).
 
 =item B<post.author>
 
