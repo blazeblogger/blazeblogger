@@ -646,7 +646,7 @@ exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
 $conf = read_conf();
 
 # Check whether the processor is enabled in the configuration:
-if (my $processor = $conf->{core}->{processor}) {
+if ($process && (my $processor = $conf->{core}->{processor})) {
   # Make sure the processor specification is valid:
   exit_with_error("Invalid core.processor option.", 1)
     unless ($processor =~ /%in%/i && $processor =~ /%out%/i);
