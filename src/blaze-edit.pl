@@ -30,6 +30,7 @@ use constant VERSION => '0.9.1';                    # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
+our $force   = 0;                                   # Force raw file?
 our $process = 1;                                   # Use processor?
 our $verbose = 1;                                   # Verbosity level.
 
@@ -37,7 +38,7 @@ our $verbose = 1;                                   # Verbosity level.
 our $conf    = {};                                  # Configuration.
 
 # Command-line options:
-my  $type = 'post';                                 # Type: post or page.
+my  $type    = 'post';                              # Type: post or page.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
@@ -67,13 +68,15 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqPV] [-b directory] id
+Usage: $NAME [-fpqHPV] [-b directory] id
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
   -p, --page                  edit page instead of blog post
   -P, --post                  edit blog post; the default option
+  -f, --force                 force creating the raw file if not present
+  -H, --html                  force editing the entry directly in HTML
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -327,11 +330,11 @@ sub read_record {
   my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
   my $raw  = catfile($blogdir, '.blaze', "${type}s", 'raw',  $id);
 
-  # Check whether the processor is enabled:
-  if ($process) {
-    # Make sure the raw file exists:
-    exit_with_error("Raw file does not exist.", 1)
-      unless (-e $raw);
+  # If processor is enabled, make sure the raw file exist:
+  if ($process && ! -e $raw) {
+    exit_with_error("Raw file does not exist. Use `--force' to create " .
+                    "new one, or `--html' to edit HTML file directly.", 1)
+      unless $force;
   }
 
   # Parse the record header data:
@@ -365,16 +368,21 @@ sub read_record {
 # The header ends here. The rest is the content of your $type.
 END_HEADER
 
-    # Open the record for the reading:
-    open(FIN, ($process ? $raw : $body)) or return 0;
+    # Skip this part when forced to create empty raw file:
+    unless ($process && ! -e $raw && $force) {
+      # Open the record for the reading:
+      open(FIN, ($process ? $raw : $body)) or return 0;
 
-    # Add content of the record body to the file:
-    while (my $line = <FIN>) {
-      print FOUT $line;
+      # Add content of the record body to the file:
+      while (my $line = <FIN>) {
+        print FOUT $line;
+      }
+
+      # Close the record:
+      close(FIN);
     }
 
-    # Close previously opened files:
-    close(FIN);
+    # Close the file:
     close(FOUT);
 
     # Return success:
@@ -607,6 +615,8 @@ GetOptions(
   'version|v'     => sub { display_version(); exit 0; },
   'page|pages|p'  => sub { $type    = 'page'; },
   'post|posts|P'  => sub { $type    = 'post'; },
+  'force|f'       => sub { $force   = 1;      },
+  'html|H'        => sub { $process = 0;      },
   'quiet|q'       => sub { $verbose = 0;      },
   'verbose|V'     => sub { $verbose = 1;      },
   'blogdir|b=s'   => sub { $blogdir = $_[1];  },
@@ -655,7 +665,7 @@ blaze-edit - edit a blog post or a page in the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-edit> [B<-pqPV>] [B<-b> I<directory>] I<id>
+B<blaze-edit> [B<-fpqHPV>] [B<-b> I<directory>] I<id>
 
 B<blaze-edit> B<-h> | B<-v>
 
@@ -712,6 +722,18 @@ Edit page instead of blog post.
 =item B<-P>, B<--post>
 
 Edit blog post; this is the default option.
+
+=item B<-f>, B<--force>
+
+Force creating a new, empty raw file when it does not already exist,
+although the C<core.processor> is enabled in the configuration. Note that
+this will rewrite whatever content is in existing HTML file.
+
+=item B<-H>, B<--html>
+
+Force editing the blog post or page directly in HTML. Unless the
+C<core.processor> is enabled in the configuration, this is the default
+behaviour.
 
 =item B<-q>, B<--quiet>
 
