@@ -18,6 +18,7 @@
 use strict;
 use warnings;
 use File::Basename;
+use File::Path;
 use File::Spec::Functions;
 use Getopt::Long;
 
@@ -89,27 +90,6 @@ distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
 TICULAR PURPOSE.
 END_VERSION
-
-  # Return success:
-  return 1;
-}
-
-# Create given directories:
-sub make_directories {
-  my $dirs = shift || die 'Missing argument';
-  my $mask = shift || 0777;
-
-  # Process each directory:
-  foreach my $dir (sort @$dirs) {
-    # Skip existing directories:
-    unless (-d $dir) {
-      # Create the directory:
-      mkdir($dir, $mask) || exit_with_error("Creating `$dir': $!", 13);
-
-      # Report success:
-      print "Created $dir\n" if $verbose > 1;
-    }
-  }
 
   # Return success:
   return 1;
@@ -629,18 +609,23 @@ exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 my $action = (-d catdir($blogdir, '.blaze')) ? 'Recovered' : 'Created';
 
 # Create the directory tree:
-make_directories [
-  catdir($blogdir, '.blaze'),                       # Root directory.
-  catdir($blogdir, '.blaze', 'lang'),               # Translations.
-  catdir($blogdir, '.blaze', 'theme'),              # Templates.
-  catdir($blogdir, '.blaze', 'style'),              # Stylesheets.
-  catdir($blogdir, '.blaze', 'pages'),              # Pages.
-  catdir($blogdir, '.blaze', 'pages', 'head'),      # Pages' headers.
-  catdir($blogdir, '.blaze', 'pages', 'body'),      # Pages' bodies.
-  catdir($blogdir, '.blaze', 'posts'),              # Blog posts.
-  catdir($blogdir, '.blaze', 'posts', 'head'),      # Posts' headers.
-  catdir($blogdir, '.blaze', 'posts', 'body'),      # Posts' bodies.
-];
+eval {
+  mkpath(
+    catdir($blogdir, '.blaze', 'lang'),
+    catdir($blogdir, '.blaze', 'theme'),
+    catdir($blogdir, '.blaze', 'style'),
+    catdir($blogdir, '.blaze', 'pages', 'head'),
+    catdir($blogdir, '.blaze', 'pages', 'body'),
+    catdir($blogdir, '.blaze', 'pages', 'raw'),
+    catdir($blogdir, '.blaze', 'posts', 'head'),
+    catdir($blogdir, '.blaze', 'posts', 'body'),
+    catdir($blogdir, '.blaze', 'posts', 'raw'),
+    { verbose => 0 }
+  );
+};
+
+# Make sure the directory tree creation was successful:
+exit_with_error("Creating directory tree: $@", 13) if $@;
 
 # Create the default configuration file:
 create_conf()
