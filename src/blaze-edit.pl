@@ -480,7 +480,7 @@ sub save_record {
       # Create the target directory tree:
       eval { mkpath($raw_dir, { verbose => 0 }); };
 
-      # Make sure the directory creation was successfull:
+      # Make sure the directory creation was successful:
       exit_with_error("Creating directory tree: $@", 13) if $@;
     }
 
@@ -493,7 +493,7 @@ sub save_record {
     # Create the target directory tree:
     eval { mkpath($head_dir, $body_dir, { verbose => 0 }); };
 
-    # Make sure the directory creation was successfull:
+    # Make sure the directory creation was successful:
     exit_with_error("Creating directory tree: $@", 13) if $@;
   }
 
