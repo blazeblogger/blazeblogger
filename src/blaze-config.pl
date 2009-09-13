@@ -131,6 +131,8 @@ END_VERSION
 # Read data from the INI file:
 sub read_ini {
   my $file    = shift || die 'Missing argument';
+
+  # Initialize required variables:
   my $hash    = {};
   my $section = 'default';
 
@@ -357,6 +359,7 @@ END_TEMP
 
 # Edit the configuration file:
 sub edit_options {
+  # Initialize required variables:
   my ($before, $after);
 
   # Prepare the temporary file name:
@@ -650,10 +653,6 @@ C<true>, or C<false>. Colours are turned off by default.
 Whether to use coloured log listing; the value has to be either C<true>, or
 C<false>. Colours are turned off by default.
 
-=item B<core.editor>
-
-Text editor to be used for editing purposes.
-
 =item B<core.encoding>
 
 Records encoding in the form recognised by the W3C HTML 4.01 standard (e.g.
@@ -663,6 +662,13 @@ the default UTF-8).
 
 File extension for the generated pages. By default, the C<html> is used as
 a reasonable choice.
+
+=item B<core.editor>
+
+Text editor to be used for editing purposes. Unless this option is set,
+BlazeBlogger tries to use system wide settings by looking for C<EDITOR>
+environment variable, and if neither of these options is supplied, C<vi> is
+used as a considerably reasonable option.
 
 =item B<core.processor>
 

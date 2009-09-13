@@ -28,8 +28,8 @@ use constant VERSION => '0.9.1';                    # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
-our $verbose = 1;                                   # Verbosity level.
 our $force   = 0;                                   # Force files rewrite?
+our $verbose = 1;                                   # Verbosity level.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
@@ -97,6 +97,7 @@ END_VERSION
 
 # Create the default configuration file:
 sub create_conf {
+  # Prepare the configuration file name:
   my $file = catfile($blogdir, '.blaze', 'config');
 
   # Skip existing file unless forced:
@@ -204,6 +205,7 @@ END_CONFIG
 
 # Create the default theme file:
 sub create_theme {
+  # Prepare the theme file name:
   my $file = catfile($blogdir, '.blaze', 'theme', 'default.html');
 
   # Skip existing file unless forced:
@@ -286,6 +288,7 @@ END_THEME
 
 # Create the default style file:
 sub create_style {
+  # Prepare the style file name:
   my $file = catfile($blogdir, '.blaze', 'style', 'default.css');
 
   # Skip existing file unless forced:
@@ -526,6 +529,7 @@ END_STYLE
 
 # Create the default language file:
 sub create_lang {
+  # Prepare the language file name:
   my $file = catfile($blogdir, '.blaze', 'lang', 'en_GB');
 
   # Skip existing file unless forced:
@@ -573,6 +577,8 @@ END_LANG
 # Add given string to the log file:
 sub add_to_log {
   my $text = shift || 'Something miraculous has just happened!';
+
+  # Prepare the log file name:
   my $file = catfile($blogdir, '.blaze', 'log');
 
   # Open the log file for appending:
