@@ -17,11 +17,11 @@
 
 use strict;
 use warnings;
+use Digest::MD5;
 use File::Basename;
 use File::Copy;
 use File::Path;
 use File::Spec::Functions;
-use Digest::MD5;
 use Getopt::Long;
 use Time::Local 'timelocal_nocheck';
 

@@ -17,11 +17,11 @@
 
 use strict;
 use warnings;
-use Text::Wrap;
 use File::Basename;
 use File::Spec::Functions;
-use Term::ANSIColor;
 use Getopt::Long;
+use Term::ANSIColor;
+use Text::Wrap;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -136,6 +136,8 @@ sub date_to_string {
 # Read data from the INI file:
 sub read_ini {
   my $file    = shift || die 'Missing argument';
+
+  # Initialize required variables:
   my $hash    = {};
   my $section = 'default';
 
@@ -278,6 +280,8 @@ sub compare_records {
 # Return the list of posts/pages header records:
 sub collect_headers {
   my $type    = shift || 'post';
+
+  # Initialize required variables:
   my @records = ();
 
   # Prepare the file name:
@@ -359,6 +363,8 @@ sub display_records {
   my $year    = shift || '....';
   my $month   = shift || '..';
   my $day     = shift || '..';
+
+  # Initialize required variables:
   my $count   = 0;
 
   # Collect the pages/posts headers:

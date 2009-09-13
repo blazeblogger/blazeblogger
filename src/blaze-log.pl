@@ -17,11 +17,11 @@
 
 use strict;
 use warnings;
-use Text::Wrap;
 use File::Basename;
 use File::Spec::Functions;
-use Term::ANSIColor;
 use Getopt::Long;
+use Term::ANSIColor;
+use Text::Wrap;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
@@ -29,11 +29,11 @@ use constant VERSION => '0.9.1';                    # Script version.
 
 # General script settings:
 our $blogdir    = '.';                              # Repository location.
-our $verbose    = 1;                                # Verbosity level.
-our $compact    = 0;                                # Use compact listing?
 our $coloured   = undef;                            # Use coloured listing?
-our $reverse    = 0;                                # Use reverse order?
+our $compact    = 0;                                # Use compact listing?
 our $number     = 0;                                # Listed records limit.
+our $reverse    = 0;                                # Use reverse order?
+our $verbose    = 1;                                # Verbosity level.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -105,6 +105,8 @@ END_VERSION
 # Read data from the INI file:
 sub read_ini {
   my $file    = shift || die 'Missing argument';
+
+  # Initialize required variables:
   my $hash    = {};
   my $section = 'default';
 
@@ -185,6 +187,7 @@ sub display_record {
 
 # Display log records:
 sub display_log {
+  # Initialize required variables:
   my @lines = ();
   my $count = 0;
 

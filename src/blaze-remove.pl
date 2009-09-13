@@ -27,8 +27,8 @@ use constant VERSION => '0.9.1';                    # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
-our $verbose = 1;                                   # Verbosity level.
 our $prompt  = 0;                                   # Ask for confirmation?
+our $verbose = 1;                                   # Verbosity level.
 
 # Command-line options:
 my  $type    = 'post';                              # Type: post or page.
