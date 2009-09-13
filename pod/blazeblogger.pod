@@ -8,20 +8,20 @@ B<blaze-init> [B<-fqV>] [B<-b> I<directory>]
 
 B<blaze-config> [B<-qV>] [B<-b> I<directory>] I<name> [I<value>...]
 
-B<blaze-add> [B<-pqPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
+B<blaze-add> [B<-pqHPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
 I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
 
-B<blaze-edit> [B<-pqPV>] [B<-b> I<directory>] I<id>
+B<blaze-edit> [B<-fpqHPV>] [B<-b> I<directory>] I<id>
 
 B<blaze-remove> [B<-fipqPV>] [B<-b> I<directory>] I<id>...
 
-B<blaze-list> [B<-cpqsCPSV>] [B<-b> I<directory>] [B<-I> I<id>] [B<-a>
+B<blaze-list> [B<-cpqrsCPSV>] [B<-b> I<directory>] [B<-I> I<id>] [B<-a>
 I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>] [B<-m> I<month>]
-[B<-y> I<year>]
+[B<-y> I<year>] [B<-n> I<number>]
 
 B<blaze-make> [B<-cpqrtIFPV>] [B<-b> I<directory>] [B<-d> I<directory>]
 
-B<blaze-log> [B<-cqsCV>] [B<-b> I<directory>]
+B<blaze-log> [B<-cqrsCV>] [B<-b> I<directory>] [B<-n> I<number>]
 
 =head1 DESCRIPTION
 
