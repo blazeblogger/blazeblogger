@@ -46,9 +46,9 @@ our %opt = (
   'color.log'      => 'false',                      # Coloured log?
 
   # Core settings:
-  'core.editor'    => 'vi',                         # External text editor.
   'core.encoding'  => 'UTF-8',                      # Posts/pages codepage.
   'core.extension' => 'html',                       # File extension.
+  'core.editor'    => '',                           # External text editor.
   'core.processor' => '',                           # External processor.
 
   # Post related settings:
@@ -301,18 +301,18 @@ log=$color_log
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
 ##
-##   editor    - An external text editor to be used for editing purposes.
 ##   encoding  - Records  encoding in the form  recognised by the  W3C HTML
 ##               4.01 standard (e.g. the default UTF-8).
 ##   extension - File extension for the generated pages.
+##   editor    - An external text editor to be used for editing purposes.
 ##   processor - An optional external application to be used to process the
 ##               entries;  use %in% and %out% in place of input and  output
 ##               files, for example: markdown --html4tags %in% > %out%
 ##
 [core]
-editor=$core_editor
 encoding=$core_encoding
 extension=$core_extension
+editor=$core_editor
 processor=$core_processor
 
 ## The following are the post related settings, making it possible to alter

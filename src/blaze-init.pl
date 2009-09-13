@@ -110,8 +110,7 @@ sub create_conf {
 ## This is the default BlazeBlogger configuration file. The recommended way
 ## to set up your blog is to leave this file intact and use blaze-config(1)
 ## instead.  Nevertheless, if you prefer to configure the settings by hand,
-## simply uncomment the desired option  (i.e. remove the hash sign from the
-## beginning of the line) and replace the value next to the equal sign.
+## simply replace the value next to the equal sign.
 
 ## The following are the blog related settings, having the direct influence
 ## on the way the whole thing looks. The options are as follows:
@@ -131,13 +130,13 @@ sub create_conf {
 ##   url      - The blog base url; required for RSS feed only.
 ##
 [blog]
-#title=My Blog
-#subtitle=yet another blog
-#theme=default.html
-#style=default.css
-#lang=en_GB
-#posts=10
-#url=
+title=My Blog
+subtitle=yet another blog
+theme=default.html
+style=default.css
+lang=en_GB
+posts=10
+url=
 
 ## The following are the colour settings, affecting the way various outputs
 ## look. The options are as follows:
@@ -148,25 +147,25 @@ sub create_conf {
 ##          to be either true, or false.
 ##
 [color]
-#list=false
-#log=false
+list=false
+log=false
 
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
 ##
-##   editor    - An external text editor to be used for editing purposes.
 ##   encoding  - Records  encoding in the form  recognised by the  W3C HTML
 ##               4.01 standard (e.g. the default UTF-8).
 ##   extension - File extension for the generated pages.
+##   editor    - An external text editor to be used for editing purposes.
 ##   processor - An optional external application to be used to process the
 ##               entries;  use %in% and %out% in place of input and  output
 ##               files, for example: markdown --html4tags %in% > %out%
 ##
 [core]
-#editor=vi
-#encoding=UTF-8
-#extension=html
-#processor=
+encoding=UTF-8
+extension=html
+editor=
+processor=
 
 ## The following are the post related settings, making it possible to alter
 ## the look of a single post even further. The options are as follows:
@@ -178,9 +177,9 @@ sub create_conf {
 ##  tags   - Location of tags;  available options are top, bottom, or none.
 ##
 [post]
-#author=top
-#date=top
-#tags=top
+author=top
+date=top
+tags=top
 
 ## The following are the user related settings. The options are as follows:
 ##
@@ -189,8 +188,8 @@ sub create_conf {
 ##   email - User's e-mail.
 ##
 [user]
-#name=admin
-#email=admin@localhost
+name=admin
+email=admin@localhost
 END_CONFIG
 
   # Close the file:
