@@ -32,12 +32,6 @@ scripting, it is literally a CMS without boundaries suitable for a wide
 variety of web presentations, from personal weblog to a project page or
 even a company presentation.
 
-Using BlazeBlogger is really easy. Strongly inspired by Git in its design
-and in the best spirit of Unix philosophy, it comes as a set of smaller
-utilities that do one thing and do it well rather than the monolithic
-program for everything. Keeping the default configuration you can have a
-full-featured blog with the first post in only three steps!
-
 =head1 SEE ALSO
 
 =over
