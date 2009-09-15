@@ -30,6 +30,9 @@ mandir  = $(prefix)/share/man
 man1dir = $(mandir)/man1
 man7dir = $(mandir)/man7
 
+# Additional information:
+VERSION = 0.9.1
+
 # Make rules;  please do not edit these unless you really know what you are
 # doing:
 .PHONY: all clean install uninstall
@@ -95,8 +98,8 @@ uninstall:
 	-rmdir $(bindir) $(man1dir) $(man7dir) $(mandir)
 
 %.1: %.pl
-	$(POD2MAN) --section=1 $^ $@
+	$(POD2MAN) --section=1 --release="Version $(VERSION)" $^ $@
 
 %.7: %.pod
-	$(POD2MAN) --section=7 $^ $@
+	$(POD2MAN) --section=7 --release="Version $(VERSION)" $^ $@
 
