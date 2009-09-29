@@ -25,7 +25,7 @@ use Text::Wrap;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
-use constant VERSION => '0.9.1';                    # Script version.
+use constant VERSION => '1.0.0';                    # Script version.
 
 # General script settings:
 our $blogdir    = '.';                              # Repository location.

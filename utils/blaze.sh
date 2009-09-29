@@ -17,7 +17,7 @@
 
 # General script information:
 NAME=${0##*/}
-VERSION='0.9.1'
+VERSION='1.0.0'
 
 # Get user supplied command (if any):
 COMMAND=$1
