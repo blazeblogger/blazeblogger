@@ -37,9 +37,9 @@ case "$COMMAND" in
   "remove") exec blaze-remove "$@";;
   "-v" | "--version" | "version")
     # Display version information:
-    echo "$NAME $VERSION"
+    echo "BlazeBlogger $VERSION"
     echo
-    echo "Copyright (C) 2009 Jaromir Hradilek"
+    echo "Copyright (C) 2008, 2009 Jaromir Hradilek"
     echo "This program is free software; see the source for copying conditions. It is"
     echo "distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;"
     echo "without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-"
