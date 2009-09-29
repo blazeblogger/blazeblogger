@@ -19,8 +19,8 @@ use strict;
 use warnings;
 use Digest::MD5;
 use File::Basename;
-use File::Copy;
 use File::Compare;
+use File::Copy;
 use File::Path;
 use File::Spec::Functions;
 use Getopt::Long;
@@ -981,6 +981,7 @@ sub copy_stylesheet {
   my $from  = catfile($blogdir, '.blaze', 'style', $style);
   my $to    = ($destdir eq '.') ? $style : catfile($destdir, $style);
 
+  # Check whether the existing stylesheet differs:
   if (compare($from,$to)) {
     # Copy the file:
     copy($from, $to) or return 0;
