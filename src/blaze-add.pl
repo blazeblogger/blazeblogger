@@ -71,7 +71,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqHPV] [-b directory] [-a author] [-d date] [-t title]
+Usage: $NAME [-pqCPV] [-b directory] [-a author] [-d date] [-t title]
                  [-T tags] [-u url] [file...]
        $NAME -h | -v
 
@@ -84,7 +84,7 @@ Usage: $NAME [-pqHPV] [-b directory] [-a author] [-d date] [-t title]
   -u, --url url               use given url; based on the title by default
   -p, --page                  add page instead of blog post
   -P, --post                  add blog post; the default option
-  -H, --html                  force writing the entry directly in HTML
+  -C, --no-processor          disable the use of external processor
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -623,19 +623,19 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
 # Process command-line options:
 GetOptions(
-  'help|h'        => sub { display_help();    exit 0; },
-  'version|v'     => sub { display_version(); exit 0; },
-  'page|pages|p'  => sub { $type    = 'page'; },
-  'post|posts|P'  => sub { $type    = 'post'; },
-  'html|H'        => sub { $process = 0;      },
-  'quiet|q'       => sub { $verbose = 0;      },
-  'verbose|V'     => sub { $verbose = 1;      },
-  'blogdir|b=s'   => sub { $blogdir = $_[1];  },
-  'title|t=s'     => sub { $data->{header}->{title}  = $_[1]; },
-  'author|a=s'    => sub { $data->{header}->{author} = $_[1]; },
-  'date|d=s'      => sub { $data->{header}->{date}   = $_[1]; },
-  'tags|tag|T=s'  => sub { $data->{header}->{tags}   = $_[1]; },
-  'url|u=s'       => sub { $data->{header}->{url}    = $_[1]; },
+  'help|h'         => sub { display_help();    exit 0; },
+  'version|v'      => sub { display_version(); exit 0; },
+  'page|pages|p'   => sub { $type    = 'page'; },
+  'post|posts|P'   => sub { $type    = 'post'; },
+  'no-processor|C' => sub { $process = 0;      },
+  'quiet|q'        => sub { $verbose = 0;      },
+  'verbose|V'      => sub { $verbose = 1;      },
+  'blogdir|b=s'    => sub { $blogdir = $_[1];  },
+  'title|t=s'      => sub { $data->{header}->{title}  = $_[1]; },
+  'author|a=s'     => sub { $data->{header}->{author} = $_[1]; },
+  'date|d=s'       => sub { $data->{header}->{date}   = $_[1]; },
+  'tags|tag|T=s'   => sub { $data->{header}->{tags}   = $_[1]; },
+  'url|u=s'        => sub { $data->{header}->{url}    = $_[1]; },
 );
 
 # Check the repository is present (however naive this method is):
@@ -690,7 +690,7 @@ blaze-add - add a blog post or a page to the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-add> [B<-pqHPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
+B<blaze-add> [B<-pqCPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
 I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
 
 B<blaze-add> B<-h> | B<-v>
@@ -775,11 +775,10 @@ Add page instead of blog post.
 
 Add blog post; this is the default option.
 
-=item B<-H>, B<--html>
+=item B<-C>, B<--no-processor>
 
-Force writing the blog post or page directly in HTML. Unless the
-C<core.processor> is enabled in the configuration, this is the default
-behaviour.
+Disable the use of external processor. Unless the C<core.processor> is
+enabled in the configuration, this is the default behaviour.
 
 =item B<-q>, B<--quiet>
 
