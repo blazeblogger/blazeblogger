@@ -68,7 +68,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-fpqHPV] [-b directory] id
+Usage: $NAME [-fpqCPV] [-b directory] id
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
@@ -76,7 +76,7 @@ Usage: $NAME [-fpqHPV] [-b directory] id
   -p, --page                  edit page instead of blog post
   -P, --post                  edit blog post; the default option
   -f, --force                 force creating the raw file if not present
-  -H, --html                  force editing the entry directly in HTML
+  -C, --no-processor          disable the use of external processor
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
   -h, --help                  display this help and exit
@@ -611,15 +611,15 @@ Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
 # Process command-line options:
 GetOptions(
-  'help|h'        => sub { display_help();    exit 0; },
-  'version|v'     => sub { display_version(); exit 0; },
-  'page|pages|p'  => sub { $type    = 'page'; },
-  'post|posts|P'  => sub { $type    = 'post'; },
-  'force|f'       => sub { $force   = 1;      },
-  'html|H'        => sub { $process = 0;      },
-  'quiet|q'       => sub { $verbose = 0;      },
-  'verbose|V'     => sub { $verbose = 1;      },
-  'blogdir|b=s'   => sub { $blogdir = $_[1];  },
+  'help|h'         => sub { display_help();    exit 0; },
+  'version|v'      => sub { display_version(); exit 0; },
+  'page|pages|p'   => sub { $type    = 'page'; },
+  'post|posts|P'   => sub { $type    = 'post'; },
+  'force|f'        => sub { $force   = 1;      },
+  'no-processor|C' => sub { $process = 0;      },
+  'quiet|q'        => sub { $verbose = 0;      },
+  'verbose|V'      => sub { $verbose = 1;      },
+  'blogdir|b=s'    => sub { $blogdir = $_[1];  },
 );
 
 # Check superfluous options:
@@ -726,14 +726,16 @@ Edit blog post; this is the default option.
 =item B<-f>, B<--force>
 
 Force creating a new, empty raw file when it does not already exist,
-although the C<core.processor> is enabled in the configuration. Note that
-this will rewrite whatever content is in existing HTML file.
+although the C<core.processor> is enabled in the configuration; just be
+warned that this will rewrite whatever content is in the existing target
+file.
 
-=item B<-H>, B<--html>
+=item B<-C>, B<--no-processor>
 
-Force editing the blog post or page directly in HTML. Unless the
-C<core.processor> is enabled in the configuration, this is the default
-behaviour.
+Disable the use of external processor; just be warned that you will be
+editing the target (i.e. potentially previously processed) file instead of
+the raw source. Unless the C<core.processor> is enabled in the
+configuration, this is the default behaviour.
 
 =item B<-q>, B<--quiet>
 
