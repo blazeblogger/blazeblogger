@@ -8,10 +8,10 @@ B<blaze-init> [B<-fqV>] [B<-b> I<directory>]
 
 B<blaze-config> [B<-qV>] [B<-b> I<directory>] I<name> [I<value>...]
 
-B<blaze-add> [B<-pqHPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
+B<blaze-add> [B<-pqCPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
 I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
 
-B<blaze-edit> [B<-fpqHPV>] [B<-b> I<directory>] I<id>
+B<blaze-edit> [B<-fpqCPV>] [B<-b> I<directory>] I<id>
 
 B<blaze-remove> [B<-fipqPV>] [B<-b> I<directory>] I<id>...
 

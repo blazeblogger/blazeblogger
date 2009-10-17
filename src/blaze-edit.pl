@@ -333,7 +333,8 @@ sub read_record {
   # If processor is enabled, make sure the raw file exist:
   if ($process && ! -e $raw) {
     exit_with_error("Raw file does not exist. Use `--force' to create " .
-                    "new one, or `--html' to edit HTML file directly.", 1)
+                    "a new one, or `--no-processor' to disable the " .
+                    "processor.", 1)
       unless $force;
   }
 
@@ -665,7 +666,7 @@ blaze-edit - edit a blog post or a page in the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-edit> [B<-fpqHPV>] [B<-b> I<directory>] I<id>
+B<blaze-edit> [B<-fpqCPV>] [B<-b> I<directory>] I<id>
 
 B<blaze-edit> B<-h> | B<-v>
 
