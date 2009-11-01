@@ -35,6 +35,7 @@ case "$COMMAND" in
   "make")   exec blaze-make "$@";;
   "config") exec blaze-config "$@";;
   "remove") exec blaze-remove "$@";;
+  "submit") exec blaze-init "$@";;
   "-v" | "--version" | "version")
     # Display version information:
     echo "BlazeBlogger $VERSION"
@@ -54,7 +55,7 @@ case "$COMMAND" in
 
     # Parse command and display its usage:
     case "$COMMAND" in
-      "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove")
+      "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove" | "submit")
         # Display command usage information:
         exec blaze-$COMMAND --help
         ;;
@@ -71,6 +72,7 @@ case "$COMMAND" in
         echo "  list    Browse the content of the BlazeBlogger repository."
         echo "  make    Generate static content from the BlazeBlogger repository."
         echo "  log     Display the BlazeBlogger repository log."
+        echo "  submit  Upload entire blog dir to an FTP destination."
         echo
         echo "Type \`$NAME help COMMAND' for command details."
 
