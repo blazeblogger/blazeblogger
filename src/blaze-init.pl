@@ -184,13 +184,33 @@ tags=top
 
 ## The following are the user related settings. The options are as follows:
 ##
-##   user  - User's name  to be used as a default posts' author  and in the
+##   name  - User's name  to be used as a default posts' author  and in the
 ##           copyright notice.
 ##   email - User's e-mail.
 ##
 [user]
 name=admin
 email=admin@localhost
+
+
+## The following are the user related settings. The options are as follows:
+##
+##   user             - User's name  to be used while authentification to an FTP server
+##   password         - User's password 
+##   host             - Address of an FTP server
+##   port             - Connection port of FTP server
+##   remote_directory - Location of directory on FTP server, where the data may be saved (Example: /www/blog) 
+##   blog_directory   - Location of local directory with generated blog data (In default ./ (actual directory))
+##
+##
+[submit]
+user=anonymous
+password=theGreenHorseWalkingOnTheGreenGrass17
+host=ftp://ftp.myblog.net
+port=21
+remote_directory=/www/blog
+blog_directory=./
+
 END_CONFIG
 
   # Close the file:
