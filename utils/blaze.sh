@@ -35,7 +35,7 @@ case "$COMMAND" in
   "make")   exec blaze-make "$@";;
   "config") exec blaze-config "$@";;
   "remove") exec blaze-remove "$@";;
-  "submit") exec blaze-init "$@";;
+  "submit") exec blaze-submit "$@";;
   "-v" | "--version" | "version")
     # Display version information:
     echo "BlazeBlogger $VERSION"
