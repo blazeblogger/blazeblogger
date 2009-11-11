@@ -59,6 +59,15 @@ our %opt = (
   # User related settings:
   'user.name'      => 'admin',                      # User's name.
   'user.email'     => 'admin@localhost',            # User's e-mail.
+  
+  # Submit module settings:
+  'submit.remote_directory' => '',                  # Remote server directory.
+  'submit.blog_directory' => '',                    # Local blog directory.
+  'submit.host'      => '',                         # Remote server host.
+  'submit.port'      => '',                         # Remote server port.
+  'submit.method'    => '',                         # Prepared for future.
+  'submit.user'      => '',                         # FTP username.
+  'submit.password'  => ''                          # FTP password.
 );
 
 # Command-line options:
@@ -258,6 +267,13 @@ sub create_temp {
   my $user_name      = $conf->{user}->{name}      || $opt{'user.name'};
   my $user_email     = $conf->{user}->{email}     || $opt{'user.email'};
 
+  # Prepare the submit module settings:
+  my $submit_rmdir  = $conf->{submit}->{remote_directory} || $opt{'submit.remote_directory'};
+  my $submit_blogdir = $conf->{submit}->{blog_directory}  || $opt{'submit.blog_directory'};
+  my $submit_host    = $conf->{submit}->{host}            || $opt{'submit.host'};
+  my $submit_port    = $conf->{submit}->{port}            || $opt{'submit.port'};
+  my $submit_user    = $conf->{submit}->{user}            || $opt{'submit.user'};
+  my $submit_passwd  = $conf->{submit}->{password}        || $opt{'submit.password'};
   # Open the file for writing:
   if(open(FILE, ">$file")) {
     # Write to the temporary file:
@@ -340,6 +356,24 @@ tags=$post_tags
 [user]
 name=$user_name
 email=$user_email
+
+## The following are the user related settings. The options are as follows:
+##
+##   user             - User's name  to be used while authentification to an FTP server
+##   password         - User's password 
+##   host             - Address of an FTP server
+##   port             - Connection port of FTP server
+##   remote_directory - Location of directory on FTP server, where the data may be saved (Example: /www/blog) 
+##   blog_directory   - Location of local directory with generated blog data (In default ./ (actual directory))
+##
+[submit]
+user=$submit_user
+password=$submit_passwd
+host=$submit_host
+port=$submit_port
+remote_directory=$submit_rmdir
+blog_directory=$submit_blogdir
+
 END_TEMP
 
     # Close the file:

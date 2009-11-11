@@ -202,7 +202,6 @@ email=admin@localhost
 ##   remote_directory - Location of directory on FTP server, where the data may be saved (Example: /www/blog) 
 ##   blog_directory   - Location of local directory with generated blog data (In default ./ (actual directory))
 ##
-##
 [submit]
 user=anonymous
 password=theGreenHorseWalkingOnTheGreenGrass17

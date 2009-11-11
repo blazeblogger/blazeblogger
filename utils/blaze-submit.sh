@@ -1,5 +1,5 @@
 #!/bin/sh
-set -o xtrace
+#set -o xtrace
 
 # blaze, a command wrapper for BlazeBlogger
 # Copyright (C) 2009 SKooDA(http://www.skooda.org)
@@ -57,7 +57,7 @@ while [ "$#" -ne "0" ]; do
 
      *)
          # Incorect parameters 
-         echo "INPUT ERROR: Incorrect parameter $1, try blaze-submit -v to help" 
+         echo "INPUT ERROR: Incorrect parameter $1, try blaze-submit -h to help" 
 
          # Return fail:
          exit 1
