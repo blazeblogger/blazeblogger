@@ -55,6 +55,7 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 755 src/blaze-remove.pl $(bindir)/blaze-remove
 	@echo "Copying utilities..."
 	$(INSTALL) -m 755 utils/blaze.sh $(bindir)/blaze
+	$(INSTALL) -m 755 utils/blaze-submit.sh $(bindir)/blaze-submit
 	@echo "Copying man pages..."
 	$(INSTALL) -d $(man1dir)
 	$(INSTALL) -m 644 src/blaze-add.1 $(man1dir)
@@ -82,6 +83,7 @@ uninstall:
 	-rm -f $(bindir)/blaze-remove
 	@echo "Removing utilities..."
 	-rm -f $(bindir)/blaze
+	-rm -f $(bindir)/blaze-submit
 	@echo "Removing man pages..."
 	-rm -f $(man1dir)/blaze-add.1
 	-rm -f $(man1dir)/blaze-log.1
