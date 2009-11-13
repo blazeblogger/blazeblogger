@@ -361,13 +361,13 @@ email=$user_email
 ## The following are submit utility settings. The options are as follows:
 ##
 ##   user             - User's name for remote server authentication.
-##   password         - User's password.
+##   password         - User's password for remote server authentication.
 ##   host             - Remote server address (e.g. ftp://example.com).
 ##   port             - Remote server port (e.g. 21).
 ##   remote_directory - Remote directory  where the data  are to be  placed
 ##                      (e.g. /www/blog).
 ##   blog_directory   - Blog directory where the static content is created;
-##                      the default value is current working directory.
+##                      the default value is the current working directory.
 ##
 [submit]
 user=$submit_user
@@ -742,6 +742,31 @@ on the page, depending on the theme (e.g. in the copyright notice).
 User's e-mail. Depending on the theme, it can be used anywhere on the page
 (e.g. in the copyright notice). However, non of the official themes
 actually use it.
+
+=item B<submit.user>
+
+User's name for remote server authentication.
+
+=item B<submit.password>
+
+User's password for remote server authentication.
+
+=item B<submit.host>
+
+Remote server address (e.g. ftp://example.com).
+
+=item B<submit.port>
+
+Remote server port (e.g. 21).
+
+=item B<submit.remote_directory>
+
+Remote directory where the data are to be placed (e.g. /www/blog).
+
+=item B<submit.blog_directory>
+
+Blog directory where the static content is created; the default value is
+the current working directory.
 
 =back
 
