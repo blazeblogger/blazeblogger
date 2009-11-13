@@ -72,7 +72,7 @@ case "$COMMAND" in
         echo "  list    Browse the content of the BlazeBlogger repository."
         echo "  make    Generate static content from the BlazeBlogger repository."
         echo "  log     Display the BlazeBlogger repository log."
-        echo "  submit  Upload entire blog dir to an FTP destination."
+        echo "  submit  Upload the static content to the remote server."
         echo
         echo "Type \`$NAME help COMMAND' for command details."
 

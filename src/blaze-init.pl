@@ -192,22 +192,23 @@ tags=top
 name=admin
 email=admin@localhost
 
-
-## The following are the user related settings. The options are as follows:
+## The following are submit utility settings. The options are as follows:
 ##
-##   user             - User's name  to be used while authentification to an FTP server
-##   password         - User's password 
-##   host             - Address of an FTP server
-##   port             - Connection port of FTP server
-##   remote_directory - Location of directory on FTP server, where the data may be saved (Example: /www/blog) 
-##   blog_directory   - Location of local directory with generated blog data (In default ./ (actual directory))
+##   user             - User's name for remote server authentication.
+##   password         - User's password.
+##   host             - Remote server address (e.g. ftp://example.com/).
+##   port             - Remote server port (e.g. 21).
+##   remote_directory - Remote directory  where the data  are to be  placed
+##                      (e.g. /www/blog).
+##   blog_directory   - Blog directory where the static content is created;
+##                      the default value is current working directory.
 ##
 [submit]
-user=anonymous
-password=theGreenHorseWalkingOnTheGreenGrass17
-host=ftp://ftp.myblog.net
+user=
+password=
+host=
 port=21
-remote_directory=/www/blog
+remote_directory=
 blog_directory=./
 
 END_CONFIG

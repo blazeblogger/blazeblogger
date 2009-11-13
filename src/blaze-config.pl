@@ -33,41 +33,41 @@ our $verbose = 1;                                   # Verbosity level.
 # List of valid options and their default values:
 our %opt = (
   # Blog related settings:
-  'blog.title'     => 'My Blog',                    # Blog title.
-  'blog.subtitle'  => 'yet another blog',           # Blog subtitle.
-  'blog.theme'     => 'default.html',               # Blog template file.
-  'blog.style'     => 'default.css',                # Blog stylesheet file.
-  'blog.lang'      => 'en_GB',                      # Blog language.
-  'blog.posts'     => '10',                         # Posts to display.
-  'blog.url'       => '',                           # Blog base URL.
+  'blog.title'       => 'My Blog',                  # Blog title.
+  'blog.subtitle'    => 'yet another blog',         # Blog subtitle.
+  'blog.theme'       => 'default.html',             # Blog template file.
+  'blog.style'       => 'default.css',              # Blog stylesheet file.
+  'blog.lang'        => 'en_GB',                    # Blog language.
+  'blog.posts'       => '10',                       # Posts to display.
+  'blog.url'         => '',                         # Blog base URL.
 
   # Colour related settings:
-  'color.list'     => 'false',                      # Coloured listing?
-  'color.log'      => 'false',                      # Coloured log?
+  'color.list'       => 'false',                    # Coloured listing?
+  'color.log'        => 'false',                    # Coloured log?
 
   # Core settings:
-  'core.encoding'  => 'UTF-8',                      # Posts/pages codepage.
-  'core.extension' => 'html',                       # File extension.
-  'core.editor'    => '',                           # External text editor.
-  'core.processor' => '',                           # External processor.
+  'core.encoding'    => 'UTF-8',                    # Posts/pages codepage.
+  'core.extension'   => 'html',                     # File extension.
+  'core.editor'      => '',                         # External text editor.
+  'core.processor'   => '',                         # External processor.
 
   # Post related settings:
-  'post.author'    => 'top',                        # Post author location.
-  'post.date'      => 'top',                        # Post date location.
-  'post.tags'      => 'top',                        # Post tags location.
+  'post.author'      => 'top',                      # Post author location.
+  'post.date'        => 'top',                      # Post date location.
+  'post.tags'        => 'top',                      # Post tags location.
 
   # User related settings:
-  'user.name'      => 'admin',                      # User's name.
-  'user.email'     => 'admin@localhost',            # User's e-mail.
-  
-  # Submit module settings:
-  'submit.remote_directory' => '',                  # Remote server directory.
-  'submit.blog_directory' => '',                    # Local blog directory.
-  'submit.host'      => '',                         # Remote server host.
-  'submit.port'      => '',                         # Remote server port.
-  'submit.method'    => '',                         # Prepared for future.
+  'user.name'        => 'admin',                    # User's name.
+  'user.email'       => 'admin@localhost',          # User's e-mail.
+
+  # Submit utility settings:
   'submit.user'      => '',                         # FTP username.
-  'submit.password'  => ''                          # FTP password.
+  'submit.password'  => '',                         # FTP password.
+  'submit.host'      => '',                         # Remote server host.
+  'submit.port'      => '21',                       # Remote server port.
+  'submit.remote_directory' => '',                  # Remote directory.
+  'submit.blog_directory'   => './',                # Local blog directory.
+  'submit.method'    => '',                         # Prepared for future.
 );
 
 # Command-line options:
@@ -267,13 +267,14 @@ sub create_temp {
   my $user_name      = $conf->{user}->{name}      || $opt{'user.name'};
   my $user_email     = $conf->{user}->{email}     || $opt{'user.email'};
 
-  # Prepare the submit module settings:
-  my $submit_rmdir  = $conf->{submit}->{remote_directory} || $opt{'submit.remote_directory'};
-  my $submit_blogdir = $conf->{submit}->{blog_directory}  || $opt{'submit.blog_directory'};
-  my $submit_host    = $conf->{submit}->{host}            || $opt{'submit.host'};
-  my $submit_port    = $conf->{submit}->{port}            || $opt{'submit.port'};
-  my $submit_user    = $conf->{submit}->{user}            || $opt{'submit.user'};
-  my $submit_passwd  = $conf->{submit}->{password}        || $opt{'submit.password'};
+  # Prepare the submit utility settings:
+  my $submit_rmdir   = $conf->{submit}->{remote_directory} || $opt{'submit.remote_directory'};
+  my $submit_blogdir = $conf->{submit}->{blog_directory}   || $opt{'submit.blog_directory'};
+  my $submit_host    = $conf->{submit}->{host}             || $opt{'submit.host'};
+  my $submit_port    = $conf->{submit}->{port}             || $opt{'submit.port'};
+  my $submit_user    = $conf->{submit}->{user}             || $opt{'submit.user'};
+  my $submit_passwd  = $conf->{submit}->{password}         || $opt{'submit.password'};
+
   # Open the file for writing:
   if(open(FILE, ">$file")) {
     # Write to the temporary file:
@@ -349,7 +350,7 @@ tags=$post_tags
 
 ## The following are the user related settings. The options are as follows:
 ##
-##   user  - User's name  to be used as a default posts' author  and in the
+##   name  - User's name  to be used as a default posts' author  and in the
 ##           copyright notice.
 ##   email - User's e-mail.
 ##
@@ -357,14 +358,16 @@ tags=$post_tags
 name=$user_name
 email=$user_email
 
-## The following are the user related settings. The options are as follows:
+## The following are submit utility settings. The options are as follows:
 ##
-##   user             - User's name  to be used while authentification to an FTP server
-##   password         - User's password 
-##   host             - Address of an FTP server
-##   port             - Connection port of FTP server
-##   remote_directory - Location of directory on FTP server, where the data may be saved (Example: /www/blog) 
-##   blog_directory   - Location of local directory with generated blog data (In default ./ (actual directory))
+##   user             - User's name for remote server authentication.
+##   password         - User's password.
+##   host             - Remote server address (e.g. ftp://example.com).
+##   port             - Remote server port (e.g. 21).
+##   remote_directory - Remote directory  where the data  are to be  placed
+##                      (e.g. /www/blog).
+##   blog_directory   - Blog directory where the static content is created;
+##                      the default value is current working directory.
 ##
 [submit]
 user=$submit_user
