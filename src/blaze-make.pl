@@ -1092,33 +1092,71 @@ sub generate_index {
   my $data       = shift || die 'Missing argument';
 
   # Initialize required variables:
-  my $body       = '';
-  my $count      = 0;
+  my $body       = '';                              # List of posts.
+  my $count      = 0;                               # Post counter.
+  my $page       = 0;                               # Page counter.
 
   # Read required data from the configuration:
   my $max_posts  = $conf->{blog}->{posts}     || 10;
   my $blog_title = $conf->{blog}->{title}     || 'My Blog';
 
+  # Prepare the target directory name:
+  my $target     = ($destdir eq '.') ? '' : $destdir;
+
   # Check whether the posts are enabled:
   if ($with_posts) {
     # Process the requested number of posts:
     foreach my $record (@{$data->{headers}->{posts}}) {
-      # Stop when the post count reaches the limit:
-      last if $count == $max_posts;
+      # Check whether the number of listed posts reached the limit:
+      if ($count == $max_posts) {
+        # Prepare information for the page navigation:
+        my $index = $page     || '';
+        my $next  = $page - 1 || '';
+        my $prev  = $page + 1;
 
-      # Add the post excerpt to the listing:
+        # Add navigation:
+        $body .= format_navigation('previous', $prev);
+        $body .= format_navigation('next', $next) if $page;
+
+        # Write the index page:
+        write_page($data, $target, '', $body, $blog_title, $index)
+          or return 0;
+
+        # Clear the page body:
+        $body  = '';
+
+        # Reset the post counter:
+        $count = 0;
+
+        # Increase the page counter:
+        $page++;
+      }
+
+      # Add the post excerpt to the page body:
       $body .= format_entry($data, $record, '', 'post', 1);
 
-      # Increase the number of listed items:
+      # Increase the number of listed posts:
       $count++;
     }
+
+    # Check whether there are unwritten data:
+    if ($body) {
+      # Prepare information for the page navigation:
+      my $index = $page     || '';
+      my $next  = $page - 1 || '';
+
+      # Add navigation:
+      $body .= format_navigation('next', $next) if $page;
+
+      # Write the index page:
+      write_page($data, $target, '', $body, $blog_title, $index)
+        or return 0;
+    }
   }
-
-  # Prepare the target directory name:
-  my $target = ($destdir eq '.') ? '' : $destdir;
-
-  # Write the index file:
-  write_page($data, $target, '', $body, $blog_title) or return 0;
+  else {
+    # Write empty index page:
+    write_page($data, $target, '', $body, $blog_title) or return 0;
+  }
 
   # Return success:
   return 1;
