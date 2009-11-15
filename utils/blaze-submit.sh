@@ -56,6 +56,9 @@ while [ "$#" -ne "0" ]; do
        echo "  -d --destination <directory>  destination directory on remote server"; 
        echo "  -h --help                     shows this message"; 
        echo "  "; 
+
+       # Return success:
+       exit 0
      ;;
      "-v" | "--version"  | "version") 
        # Display version information:
@@ -68,7 +71,6 @@ while [ "$#" -ne "0" ]; do
        echo "TICULAR PURPOSE. \n"
 
        # Return success:
-
        exit 0
      ;;
 
