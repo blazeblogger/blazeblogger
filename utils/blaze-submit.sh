@@ -34,15 +34,32 @@ while [ "$#" -ne "0" ]; do
  case "$1" in
      "-u" | "--username")    USER_NAME="$2";        shift;;
      "-P" | "--password")    USER_PASSWORD="$2";    shift;;
-     "-h" | "--host")        SERVER_HOST="$2";      shift;;
+     "-H" | "--host")        SERVER_HOST="$2";      shift;;
      "-p" | "--port")        SERVER_PORT="$2";      shift;;
      "-b" | "--blogdir")     BLOG_DIRECTORY="$2";   shift;;
      "-c" | "--config")      CONFIG_FILE="$2";      shift;;
      "-d" | "--destination") REMOTE_DIRECTORY="$2"; shift;;
+     "-h" | "help" | "?" | "--help" | "-help")
+       # Display help
+       echo "\nBlazeBlogger Submit Tool $VERSION"
+       echo "blaze-submit: upload blog created with the blaze-blogger to an ftp destination" 
+       echo
+       echo "Usage:  blaze-submit [-argument setting, -argument setting,...]"
+       echo
+       echo "usable arguments:"
+       echo "  -c --config <file>            Use alternative configuration file"; 
+       echo "  -u --username <username>      FTP username"; 
+       echo "  -P --password <password>      FTP password"; 
+       echo "  -H --host <address>           remote host address"; 
+       echo "  -p --port <port>              remote host port"; 
+       echo "  -b --blogdir <directory>      local directory to upload"; 
+       echo "  -d --destination <directory>  destination directory on remote server"; 
+       echo "  -h --help                     shows this message"; 
+       echo "  "; 
+     ;;
      "-v" | "--version"  | "version") 
        # Display version information:
        echo "\nBlazeBlogger Submit Tool $VERSION"
-
        echo
        echo "Copyright (C) 2009 SKooDA(http://www.skooda.org)"
        echo "This program is free software; see the souirce for copying conditions. It is"
