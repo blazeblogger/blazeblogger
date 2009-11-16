@@ -17,10 +17,15 @@
 SHELL   = /bin/sh
 INSTALL = /usr/bin/install -c
 POD2MAN = /usr/bin/pod2man
-SRCS   := $(wildcard src/*.pl)
-DOCS   := $(wildcard pod/*.pod)
-MAN1   := $(patsubst %.pl, %.1, $(SRCS))
-MAN7   := $(patsubst %.pod, %.7, $(DOCS))
+SRCS   := src/blaze-add.pl src/blaze-config.pl src/blaze-edit.pl \
+          src/blaze-init.pl src/blaze-list.pl src/blaze-log.pl \
+          src/blaze-make.pl src/blaze-remove.pl
+DOCS   := pod/blaze-submit.pod pod/blazeblogger.pod pod/blazeintro.pod \
+          pod/blazetheme.pod
+MAN1   := src/blaze-add.1 src/blaze-config.1 src/blaze-edit.1 \
+          src/blaze-init.1 src/blaze-list.1 src/blaze-log.1 \
+          src/blaze-make.1 src/blaze-remove.1 pod/blaze-submit.1
+MAN7   := pod/blazeblogger.7 pod/blazeintro.7 pod/blazetheme.7
 
 # Installation directories; feel free to modify according to your taste and
 # current situation:
@@ -66,6 +71,7 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 644 src/blaze-make.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-config.1 $(man1dir)
 	$(INSTALL) -m 644 src/blaze-remove.1 $(man1dir)
+	$(INSTALL) -m 644 pod/blaze-submit.1 $(man1dir)
 	$(INSTALL) -d $(man7dir)
 	$(INSTALL) -m 644 pod/blazeintro.7 $(man7dir)
 	$(INSTALL) -m 644 pod/blazetheme.7 $(man7dir)
@@ -93,6 +99,7 @@ uninstall:
 	-rm -f $(man1dir)/blaze-make.1
 	-rm -f $(man1dir)/blaze-config.1
 	-rm -f $(man1dir)/blaze-remove.1
+	-rm -f $(man1dir)/blaze-submit.1
 	-rm -f $(man7dir)/blazeintro.7
 	-rm -f $(man7dir)/blazetheme.7
 	-rm -f $(man7dir)/blazeblogger.7
@@ -100,6 +107,9 @@ uninstall:
 	-rmdir $(bindir) $(man1dir) $(man7dir) $(mandir)
 
 %.1: %.pl
+	$(POD2MAN) --section=1 --release="Version $(VERSION)" $^ $@
+
+%.1: %.pod
 	$(POD2MAN) --section=1 --release="Version $(VERSION)" $^ $@
 
 %.7: %.pod
