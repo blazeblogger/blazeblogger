@@ -17,15 +17,15 @@
 SHELL   = /bin/sh
 INSTALL = /usr/bin/install -c
 POD2MAN = /usr/bin/pod2man
-SRCS   := src/blaze-add.pl src/blaze-config.pl src/blaze-edit.pl \
+SRCS    = src/blaze-add.pl src/blaze-config.pl src/blaze-edit.pl \
           src/blaze-init.pl src/blaze-list.pl src/blaze-log.pl \
           src/blaze-make.pl src/blaze-remove.pl
-DOCS   := pod/blaze-submit.pod pod/blazeblogger.pod pod/blazeintro.pod \
+DOCS    = pod/blaze-submit.pod pod/blazeblogger.pod pod/blazeintro.pod \
           pod/blazetheme.pod
-MAN1   := src/blaze-add.1 src/blaze-config.1 src/blaze-edit.1 \
+MAN1    = src/blaze-add.1 src/blaze-config.1 src/blaze-edit.1 \
           src/blaze-init.1 src/blaze-list.1 src/blaze-log.1 \
           src/blaze-make.1 src/blaze-remove.1 pod/blaze-submit.1
-MAN7   := pod/blazeblogger.7 pod/blazeintro.7 pod/blazetheme.7
+MAN7    = pod/blazeblogger.7 pod/blazeintro.7 pod/blazetheme.7
 
 # Installation directories; feel free to modify according to your taste and
 # current situation:

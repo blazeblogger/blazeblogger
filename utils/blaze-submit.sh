@@ -1,7 +1,7 @@
 #!/bin/sh
 #set -o xtrace
 
-# blaze, a command wrapper for BlazeBlogger
+# blaze-submit, upload the static content to the remote server
 # Copyright (C) 2009 SKooDA(http://www.skooda.org)
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -41,48 +41,47 @@ while [ "$#" -ne "0" ]; do
      "-d" | "--destination") REMOTE_DIRECTORY="$2"; shift;;
      "-h" | "help" | "?" | "--help" | "-help")
        # Display help
-       echo "\nBlazeBlogger Submit Tool $VERSION"
-       echo "blaze-submit: upload blog created with the blaze-blogger to an ftp destination" 
+       echo "Usage: $NAME [-c file] [-b directory] [-d directory] [-H address]"
+       echo "                    [-p port] [-u username] [-P password]"
+       echo "       $NAME -h | -v"
        echo
-       echo "Usage:  blaze-submit [-argument setting, -argument setting,...]"
-       echo
-       echo "usable arguments:"
-       echo "  -c --config <file>            Use alternative configuration file"; 
-       echo "  -u --username <username>      FTP username"; 
-       echo "  -P --password <password>      FTP password"; 
-       echo "  -H --host <address>           remote host address"; 
-       echo "  -p --port <port>              remote host port"; 
-       echo "  -b --blogdir <directory>      local directory to upload"; 
-       echo "  -d --destination <directory>  destination directory on remote server"; 
-       echo "  -h --help                     shows this message"; 
-       echo "  "; 
+       echo "  -c, --config file           use alternative configuration file"
+       echo "  -u, --username username     specify FTP username"
+       echo "  -P, --password password     specify FTP password"
+       echo "  -H, --host address          specify remote host address"
+       echo "  -p, --port port             specify remote host port"
+       echo "  -b, --blogdir directory     specify local directory to upload"
+       echo "  -d, --destination directory specify destination directory on remote server"
+       echo "  -h, --help                  display this help and exit"
+       echo "  -v, --version               display version information and exit"
 
        # Return success:
        exit 0
      ;;
-     "-v" | "--version"  | "version") 
+     "-v" | "--version"  | "version")
        # Display version information:
-       echo "\nBlazeBlogger Submit Tool $VERSION"
+       echo "BlazeBlogger Submit Tool $VERSION"
        echo
        echo "Copyright (C) 2009 SKooDA(http://www.skooda.org)"
-       echo "This program is free software; see the souirce for copying conditions. It is"
+       echo "This program is free software; see the source for copying conditions. It is"
        echo "distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;"
        echo "without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-"
-       echo "TICULAR PURPOSE. \n"
+       echo "TICULAR PURPOSE."
 
        # Return success:
        exit 0
      ;;
 
      *)
-         # Incorect parameters 
-         echo "INPUT ERROR: Incorrect parameter $1, try blaze-submit -h to help" 
+         # Incorect parameters
+         echo "$NAME: Invalid option: $1" 1>&2
+         echo "Try \`$NAME --help' for more information." 1>&2
 
          # Return fail:
          exit 1
-     ;; 
+     ;;
   esac
-  # Reat next parameter
+  # Read next parameter
   shift
 done
 
@@ -94,9 +93,9 @@ LENGHT=$(echo "$FILE"|wc -l)
 FILE=$(echo "$FILE"|tail -n$(($LENGHT - $START)))
 END=$(echo "$FILE"|grep -n "\["|cut -d: -f1|line)
 # Test if the submit section is on the end of file
-if [ -z $END ]; then END=$(($LENGHT + 1)); else END=$(($END - 1)); fi 
+if [ -z $END ]; then END=$(($LENGHT + 1)); else END=$(($END - 1)); fi
 FILE=$(echo "$FILE"|head -n${END} )
-# Remove the comments 
+# Remove the comments
 FILE=$(echo "$FILE"|grep -v '^ *#'|cut -d'#' -f1)
 
 ## Parse configuration
@@ -107,8 +106,8 @@ for I in $(seq $LENGHT); do
   LINE=$( echo "$LINE" | awk '$1=$1' OFS="" )
   KEY=$(echo "$LINE"|cut -d"=" -f1)
   VALUE=$(echo "$LINE"|cut -d"=" -f2)
-  
-  # Parsing informations  
+
+  # Parsing information
   case "$KEY" in
     "user" ) USER_NAME=$VALUE;;
     "password" ) USER_PASSWORD=$VALUE;;
@@ -117,7 +116,7 @@ for I in $(seq $LENGHT); do
     "host" ) SERVER_HOST=$VALUE;;
     "port" ) SERVER_PORT=$VALUE;;
     "method" ) ;; ## Prepared for future
-    * ) echo "Warning: Unexpected configuration directive \"$KEY\"!"
+    * ) echo "Warning: Unexpected configuration directive \"$KEY\"!" 1>&2
   esac
 done
 
