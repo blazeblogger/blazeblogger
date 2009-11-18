@@ -39,7 +39,6 @@ our %opt = (
   'blog.style'       => 'default.css',              # Blog stylesheet file.
   'blog.lang'        => 'en_GB',                    # Blog language.
   'blog.posts'       => '10',                       # Posts to display.
-  'blog.url'         => '',                         # Blog base URL.
 
   # Colour related settings:
   'color.list'       => 'false',                    # Coloured listing?
@@ -50,6 +49,10 @@ our %opt = (
   'core.extension'   => 'html',                     # File extension.
   'core.editor'      => '',                         # External text editor.
   'core.processor'   => '',                         # External processor.
+
+  # Feed related settings:
+  'feed.baseurl'     => '',                         # Blog base URL.
+  'feed.posts'       => '10',                       # Posts to list.
 
   # Post related settings:
   'post.author'      => 'top',                      # Post author location.
@@ -246,7 +249,6 @@ sub create_temp {
   my $blog_style     = $conf->{blog}->{style}     || $opt{'blog.style'};
   my $blog_lang      = $conf->{blog}->{lang}      || $opt{'blog.lang'};
   my $blog_posts     = $conf->{blog}->{posts}     || $opt{'blog.posts'};
-  my $blog_url       = $conf->{blog}->{url}       || $opt{'blog.url'};
 
   # Prepare the colour related settings:
   my $color_list     = $conf->{color}->{list}     || $opt{'color.list'};
@@ -257,6 +259,10 @@ sub create_temp {
   my $core_encoding  = $conf->{core}->{encoding}  || $opt{'core.encoding'};
   my $core_extension = $conf->{core}->{extension} || $opt{'core.extension'};
   my $core_processor = $conf->{core}->{processor} || $opt{'core.processor'};
+
+  # Prepare the feed related settings:
+  my $feed_baseurl   = $conf->{feed}->{baseurl}   || $opt{'feed.baseurl'};
+  my $feed_posts     = $conf->{feed}->{posts}     || $opt{'feed.posts'};
 
   # Prepare the post related settings:
   my $post_author    = $conf->{post}->{author}    || $opt{'post.author'};
@@ -274,6 +280,13 @@ sub create_temp {
   my $submit_port    = $conf->{submit}->{port}             || $opt{'submit.port'};
   my $submit_user    = $conf->{submit}->{user}             || $opt{'submit.user'};
   my $submit_passwd  = $conf->{submit}->{password}         || $opt{'submit.password'};
+
+  # Handle the depricated settings; for backward compatibility reasons only
+  # and to be removed in the future:
+  if ((defined $conf->{blog}->{url}) && (not $feed_baseurl)) {
+    # Assign the value to the proper option:
+    $feed_baseurl    = $conf->{blog}->{url};
+  }
 
   # Open the file for writing:
   if(open(FILE, ">$file")) {
@@ -294,7 +307,6 @@ sub create_temp {
 ##              file in the .blaze/lang directory.
 ##   posts    - Number of posts to be listed on a single page;  the default
 ##              value is 10.
-##   url      - The blog base url; required for RSS feed only.
 ##
 [blog]
 title=$blog_title
@@ -303,7 +315,6 @@ theme=$blog_theme
 style=$blog_style
 lang=$blog_lang
 posts=$blog_posts
-url=$blog_url
 
 ## The following are the colour settings, affecting the way various outputs
 ## look. The options are as follows:
@@ -333,6 +344,17 @@ encoding=$core_encoding
 extension=$core_extension
 editor=$core_editor
 processor=$core_processor
+
+## The following are the RSS feed related settings, giving you the opportu-
+## nity to adjust it to your liking. The options are as follows:
+##
+##  baseurl - The blog base URL (e.g. http://blog.example.com/).
+##  posts   - Number of posts  to be listed in the feed;  the default value
+##            is 10.
+##
+[feed]
+baseurl=$feed_baseurl
+posts=$feed_posts
 
 ## The following are the post related settings, making it possible to alter
 ## the look of a single post even further. The options are as follows:
@@ -495,6 +517,19 @@ sub set_option {
 
   # Set up the option:
   $conf->{$section}->{$key} = $value;
+
+  # Handle the depricated settings; for backward compatibility reasons only
+  # and to be removed in the future:
+  if (defined $conf->{blog}->{url}) {
+    # Check whether the currently set option is the affected one:
+    if ($option ne 'feed.baseurl') {
+      # Assign the value to the proper option:
+      $conf->{feed}->{baseurl} = $conf->{blog}->{url};
+    }
+
+    # Remove the deprecated option from the configuration:
+    delete $conf->{blog}->{url};
+  }
 
   # Save the configuration file:
   write_conf($conf) or return 0;

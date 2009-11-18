@@ -128,7 +128,6 @@ sub create_conf {
 ##              file in the .blaze/lang directory.
 ##   posts    - Number of posts to be listed on a single page;  the default
 ##              value is 10.
-##   url      - The blog base url; required for RSS feed only.
 ##
 [blog]
 title=My Blog
@@ -137,7 +136,6 @@ theme=default.html
 style=default.css
 lang=en_GB
 posts=10
-url=
 
 ## The following are the colour settings, affecting the way various outputs
 ## look. The options are as follows:
@@ -167,6 +165,17 @@ encoding=UTF-8
 extension=html
 editor=
 processor=
+
+## The following are the RSS feed related settings, giving you the opportu-
+## nity to adjust it to your liking. The options are as follows:
+##
+##  baseurl - The blog base URL (e.g. http://blog.example.com/).
+##  posts   - Number of posts  to be listed in the feed;  the default value
+##            is 10.
+##
+[feed]
+baseurl=
+posts=10
 
 ## The following are the post related settings, making it possible to alter
 ## the look of a single post even further. The options are as follows:
