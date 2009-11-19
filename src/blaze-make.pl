@@ -1004,12 +1004,23 @@ sub generate_rss {
   # Read required data from the configuration:
   my $blog_title    = $conf->{blog}->{title}     || 'My Blog';
   my $blog_subtitle = $conf->{blog}->{subtitle}  || 'yet another blog';
-  my $base          = $conf->{blog}->{url};
+  my $base          = $conf->{feed}->{baseurl};
+
+  # Handle the deprecated setting; for backward compatibility reasons only
+  # and to be removed in the future:
+  if ((defined $conf->{blog}->{url}) && (not $base)) {
+    # Use the value from the deprecated option:
+    $base = $conf->{blog}->{url};
+
+    # Display the warning:
+    display_warning("Option blog.url is deprecated. Use feed.baseurl " .
+                    "instead.");
+  }
 
   # Check whether the base URL is specified:
   unless ($base) {
     # Display the warning:
-    display_warning("Missing blog.url option. " .
+    display_warning("Missing feed.baseurl option. " .
                     "Skipping the RSS feed creation.");
 
     # Disable the RSS:
