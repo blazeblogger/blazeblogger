@@ -36,19 +36,6 @@ case "$COMMAND" in
   "config") exec blaze-config "$@";;
   "remove") exec blaze-remove "$@";;
   "submit") exec blaze-submit "$@";;
-  "-v" | "--version" | "version")
-    # Display version information:
-    echo "BlazeBlogger $VERSION"
-    echo
-    echo "Copyright (C) 2008, 2009 Jaromir Hradilek"
-    echo "This program is free software; see the source for copying conditions. It is"
-    echo "distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;"
-    echo "without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-"
-    echo "TICULAR PURPOSE."
-
-    # Return success:
-    exit 0
-    ;;
   "-h" | "--help" | "help")
     # Get user supplied command (if any):
     COMMAND=$1
@@ -74,12 +61,46 @@ case "$COMMAND" in
         echo "  log     Display the BlazeBlogger repository log."
         echo "  submit  Upload the static content to the remote server."
         echo
+        echo "Additional commands:"
+        echo "  help [COMMAND]  Display usage information (on specified command)."
+        echo "  man [COMMAND]   Display manual page (on specified command)."
+        echo "  version         Display version information."
+        echo
         echo "Type \`$NAME help COMMAND' for command details."
 
         # Return success:
         exit 0
         ;;
     esac
+    ;;
+  "man")
+    # Get user supplied command (if any):
+    COMMAND=$1
+
+    # Parse command and display its manual page:
+    case "$COMMAND" in
+      "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove" | "submit")
+        # Display command usage information:
+        exec man blaze-$COMMAND
+        ;;
+      *)
+        # Display general manual page:
+        exec man blazeblogger
+        ;;
+    esac
+    ;;
+  "-v" | "--version" | "version")
+    # Display version information:
+    echo "BlazeBlogger $VERSION"
+    echo
+    echo "Copyright (C) 2008, 2009 Jaromir Hradilek"
+    echo "This program is free software; see the source for copying conditions. It is"
+    echo "distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;"
+    echo "without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-"
+    echo "TICULAR PURPOSE."
+
+    # Return success:
+    exit 0
     ;;
   *)
     # Respond to wrong/missing command:
