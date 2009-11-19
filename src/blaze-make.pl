@@ -1004,6 +1004,15 @@ sub generate_rss {
   my $max_posts     = $conf->{feed}->{posts}     || 10;
   my $base          = $conf->{feed}->{baseurl};
 
+  # Make sure the posts number is a valid integer:
+  unless ($max_posts =~ /^\d+$/) {
+    # Use default value:
+    $max_posts = 10;
+
+    # Display warning:
+    display_warning("Invalid feed.posts option. Using the default value.");
+  }
+
   # Handle the deprecated setting; for backward compatibility reasons only
   # and to be removed in the future:
   if ((defined $conf->{blog}->{url}) && (not $base)) {
@@ -1112,6 +1121,15 @@ sub generate_index {
   # Prepare the target directory name:
   my $target     = ($destdir eq '.') ? '' : $destdir;
 
+  # Make sure the posts number is a valid integer:
+  unless ($max_posts =~ /^\d+$/) {
+    # Use default value:
+    $max_posts = 10;
+
+    # Display warning:
+    display_warning("Invalid blog.posts option. Using the default value.");
+  }
+
   # Check whether the posts are enabled:
   if ($with_posts) {
     # Process the requested number of posts:
@@ -1202,6 +1220,15 @@ sub generate_posts {
 
   # Declare other necessary variables:
   my ($year, $month, $target);
+
+  # Make sure the posts number is a valid integer:
+  unless ($max_posts =~ /^\d+$/) {
+    # Use default value:
+    $max_posts = 10;
+
+    # Display warning:
+    display_warning("Invalid blog.posts option. Using the default value.");
+  }
 
   # Process each record:
   foreach my $record (@{$data->{headers}->{posts}}) {
@@ -1356,6 +1383,15 @@ sub generate_tags {
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{tags}     || 'Posts tagged as';
   my $tags_string  = $locale->{lang}->{taglist}  || 'List of tags';
+
+  # Make sure the posts number is a valid integer:
+  unless ($max_posts =~ /^\d+$/) {
+    # Use default value:
+    $max_posts = 10;
+
+    # Display warning:
+    display_warning("Invalid blog.posts option. Using the default value.");
+  }
 
   # Process each tag separately:
   foreach my $tag (keys %{$data->{links}->{tags}}) {
