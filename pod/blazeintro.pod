@@ -68,7 +68,7 @@ your blog, and the default user name; for example:
 Furthermore, if you intend to generate RSS feed, you have to specify the
 base URL:
 
-  $ blaze-config blog.url http://blog.example.com/
+  $ blaze-config feed.baseurl http://blog.example.com/
 
 Finally, if you prefer coloured output in your terminal window, you can
 enable it individually for each utility that supports it:
