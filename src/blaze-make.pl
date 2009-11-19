@@ -838,7 +838,7 @@ sub write_page {
   my $temp    = $root || '#';
 
   # Read required data from the configuration:
-  my $ext     = $conf->{core}->{extension}      || 'html';
+  my $ext     = $conf->{core}->{extension}    || 'html';
 
   # Check whether the template is not already cached:
   unless ($cache->{theme}->{$temp}) {
@@ -999,26 +999,18 @@ sub generate_rss {
   my $data          = shift || die 'Missing argument';
 
   # Read required data from the configuration:
-  my $encoding      = $conf->{core}->{encoding} || 'UTF-8';
-  my $blog_title    = $conf->{blog}->{title}    || 'My Blog';
-  my $blog_subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
-  my $max_posts     = $conf->{feed}->{posts}    || 10;
-  my $base          = $conf->{feed}->{baseurl};
-
-  # Make sure the posts number is a valid integer:
-  unless ($max_posts =~ /^\d+$/) {
-    # Use default value:
-    $max_posts = 10;
-
-    # Display warning:
-    display_warning("Invalid feed.posts option. Using the default value.");
-  }
+  my $core_encoding  = $conf->{core}->{encoding}  || 'UTF-8';
+  my $blog_title     = $conf->{blog}->{title}     || 'My Blog';
+  my $blog_subtitle  = $conf->{blog}->{subtitle}  || 'yet another blog';
+  my $feed_fullposts = $conf->{feed}->{fullposts} || 'false';
+  my $feed_posts     = $conf->{feed}->{posts}     || 10;
+  my $feed_baseurl   = $conf->{feed}->{baseurl};
 
   # Handle the deprecated setting; for backward compatibility reasons only
   # and to be removed in the future:
-  if ((defined $conf->{blog}->{url}) && (not $base)) {
+  if ((defined $conf->{blog}->{url}) && (not $feed_baseurl)) {
     # Use the value from the deprecated option:
-    $base = $conf->{blog}->{url};
+    $feed_baseurl = $conf->{blog}->{url};
 
     # Display the warning:
     display_warning("Option blog.url is deprecated. Use feed.baseurl " .
@@ -1026,7 +1018,7 @@ sub generate_rss {
   }
 
   # Check whether the base URL is specified:
-  unless ($base) {
+  unless ($feed_baseurl) {
     # Display the warning:
     display_warning("Missing feed.baseurl option. " .
                     "Skipping the RSS feed creation.");
@@ -1038,6 +1030,18 @@ sub generate_rss {
     return 1;
   }
 
+  # Make sure the posts number is a valid integer:
+  unless ($feed_posts =~ /^\d+$/) {
+    # Use default value:
+    $feed_posts = 10;
+
+    # Display warning:
+    display_warning("Invalid feed.posts option. Using the default value.");
+  }
+
+  # Set up the post item type:
+  my $fullposts  = ($feed_fullposts =~ /^(true|auto)\s*$/i) ? 1 : 0;
+
   # Initialize necessary variables:
   my $count      = 0;
 
@@ -1046,7 +1050,7 @@ sub generate_rss {
   $blog_subtitle = strip_html($blog_subtitle);
 
   # Strip trailing forward slash from the base URL:
-  $base =~ s/\/+$//;
+  $feed_baseurl  =~ s/\/+$//;
 
   # Prepare the RSS file name:
   my $file = ($destdir eq '.') ? 'index.rss'
@@ -1056,40 +1060,56 @@ sub generate_rss {
   open(RSS, ">$file") or return 0;
 
   # Write the RSS header:
-  print RSS "<?xml version=\"1.0\" encoding=\"$encoding\"?>\n" .
+  print RSS "<?xml version=\"1.0\" encoding=\"$core_encoding\"?>\n" .
             "<rss version=\"2.0\">\n<channel>\n" .
             "  <title>$blog_title</title>\n" .
-            "  <link>$base/</link>\n" .
+            "  <link>$feed_baseurl/</link>\n" .
             "  <description>$blog_subtitle</description>\n" .
             "  <generator>BlazeBlogger " . VERSION . "</generator>\n";
 
   # Process the requested number of posts:
   foreach my $record (@{$data->{headers}->{posts}}) {
     # Stop when the post count reaches the limit:
-    last if $count == $max_posts;
+    last if $count == $feed_posts;
 
     # Decompose the record:
     my $url        = $record->{url};
     my ($year, $month, $day) = split(/-/, $record->{date});
 
-    # Read the post excerpt:
-    my $post_body  = read_entry($record->{id}, 'post', '', 1);
-
-    # Strip HTML elements:
-    my $post_title = strip_html($record->{title});
-    my $post_desc  = substr(strip_html($post_body), 0, 500);
-
     # Get the RFC 822 date-time string:
     my $time       = timelocal_nocheck(1, 0, 0, $day, ($month - 1), $year);
     my $date_time  = rfc_822_date($time);
 
-    # Add the post item:
+    # Prepare the post title:
+    my $post_title = strip_html($record->{title});
+
+    # Open the post item:
     print RSS "  <item>\n    <title>$post_title</title>\n  " .
-              "  <link>$base/$year/$month/$url/</link>\n  " .
-              "  <guid>$base/$year/$month/$url/</guid>\n  " .
-              "  <pubDate>$date_time</pubDate>\n  " .
-              "  <description>$post_desc    </description>\n" .
-              "  </item>\n";
+              "  <link>$feed_baseurl/$year/$month/$url/</link>\n  " .
+              "  <guid>$feed_baseurl/$year/$month/$url/</guid>\n  " .
+              "  <pubDate>$date_time</pubDate>\n  ";
+
+    # Check whether to list full posts:
+    unless ($fullposts) {
+      # Read the post excerpt:
+      my $post_body = read_entry($record->{id}, 'post', '', 1);
+
+      # Strip HTML elements:
+      my $post_desc = substr(strip_html($post_body), 0, 500);
+
+      # Add the post excerpt:
+      print RSS "  <description>$post_desc    </description>\n";
+    }
+    else {
+      # Read the post body:
+      my $post_desc = read_entry($record->{id}, 'post', '', 0);
+
+      # Add the post body:
+      print RSS "  <description><![CDATA[$post_desc    ]]></description>\n";
+    }
+
+    # Close the post item:
+    print RSS "  </item>\n";
 
     # Increase the number of listed items:
     $count++;
@@ -1118,16 +1138,16 @@ sub generate_index {
   my $page       = 0;                               # Page counter.
 
   # Read required data from the configuration:
-  my $max_posts  = $conf->{blog}->{posts}     || 10;
+  my $blog_posts = $conf->{blog}->{posts}     || 10;
   my $blog_title = $conf->{blog}->{title}     || 'My Blog';
 
   # Prepare the target directory name:
   my $target     = ($destdir eq '.') ? '' : $destdir;
 
   # Make sure the posts number is a valid integer:
-  unless ($max_posts =~ /^\d+$/) {
+  unless ($blog_posts =~ /^\d+$/) {
     # Use default value:
-    $max_posts = 10;
+    $blog_posts = 10;
 
     # Display warning:
     display_warning("Invalid blog.posts option. Using the default value.");
@@ -1138,7 +1158,7 @@ sub generate_index {
     # Process the requested number of posts:
     foreach my $record (@{$data->{headers}->{posts}}) {
       # Check whether the number of listed posts reached the limit:
-      if ($count == $max_posts) {
+      if ($count == $blog_posts) {
         # Prepare information for the page navigation:
         my $index = $page     || '';
         my $next  = $page - 1 || '';
@@ -1197,7 +1217,7 @@ sub generate_posts {
   my $data         = shift || die 'Missing argument';
 
   # Read required data from the configuration:
-  my $max_posts    = $conf->{blog}->{posts}      || 10;
+  my $blog_posts   = $conf->{blog}->{posts}      || 10;
 
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{archive}  || 'Archive for';
@@ -1225,9 +1245,9 @@ sub generate_posts {
   my ($year, $month, $target);
 
   # Make sure the posts number is a valid integer:
-  unless ($max_posts =~ /^\d+$/) {
+  unless ($blog_posts =~ /^\d+$/) {
     # Use default value:
-    $max_posts = 10;
+    $blog_posts = 10;
 
     # Display warning:
     display_warning("Invalid blog.posts option. Using the default value.");
@@ -1283,7 +1303,7 @@ sub generate_posts {
 
     # Check whether the month has changed  or whether the  number of listed
     # posts reached the limit:
-    if (($month_last ne $month_curr) || ($month_count == $max_posts)) {
+    if (($month_last ne $month_curr) || ($month_count == $blog_posts)) {
       # Prepare information for the page navigation:
       my $index = $month_page     || '';
       my $next  = $month_page - 1 || '';
@@ -1381,16 +1401,16 @@ sub generate_tags {
   my $data         = shift || die 'Missing argument';
 
   # Read required data from the configuration:
-  my $max_posts    = $conf->{blog}->{posts}      || 10;
+  my $blog_posts   = $conf->{blog}->{posts}      || 10;
 
   # Read required data from the localization:
   my $title_string = $locale->{lang}->{tags}     || 'Posts tagged as';
   my $tags_string  = $locale->{lang}->{taglist}  || 'List of tags';
 
   # Make sure the posts number is a valid integer:
-  unless ($max_posts =~ /^\d+$/) {
+  unless ($blog_posts =~ /^\d+$/) {
     # Use default value:
-    $max_posts = 10;
+    $blog_posts = 10;
 
     # Display warning:
     display_warning("Invalid blog.posts option. Using the default value.");
@@ -1412,7 +1432,7 @@ sub generate_tags {
       next unless $record->{tags} =~ /(^|,\s*)$tag(,\s*|$)/;
 
       # Check whether the number of listed posts reached the limit:
-      if ($tag_count == $max_posts) {
+      if ($tag_count == $blog_posts) {
         # Prepare information for the page navigation:
         my $index = $tag_page     || '';
         my $next  = $tag_page - 1 || '';
