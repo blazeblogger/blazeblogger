@@ -169,13 +169,16 @@ processor=
 ## The following are the RSS feed related settings, giving you the opportu-
 ## nity to adjust it to your liking. The options are as follows:
 ##
-##  baseurl - The blog base URL (e.g. http://blog.example.com/).
-##  posts   - Number of posts  to be listed in the feed;  the default value
-##            is 10.
+##  baseurl   - The blog base URL (e.g. http://blog.example.com/).
+##  posts     - Number of posts to be listed in the feed; the default value
+##              is 10.
+##  fullposts - Whether to list full posts or just excerpts;  the value has
+##              to be either true, or false.
 ##
 [feed]
 baseurl=
 posts=10
+fullposts=false
 
 ## The following are the post related settings, making it possible to alter
 ## the look of a single post even further. The options are as follows:

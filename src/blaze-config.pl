@@ -53,6 +53,7 @@ our %opt = (
   # Feed related settings:
   'feed.baseurl'     => '',                         # Blog base URL.
   'feed.posts'       => '10',                       # Posts to list.
+  'feed.fullposts'   => 'false',                    # List full posts?
 
   # Post related settings:
   'post.author'      => 'top',                      # Post author location.
@@ -263,6 +264,7 @@ sub create_temp {
   # Prepare the feed related settings:
   my $feed_baseurl   = $conf->{feed}->{baseurl}   || $opt{'feed.baseurl'};
   my $feed_posts     = $conf->{feed}->{posts}     || $opt{'feed.posts'};
+  my $feed_fullposts = $conf->{feed}->{fullposts} || $opt{'feed.fullposts'};
 
   # Prepare the post related settings:
   my $post_author    = $conf->{post}->{author}    || $opt{'post.author'};
@@ -348,13 +350,16 @@ processor=$core_processor
 ## The following are the RSS feed related settings, giving you the opportu-
 ## nity to adjust it to your liking. The options are as follows:
 ##
-##  baseurl - The blog base URL (e.g. http://blog.example.com/).
-##  posts   - Number of posts  to be listed in the feed;  the default value
-##            is 10.
+##  baseurl   - The blog base URL (e.g. http://blog.example.com/).
+##  posts     - Number of posts to be listed in the feed; the default value
+##              is 10.
+##  fullposts - Whether to list full posts or just excerpts;  the value has
+##              to be either true, or false.
 ##
 [feed]
 baseurl=$feed_baseurl
 posts=$feed_posts
+fullposts=$feed_fullposts
 
 ## The following are the post related settings, making it possible to alter
 ## the look of a single post even further. The options are as follows:
@@ -756,6 +761,11 @@ The blog base URL (e.g. C<http://blog.example.com>).
 =item B<feed.posts>
 
 Number of posts to be listed in the feed; the default value is C<10>.
+
+=item B<feed.fullposts>
+
+Whether to list full posts or just excerpts; the value has to be either
+C<true>, or C<false>. Full posts are turned off by default.
 
 =item B<post.author>
 
