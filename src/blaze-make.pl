@@ -998,12 +998,10 @@ sub copy_stylesheet {
 sub generate_rss {
   my $data          = shift || die 'Missing argument';
 
-  # Initialize required variables:
-  my $max_posts     = 10;
-
   # Read required data from the configuration:
   my $blog_title    = $conf->{blog}->{title}     || 'My Blog';
   my $blog_subtitle = $conf->{blog}->{subtitle}  || 'yet another blog';
+  my $max_posts     = $conf->{feed}->{posts}     || 10;
   my $base          = $conf->{feed}->{baseurl};
 
   # Handle the deprecated setting; for backward compatibility reasons only

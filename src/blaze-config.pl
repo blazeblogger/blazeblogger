@@ -504,7 +504,10 @@ sub edit_options {
 # Set the option:
 sub set_option {
   my $option = shift || die 'Missing argument';
-  my $value  = shift || die 'Missing argument';
+  my $value  = shift;
+
+  # Make sure the value is supplied, but accept empty strings and zero:
+  die 'Missing argument' unless defined $value;
 
   # Get the option pair:
   my ($section, $key) = split(/\./, $option);
