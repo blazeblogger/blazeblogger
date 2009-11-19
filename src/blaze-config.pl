@@ -693,8 +693,8 @@ an occasional visitor expect to find.
 
 =item B<blog.theme>
 
-Blog theme; the value should point to an existing file in the .blaze/theme
-directory.
+Blog theme; the value should point to an existing file in the
+C<.blaze/theme> directory.
 
 =item B<blog.style>
 
@@ -709,11 +709,7 @@ C<.blaze/lang> directory.
 
 =item B<blog.posts>
 
-Number of posts to be listed on a single page; the default value is 10.
-
-=item B<blog.url>
-
-Blog base url; required for RSS feeds only.
+Number of posts to be listed on a single page; the default value is C<10>.
 
 =item B<color.list>
 
@@ -728,7 +724,7 @@ C<false>. Colours are turned off by default.
 =item B<core.encoding>
 
 Records encoding in the form recognised by the W3C HTML 4.01 standard (e.g.
-the default UTF-8).
+the default C<UTF-8>).
 
 =item B<core.extension>
 
@@ -749,6 +745,14 @@ C<%in%> and C<%out%> in place of input and output file names (e.g.
 C<< markdown --html4tags %in% > %out% >>). Nevertheless, if you intend to
 write your content in HTML directly, feel free to leave this option empty
 (the default setting).
+
+=item B<feed.baseurl>
+
+The blog base URL (e.g. C<http://blog.example.com>).
+
+=item B<feed.posts>
+
+Number of posts to be listed in the feed; the default value is C<10>.
 
 =item B<post.author>
 
@@ -788,15 +792,15 @@ User's password for remote server authentication.
 
 =item B<submit.host>
 
-Remote server address (e.g. ftp://example.com).
+Remote server address (e.g. C<ftp://example.com>).
 
 =item B<submit.port>
 
-Remote server port (e.g. 21).
+Remote server port (e.g. C<21>).
 
 =item B<submit.remote_directory>
 
-Remote directory where the data are to be placed (e.g. /www/blog).
+Remote directory where the data are to be placed (e.g. C</www/blog>).
 
 =item B<submit.blog_directory>
 
