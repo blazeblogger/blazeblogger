@@ -999,9 +999,10 @@ sub generate_rss {
   my $data          = shift || die 'Missing argument';
 
   # Read required data from the configuration:
-  my $blog_title    = $conf->{blog}->{title}     || 'My Blog';
-  my $blog_subtitle = $conf->{blog}->{subtitle}  || 'yet another blog';
-  my $max_posts     = $conf->{feed}->{posts}     || 10;
+  my $encoding      = $conf->{core}->{encoding} || 'UTF-8';
+  my $blog_title    = $conf->{blog}->{title}    || 'My Blog';
+  my $blog_subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
+  my $max_posts     = $conf->{feed}->{posts}    || 10;
   my $base          = $conf->{feed}->{baseurl};
 
   # Make sure the posts number is a valid integer:
@@ -1055,7 +1056,8 @@ sub generate_rss {
   open(RSS, ">$file") or return 0;
 
   # Write the RSS header:
-  print RSS "<?xml version=\"1.0\"?>\n<rss version=\"2.0\">\n<channel>\n" .
+  print RSS "<?xml version=\"1.0\" encoding=\"$encoding\"?>\n" .
+            "<rss version=\"2.0\">\n<channel>\n" .
             "  <title>$blog_title</title>\n" .
             "  <link>$base/</link>\n" .
             "  <description>$blog_subtitle</description>\n" .
@@ -1084,8 +1086,9 @@ sub generate_rss {
     # Add the post item:
     print RSS "  <item>\n    <title>$post_title</title>\n  " .
               "  <link>$base/$year/$month/$url/</link>\n  " .
-              "  <description>$post_desc    </description>\n  " .
-              "  <pubDate>$date_time</pubDate>\n" .
+              "  <guid>$base/$year/$month/$url/</guid>\n  " .
+              "  <pubDate>$date_time</pubDate>\n  " .
+              "  <description>$post_desc    </description>\n" .
               "  </item>\n";
 
     # Increase the number of listed items:
