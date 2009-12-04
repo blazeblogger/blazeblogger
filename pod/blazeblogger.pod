@@ -23,9 +23,6 @@ B<blaze-make> [B<-cpqrtIFPV>] [B<-b> I<directory>] [B<-d> I<directory>]
 
 B<blaze-log> [B<-cqrsCV>] [B<-b> I<directory>] [B<-n> I<number>]
 
-B<blaze-submit> [B<-c> I<file>] [B<-b> I<directory>] [B<-d> I<directory>]
-[B<-H> I<address>] [B<-p> I<port>] [B<-u> I<username>] [B<-P> I<password>]
-
 =head1 DESCRIPTION
 
 B<BlazeBlogger> is a simple to use but capable CMS for the command line.
@@ -37,15 +34,9 @@ even a company presentation.
 
 =head1 SEE ALSO
 
+=head2 Core Utilities
+
 =over
-
-=item B<blazeintro>(7)
-
-An introduction to BlazeBlogger.
-
-=item B<blazetheme>(7)
-
-An introduction to BlazeBlogger theme creation.
 
 =item B<blaze-init>(1)
 
@@ -79,9 +70,29 @@ Generate static content from the BlazeBlogger repository.
 
 Display the BlazeBlogger repository log.
 
+=back
+
+=head2 Extra Utilities
+
+=over
+
 =item B<blaze-submit>(1)
 
 Upload the static content to the remote server.
+
+=back
+
+=head2 Further Documentation
+
+=over
+
+=item B<blazeintro>(7)
+
+An introduction to BlazeBlogger.
+
+=item B<blazetheme>(7)
+
+An introduction to BlazeBlogger theme creation.
 
 =back
 
