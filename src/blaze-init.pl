@@ -204,7 +204,8 @@ tags=top
 name=admin
 email=admin@localhost
 
-## The following are submit utility settings. The options are as follows:
+## The following are  blaze-submit extra utility settings.  The options are
+## as follows:
 ##
 ##   user             - User's name for remote server authentication.
 ##   password         - User's password.

@@ -385,7 +385,8 @@ tags=$post_tags
 name=$user_name
 email=$user_email
 
-## The following are submit utility settings. The options are as follows:
+## The following are  blaze-submit extra utility settings.  The options are
+## as follows:
 ##
 ##   user             - User's name for remote server authentication.
 ##   password         - User's password for remote server authentication.
@@ -655,7 +656,7 @@ explanation of their meaning, see the appropriate section below.
 
 =head1 OPTIONS
 
-=head2 Command-line options
+=head2 Command-line Options
 
 =over
 
@@ -686,7 +687,7 @@ Display version information and exit.
 
 =back
 
-=head2 Available option names
+=head2 Available Option Names
 
 =over
 
@@ -794,6 +795,12 @@ on the page, depending on the theme (e.g. in the copyright notice).
 User's e-mail. Depending on the theme, it can be used anywhere on the page
 (e.g. in the copyright notice). However, non of the official themes
 actually use it.
+
+=back
+
+=head2 Extra Option Names
+
+=begin
 
 =item B<submit.user>
 
