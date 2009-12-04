@@ -27,23 +27,46 @@ shift
 
 # Parse command and perform appropriate action:
 case "$COMMAND" in
-  "add")    exec blaze-add "$@";;
-  "log")    exec blaze-log "$@";;
-  "edit")   exec blaze-edit "$@";;
-  "init")   exec blaze-init "$@";;
-  "list")   exec blaze-list "$@";;
-  "make")   exec blaze-make "$@";;
-  "config") exec blaze-config "$@";;
-  "remove") exec blaze-remove "$@";;
-  "submit") exec blaze-submit "$@";;
+  "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove")
+    # Run selected core utility:
+    exec blaze-$COMMAND "$@"
+    ;;
+  "submit")
+    # Make sure that blazeblogger-extras are installed:
+    if ! which blaze-$COMMAND > /dev/null 2>&1; then
+      # Report failure:
+      echo "$NAME: Unable to find \`blaze-$COMMAND'." >&2
+      echo "Are blazeblogger-extras installed?" >&2
+
+      # Return failure:
+      exit 127
+    fi
+
+    # Run selected extra utility:
+    exec blaze-$COMMAND "$@"
+    ;;
   "-h" | "--help" | "help")
     # Get user supplied command (if any):
     COMMAND=$1
 
     # Parse command and display its usage:
     case "$COMMAND" in
-      "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove" | "submit")
-        # Display command usage information:
+      "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove")
+        # Display core utility usage information:
+        exec blaze-$COMMAND --help
+        ;;
+      "submit")
+        # Make sure that blazeblogger-extras are installed:
+        if ! which blaze-$COMMAND > /dev/null 2>&1; then
+          # Report failure:
+          echo "$NAME: Unable to find \`blaze-$COMMAND'." >&2
+          echo "Are blazeblogger-extras installed?" >&2
+
+          # Return failure:
+          exit 127
+        fi
+
+        # Display extra utility usage information:
         exec blaze-$COMMAND --help
         ;;
       *)
@@ -79,8 +102,12 @@ case "$COMMAND" in
 
     # Parse command and display its manual page:
     case "$COMMAND" in
-      "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove" | "submit")
-        # Display command usage information:
+      "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove")
+        # Display core utility usage information:
+        exec man blaze-$COMMAND
+        ;;
+      "submit")
+        # Display extra utility usage information:
         exec man blaze-$COMMAND
         ;;
       *)
