@@ -31,7 +31,7 @@ case "$COMMAND" in
     # Run selected core utility:
     exec blaze-$COMMAND "$@"
     ;;
-  "submit")
+  "submit" | "gallery")
     # Make sure that blazeblogger-extras are installed:
     if ! which blaze-$COMMAND > /dev/null 2>&1; then
       # Report failure:
@@ -55,7 +55,7 @@ case "$COMMAND" in
         # Display core utility usage information:
         exec blaze-$COMMAND --help
         ;;
-      "submit")
+      "submit" | "gallery")
         # Make sure that blazeblogger-extras are installed:
         if ! which blaze-$COMMAND > /dev/null 2>&1; then
           # Report failure:
@@ -73,16 +73,19 @@ case "$COMMAND" in
         # Display list of available commands:
         echo "Usage: $NAME COMMAND [OPTION...]"
         echo
-        echo "Available commands:"
-        echo "  init    Create or recover a BlazeBlogger repository."
-        echo "  config  Display or set the BlazeBlogger repository options."
-        echo "  add     Add new post or a page to the BlazeBlogger repository."
-        echo "  edit    Edit a post or page in the BlazeBlogger repository."
-        echo "  remove  Remove a post or page from the BlazeBlogger repository."
-        echo "  list    Browse the content of the BlazeBlogger repository."
-        echo "  make    Generate static content from the BlazeBlogger repository."
-        echo "  log     Display the BlazeBlogger repository log."
-        echo "  submit  Upload the static content to the remote server."
+        echo "Basic commands:"
+        echo "  init     Create or recover a BlazeBlogger repository."
+        echo "  config   Display or set the BlazeBlogger repository options."
+        echo "  add      Add new post or a page to the BlazeBlogger repository."
+        echo "  edit     Edit a post or page in the BlazeBlogger repository."
+        echo "  remove   Remove a post or page from the BlazeBlogger repository."
+        echo "  list     Browse the content of the BlazeBlogger repository."
+        echo "  make     Generate static content from the BlazeBlogger repository."
+        echo "  log      Display the BlazeBlogger repository log."
+        echo
+        echo "Extra commands:"
+        echo "  submit   Upload the static content to the remote server."
+        echo "  gallery  Create a simple image gallery."
         echo
         echo "Additional commands:"
         echo "  help [COMMAND]  Display usage information (on specified command)."
@@ -106,7 +109,7 @@ case "$COMMAND" in
         # Display core utility usage information:
         exec man blaze-$COMMAND
         ;;
-      "submit")
+      "submit" | "gallery")
         # Display extra utility usage information:
         exec man blaze-$COMMAND
         ;;
