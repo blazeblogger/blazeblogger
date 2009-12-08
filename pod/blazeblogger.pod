@@ -80,6 +80,10 @@ Display the BlazeBlogger repository log.
 
 Upload the static content to the remote server.
 
+=item B<blaze-gallery>(1)
+
+Create a simple image gallery.
+
 =back
 
 =head2 Further Documentation
