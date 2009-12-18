@@ -16,11 +16,11 @@
 
 1. GENERAL SYSTEM REQUIREMENTS
 
-All parts of BlazeBlogger package are standalone scripts  written in Perl 5
+All parts of BlazeBlogger package are standalone scripts  written  in  Perl
 and as such, it should be runnable on almost any operating system, provided
 that following dependencies are met:
 
-  * Working installation of Perl 5 (tested on version 5.8.8).
+  * Working installation of Perl (tested on version 5.8.8).
 
 
 2. INSTALLING ON UNIX SYSTEMS
@@ -50,8 +50,8 @@ or, if you have previously changed the destination directory,
 will completely remove all installed files.
 
 On the other hand, you can also run the scripts directly from their present
-location or copy the content of src/ directory somewhere in the $PATH your-
-self.
+location or copy the content of src/ (and unix/ in  case you  intend to use
+the command wrapper) directory somewhere in the $PATH yourself.
 
 
 3. INSTALLING ON WINDOWS
