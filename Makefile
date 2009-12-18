@@ -30,9 +30,11 @@ MAN7    = pod/blazeblogger.7 pod/blazeintro.7 pod/blazetheme.7
 # current situation:
 prefix  = /usr/local
 bindir  = $(prefix)/bin
+datadir = $(prefix)/share/blazeblogger
 mandir  = $(prefix)/share/man
 man1dir = $(mandir)/man1
 man7dir = $(mandir)/man7
+langdir = $(datadir)/lang
 
 # Additional information:
 VERSION = 1.0.0
@@ -58,7 +60,7 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 755 src/blaze-config.pl $(bindir)/blaze-config
 	$(INSTALL) -m 755 src/blaze-remove.pl $(bindir)/blaze-remove
 	@echo "Copying utilities..."
-	$(INSTALL) -m 755 utils/blaze.sh $(bindir)/blaze
+	$(INSTALL) -m 755 unix/blaze.sh $(bindir)/blaze
 	@echo "Copying man pages..."
 	$(INSTALL) -d $(man1dir)
 	$(INSTALL) -m 644 src/blaze-add.1 $(man1dir)
@@ -73,6 +75,14 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 644 pod/blazeintro.7 $(man7dir)
 	$(INSTALL) -m 644 pod/blazetheme.7 $(man7dir)
 	$(INSTALL) -m 644 pod/blazeblogger.7 $(man7dir)
+	@echo "Copying language files..."
+	$(INSTALL) -d $(langdir)
+	$(INSTALL) -m 644 lang/cs_CZ $(langdir)
+	$(INSTALL) -m 644 lang/de_DE $(langdir)
+	$(INSTALL) -m 644 lang/en_GB $(langdir)
+	$(INSTALL) -m 644 lang/es_ES $(langdir)
+	$(INSTALL) -m 644 lang/eu_ES $(langdir)
+	$(INSTALL) -m 644 lang/ja_JP $(langdir)
 
 uninstall:
 	@echo "Removing scripts..."
@@ -98,8 +108,16 @@ uninstall:
 	-rm -f $(man7dir)/blazeintro.7
 	-rm -f $(man7dir)/blazetheme.7
 	-rm -f $(man7dir)/blazeblogger.7
+	@echo "Removing language files..."
+	-rm -f $(langdir)/cs_CZ
+	-rm -f $(langdir)/de_DE
+	-rm -f $(langdir)/en_GB
+	-rm -f $(langdir)/es_ES
+	-rm -f $(langdir)/eu_ES
+	-rm -f $(langdir)/ja_JP
 	@echo "Removing empty directories..."
-	-rmdir $(bindir) $(man1dir) $(man7dir) $(mandir)
+	-rmdir $(bindir) $(man1dir) $(man7dir) $(mandir) $(langdir) \
+               $(datadir)
 
 %.1: %.pl
 	$(POD2MAN) --section=1 --release="Version $(VERSION)" $^ $@
