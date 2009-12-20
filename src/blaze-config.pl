@@ -459,6 +459,9 @@ sub edit_options {
     # Report failure:
     display_warning("Unable to run `$edit'.");
 
+    # Remove the temporary file:
+    unlink $temp;
+
     # Return failure:
     return 0;
   }
@@ -478,6 +481,9 @@ sub edit_options {
     if ($before eq $after) {
       # Report abortion:
       display_warning("File have not been changed: aborting.");
+
+      # Remove the temporary file:
+      unlink $temp;
 
       # Return success:
       exit 0;
