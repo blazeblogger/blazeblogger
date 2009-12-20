@@ -56,15 +56,25 @@ the command wrapper) directory somewhere in the $PATH yourself.
 
 3. INSTALLING ON WINDOWS
 
-Currently,  there is no installer for Microsoft Windows and the only way to
-use BlazeBlogger is to run the scripts  from their present location.  To do
-so, run  your favourite command line  interpreter  (e.g. cmd.exe), get into
-the src/ directory in the BlazeBlogger source package and type:
+Currently, there is no  installer for Microsoft Windows  and the  preferred
+way to use BlazeBlogger is to run the batch files  from their present loca-
+tion. To do so, run your favourite command line interpreter (e.g. cmd.exe),
+get into the  windows/  directory of the BlazeBlogger  source  package  and
+type commands in the following form:
+
+  blaze.bat init [options]
+
+or:
+
+  blaze-init.bat [options]
+
+Alternatively,  you can run the Perl scripts directly  from the src/ direc-
+tory like this:
 
   perl blaze-init.pl [options]
 
-etc. You might also want to change the default editor first:
+Note that you might want to change the default editor first:
 
-  perl blaze-config.pl core.editor C:\Location\Of\Your\editor.exe
+  blaze.bat config core.editor C:\Location\Of\Your\editor.exe
 
 You can also run BlazeBlogger in Cygwin.
