@@ -1,0 +1,139 @@
+                  BlazeBlogger - a CMS without boundaries
+
+                            general information
+
+
+   Copyright (C) 2009 Jaromir Hradilek
+
+   Permission is granted to copy, distribute and/or modify this document
+   under the terms of the GNU Free Documentation License, Version 1.3 or
+   any later version published by the Free Software Foundation;  with no
+   Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+   A copy  of the license is included  as a file called FDL  in the main
+   directory of the BlazeBlogger source package.
+
+   NOTE: For installation instructions see the file called INSTALL.
+
+
+1. OVERVIEW
+
+BlazeBlogger is a simple to use but capable CMS for the command line. Being
+written in  Perl as a cross-platform application  and  producing the static
+content without  the need of database servers  or server-side scripting, it
+is  literally a CMS without  boundaries  suitable for a wide variety of web
+presentations, from  personal  weblog to a project page  or even a  company
+presentation.
+
+Using BlazeBlogger is really easy.  Strongly inspired  by Git in its design
+and  in the best spirit  of Unix philosophy, it comes as a set  of  smaller
+utilities that  do one thing and do it well rather than the monolithic pro-
+gram for everything. Keeping the default configuration, you can have a full
+featured blog with the first post in only three steps!
+
+1.1 MAIN FEATURES
+
+  * Generates valid HTML 4.01 Strict pages and RSS 2.0.
+  * Generates completely browsable yearly and monthly archive and tags.
+  * Supports both blog posts and pages.
+  * Enables a quick change of theme, stylesheet or localization.
+  * Comes with tools for easy management of your blog.
+
+1.2 EXAMPLE USAGE
+
+  $ blaze-init  # Create new blog repository in .blaze/.
+  $ blaze-add   # Write new post in your favourite editor.
+  $ blaze-make  # Generate the static content of your blog.
+
+For a brief introduction to BlazeBlogger usage, read blazeintro(1) man page
+or its online version at <http://blaze.blackened.cz/tutorial/>.
+
+
+2. CUSTOMIZATION
+
+2.1 CHANGING THE BLOG THEME
+
+Changing the theme of your blog is rather straightforward. First, visit the
+<http://blaze.blackened.cz/themes/> and pick one that suits you best.  Then
+extract the content of the theme package  to the directory where the static
+content is being generated;  for example, to install the theme called  Vec-
+torLover:
+
+  $ tar xfz vectorlover-1.0.1.tar.gz
+
+Now  open the template file, in this case vectorlover.html, in your  favou-
+rite text editor and replace the sidebar sections like `About'  or  `Links'
+with appropriate information. Then place the template file  and the corres-
+ponding  stylesheet to the .blaze/theme/ and .blaze/style/ directories res-
+pectively:
+
+  $ mv vectorlover.html .blaze/theme/
+  $ mv vectorlover.css .blaze/style/
+
+Finally, change the configuration to use this theme:
+
+  $ blaze-config blog.theme vectorlover.html
+  $ blaze-config blog.style vectorlover.css
+
+Run `blaze-make' to re-create  the static content  with the new  outfit and
+you are done!
+
+For more information on how to create your own theme, see blazetheme(1) man
+page, or read its HTML version online at  <http://blaze.blackened.cz/files/
+man/en/blazetheme.html>.
+
+2.2 CHANGING THE LOCALIZATION
+
+There are several translations  of  BlazeBlogger ready to be used instantly
+in your blog that you can either copy from the  lang/ directory of the Bla-
+zeBlogger source package, or download it from the  appropriate  section  of
+the project homepage.  To change the blog language,  first place the proper
+language file to the .blaze/lang/ directory:
+
+  $ cp eu_ES .blaze/lang/
+
+Then change the configuration to use this translation:
+
+  $ blaze-config blog.lang eu_ES
+
+Finally, run `blaze-make' to re-create the static content.
+
+If the translation  you are looking for  is not available,  do not despair:
+the language  file  is quite straightforward  and translating it should not
+take you much time. If you do  so,  please,  consider sending it to the up-
+stream, so that it can be made public.
+
+
+3. DEVELOPMENT
+
+As a version control system for its source code, BlazeBlogger uses Git with
+a public repository  located on Gitorious.  To get  the latest  development
+version, you can either use the following command:
+
+  git clone git://gitorious.org/blazeblogger/mainline.git blazeblogger
+
+or, if you are behind a restrictive firewall:
+
+  git clone http://git.gitorious.org/blazeblogger/mainline.git blazeblogger
+
+If you are planning to make some interesting changes, please, consider clo-
+ning the project on Gitorious, so that I can follow you and eventually pull
+your work to the upstream.
+
+
+4. BUGS
+
+To report bug or even send patch,  either add new issue to the project bug-
+tracker at <http://code.google.com/p/blazeblogger/issues/>,  or  visit  the
+discussion group at <http://groups.google.com/group/blazeblogger/>. You can
+also contact the author directly via e-mail.
+
+
+5. COPYRIGHT
+
+Copyright (C) 2009 Jaromir Hradilek
+
+This program is free software; see the source for copying conditions. It is
+distributed  in the hope that it will be useful,  but WITHOUT ANY WARRANTY;
+without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
+TICULAR PURPOSE.
