@@ -440,7 +440,7 @@ GetOptions(
   'version|v'            => sub { display_version(); exit 0; },
   'page|pages|p'         => sub { $type     = 'page';  },
   'post|posts|P'         => sub { $type     = 'post';  },
-  'stats|S'              => sub { $type     = 'stats'; },
+  'stat|stats|S'         => sub { $type     = 'stats'; },
   'number|n=i'           => sub { $number   = $_[1];   },
   'id|I=i'               => sub { $id       = $_[1];   },
   'author|a=s'           => sub { $author   = $_[1];   },
