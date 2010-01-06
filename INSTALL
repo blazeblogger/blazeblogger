@@ -20,7 +20,8 @@ All parts of BlazeBlogger package are standalone scripts  written  in  Perl
 and as such, it should be runnable on almost any operating system, provided
 that following dependencies are met:
 
-  * Working installation of Perl (tested on version 5.8.8).
+  * Working installation of Perl (tested on version 5.10.1, but 5.8.8 ought
+    to work perfectly).
 
 
 2. INSTALLING ON UNIX SYSTEMS
