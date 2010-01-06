@@ -479,7 +479,7 @@ sub save_record {
     # Make sure the raw record directory exists:
     unless (-d $raw_dir) {
       # Create the target directory tree:
-      eval { mkpath($raw_dir, { verbose => 0 }); };
+      eval { mkpath($raw_dir, 0); };
 
       # Make sure the directory creation was successful:
       exit_with_error("Creating directory tree: $@", 13) if $@;
@@ -492,7 +492,7 @@ sub save_record {
   # Make sure the record body and header directories exist:
   unless (-d $head_dir && -d $body_dir) {
     # Create the target directory tree:
-    eval { mkpath($head_dir, $body_dir, { verbose => 0 }); };
+    eval { mkpath([$head_dir, $body_dir], 0); };
 
     # Make sure the directory creation was successful:
     exit_with_error("Creating directory tree: $@", 13) if $@;

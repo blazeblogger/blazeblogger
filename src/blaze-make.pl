@@ -948,7 +948,7 @@ sub write_page {
   }
 
   # Create the target directory tree:
-  eval { mkpath($target, { verbose => 0 }) };
+  eval { mkpath($target, 0) };
 
   # Make sure the directory creation was successful:
   exit_with_error("Creating `$target': $@", 13) if $@;

@@ -649,16 +649,18 @@ my $action = (-d catdir($blogdir, '.blaze')) ? 'Recovered' : 'Created';
 # Create the directory tree:
 eval {
   mkpath(
-    catdir($blogdir, '.blaze', 'lang'),
-    catdir($blogdir, '.blaze', 'theme'),
-    catdir($blogdir, '.blaze', 'style'),
-    catdir($blogdir, '.blaze', 'pages', 'head'),
-    catdir($blogdir, '.blaze', 'pages', 'body'),
-    catdir($blogdir, '.blaze', 'pages', 'raw'),
-    catdir($blogdir, '.blaze', 'posts', 'head'),
-    catdir($blogdir, '.blaze', 'posts', 'body'),
-    catdir($blogdir, '.blaze', 'posts', 'raw'),
-    { verbose => 0 }
+    [
+      catdir($blogdir, '.blaze', 'lang'),
+      catdir($blogdir, '.blaze', 'theme'),
+      catdir($blogdir, '.blaze', 'style'),
+      catdir($blogdir, '.blaze', 'pages', 'head'),
+      catdir($blogdir, '.blaze', 'pages', 'body'),
+      catdir($blogdir, '.blaze', 'pages', 'raw'),
+      catdir($blogdir, '.blaze', 'posts', 'head'),
+      catdir($blogdir, '.blaze', 'posts', 'body'),
+      catdir($blogdir, '.blaze', 'posts', 'raw'),
+    ],
+    0 # Don't be verbose.
   );
 };
 
