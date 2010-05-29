@@ -140,7 +140,7 @@ hyphens and underscores only.
 Keeping that in mind, your first post might look somehow like the one
 below:
 
-  # This and following lines  beginning with `#'  are the post header.
+  # This and following lines  beginning with '#'  are the post header.
   # Please take your time and replace these options with  desired val-
   # ues. Just remember  that the date has to be in an YYYY-MM-DD form,
   # tags are  a comma separated list of categories the post (pages ig-

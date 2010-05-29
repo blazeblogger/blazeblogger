@@ -352,7 +352,7 @@ sub read_record {
   if (open(FOUT, ">$file")) {
     # Write the header:
     print FOUT << "END_HEADER";
-# This and following lines beginning with  `#' are the $type header.  Please
+# This and following lines beginning with  '#' are the $type header.  Please
 # take your time and replace these options with desired values. Just remem-
 # ber that the date has to be in an YYYY-MM-DD form, tags are a comma sepa-
 # rated list of categories the post (pages ignore these) belong to, and the
