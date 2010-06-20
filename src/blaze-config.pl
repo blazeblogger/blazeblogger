@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-config, display or set the BlazeBlogger repository options
-# Copyright (C) 2008, 2009 Jaromir Hradilek
+# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -63,15 +63,6 @@ our %opt = (
   # User related settings:
   'user.name'        => 'admin',                    # User's name.
   'user.email'       => 'admin@localhost',          # User's e-mail.
-
-  # Submit utility settings:
-  'submit.user'      => '',                         # FTP username.
-  'submit.password'  => '',                         # FTP password.
-  'submit.host'      => '',                         # Remote server host.
-  'submit.port'      => '21',                       # Remote server port.
-  'submit.remote_directory' => '',                  # Remote directory.
-  'submit.blog_directory'   => './',                # Local blog directory.
-  'submit.method'    => '',                         # Prepared for future.
 );
 
 # Command-line options:
@@ -130,7 +121,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -275,14 +266,6 @@ sub create_temp {
   my $user_name      = $conf->{user}->{name}      || $opt{'user.name'};
   my $user_email     = $conf->{user}->{email}     || $opt{'user.email'};
 
-  # Prepare the submit utility settings:
-  my $submit_rmdir   = $conf->{submit}->{remote_directory} || $opt{'submit.remote_directory'};
-  my $submit_blogdir = $conf->{submit}->{blog_directory}   || $opt{'submit.blog_directory'};
-  my $submit_host    = $conf->{submit}->{host}             || $opt{'submit.host'};
-  my $submit_port    = $conf->{submit}->{port}             || $opt{'submit.port'};
-  my $submit_user    = $conf->{submit}->{user}             || $opt{'submit.user'};
-  my $submit_passwd  = $conf->{submit}->{password}         || $opt{'submit.password'};
-
   # Handle the depricated settings; for backward compatibility reasons only
   # and to be removed in the future:
   if ((defined $conf->{blog}->{url}) && (not $feed_baseurl)) {
@@ -384,26 +367,6 @@ tags=$post_tags
 [user]
 name=$user_name
 email=$user_email
-
-## The following are  blaze-submit extra utility settings.  The options are
-## as follows:
-##
-##   user             - User's name for remote server authentication.
-##   password         - User's password for remote server authentication.
-##   host             - Remote server address (e.g. ftp://example.com).
-##   port             - Remote server port (e.g. 21).
-##   remote_directory - Remote directory  where the data  are to be  placed
-##                      (e.g. /www/blog).
-##   blog_directory   - Blog directory where the static content is created;
-##                      the default value is the current working directory.
-##
-[submit]
-user=$submit_user
-password=$submit_passwd
-host=$submit_host
-port=$submit_port
-remote_directory=$submit_rmdir
-blog_directory=$submit_blogdir
 
 END_TEMP
 
@@ -804,37 +767,6 @@ actually use it.
 
 =back
 
-=head2 Extra Option Names
-
-=begin
-
-=item B<submit.user>
-
-User's name for remote server authentication.
-
-=item B<submit.password>
-
-User's password for remote server authentication.
-
-=item B<submit.host>
-
-Remote server address (e.g. C<ftp://example.com>).
-
-=item B<submit.port>
-
-Remote server port (e.g. C<21>).
-
-=item B<submit.remote_directory>
-
-Remote directory where the data are to be placed (e.g. C</www/blog>).
-
-=item B<submit.blog_directory>
-
-Blog directory where the static content is created; the default value is
-the current working directory.
-
-=back
-
 =head1 ENVIRONMENT
 
 =over
@@ -883,7 +815,7 @@ directory of the BlazeBlogger source package.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;

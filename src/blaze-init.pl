@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-init, create or recover a BlazeBlogger repository
-# Copyright (C) 2008, 2009 Jaromir Hradilek
+# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -84,7 +84,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -203,26 +203,6 @@ tags=top
 [user]
 name=admin
 email=admin@localhost
-
-## The following are  blaze-submit extra utility settings.  The options are
-## as follows:
-##
-##   user             - User's name for remote server authentication.
-##   password         - User's password.
-##   host             - Remote server address (e.g. ftp://example.com/).
-##   port             - Remote server port (e.g. 21).
-##   remote_directory - Remote directory  where the data  are to be  placed
-##                      (e.g. /www/blog).
-##   blog_directory   - Blog directory where the static content is created;
-##                      the default value is current working directory.
-##
-[submit]
-user=
-password=
-host=
-port=21
-remote_directory=
-blog_directory=./
 
 END_CONFIG
 
@@ -770,7 +750,7 @@ directory of the BlazeBlogger source package.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
