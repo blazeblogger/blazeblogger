@@ -843,6 +843,7 @@ sub write_page {
   # Check whether the template is not already cached:
   unless ($cache->{theme}->{$temp}) {
     # Read required data from the configuration:
+    my $doctype  = $conf->{core}->{doctype}   || 'html';
     my $encoding = $conf->{core}->{encoding}  || 'UTF-8';
     my $name     = $conf->{user}->{name}      || 'admin';
     my $email    = $conf->{user}->{email}     || 'admin@localhost';
@@ -860,16 +861,34 @@ sub write_page {
     # Get the current year:
     my $year     = substr(date_to_string(time), 0, 4);
 
-    # Prepare the meta and link elements for the page header:
-    my $date         = "<meta name=\"Date\" content=\"".localtime()."\">";
-    my $content_type = "<meta http-equiv=\"Content-Type\" content=\"" .
-                       "text/html; charset=$encoding\">";
-    my $generator    = "<meta name=\"Generator\" content=\"BlazeBlogger " .
-                       VERSION . "\">";
-    my $stylesheet   = "<link rel=\"stylesheet\" href=\"$root$style\"" .
-                       " type=\"text/css\">";
-    my $rss          = "<link rel=\"alternate\" href=\"${root}index.rss\"".
-                       " title=\"RSS Feed\" type=\"application/rss+xml\">";
+    # Declare the required variables:
+    my ($date, $content_type, $generator, $stylesheet, $rss);
+
+    # Check which doctype to use:
+    if ($doctype ne 'xhtml') {
+      # Prepare the meta and link elements for the page header:
+      $date         = "<meta name=\"Date\" content=\"".localtime()."\">";
+      $content_type = "<meta http-equiv=\"Content-Type\" content=\"" .
+                      "text/html; charset=$encoding\">";
+      $generator    = "<meta name=\"Generator\" content=\"BlazeBlogger " .
+                      VERSION . "\">";
+      $stylesheet   = "<link rel=\"stylesheet\" href=\"$root$style\" " .
+                      "type=\"text/css\">";
+      $rss          = "<link rel=\"alternate\" href=\"${root}index.rss\" ".
+                      "title=\"RSS Feed\" type=\"application/rss+xml\">";
+    }
+    else {
+      # Prepare the meta and link elements for the page header:
+      $date         = "<meta name=\"Date\" content=\"".localtime()."\" />";
+      $content_type = "<meta http-equiv=\"Content-Type\" content=\"" .
+                      "text/html; charset=$encoding\" />";
+      $generator    = "<meta name=\"Generator\" content=\"BlazeBlogger " .
+                      VERSION . "\" />";
+      $stylesheet   = "<link rel=\"stylesheet\" href=\"$root$style\" " .
+                      "type=\"text/css\" />";
+      $rss          = "<link rel=\"alternate\" href=\"${root}index.rss\" ".
+                      "title=\"RSS Feed\" type=\"application/rss+xml\" />";
+    }
 
     # Open the theme file for reading:
     open(THEME, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
