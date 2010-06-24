@@ -1104,6 +1104,12 @@ sub generate_rss {
       # Read the post body:
       my $post_desc = read_entry($record->{id}, 'post', '', 0);
 
+      # Substitute the root directory placeholder:
+      $post_desc =~ s/%root%/$feed_baseurl\//ig;
+
+      # Substitute the home page placeholder:
+      $post_desc =~ s/%home%/$feed_baseurl\//ig;
+
       # Add the post body:
       print RSS "  <description><![CDATA[$post_desc    ]]></description>\n";
     }
