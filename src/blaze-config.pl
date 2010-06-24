@@ -47,6 +47,7 @@ our %opt = (
   # Core settings:
   'core.encoding'    => 'UTF-8',                    # Posts/pages codepage.
   'core.extension'   => 'html',                     # File extension.
+  'core.doctype'     => 'html',                     # Document type.
   'core.editor'      => '',                         # External text editor.
   'core.processor'   => '',                         # External processor.
 
@@ -247,6 +248,7 @@ sub create_temp {
   my $color_log      = $conf->{color}->{log}      || $opt{'color.log'};
 
   # Prepare the core settings:
+  my $core_doctype   = $conf->{core}->{doctype}   || $opt{'core.doctype'};
   my $core_editor    = $conf->{core}->{editor}    || $opt{'core.editor'};
   my $core_encoding  = $conf->{core}->{encoding}  || $opt{'core.encoding'};
   my $core_extension = $conf->{core}->{extension} || $opt{'core.extension'};
@@ -316,17 +318,20 @@ log=$color_log
 ## The following are the core settings,  affecting the way the BlazeBlogger
 ## works. The options are as follows:
 ##
-##   encoding  - Records  encoding in the form  recognised by the  W3C HTML
-##               4.01 standard (e.g. the default UTF-8).
-##   extension - File extension for the generated pages.
+##   doctype   - The document type;  the value  has to be  either html,  or
+##               xhtml.
+##   extension - The file extension for the generated pages.
+##   encoding  - The encoding in the form recognised by W3C  (e.g., the de-
+##               fault UTF-8).
 ##   editor    - An external text editor to be used for editing purposes.
 ##   processor - An optional external application to be used to process the
 ##               entries;  use %in% and %out% in place of input and  output
 ##               files, for example: markdown --html4tags %in% > %out%
 ##
 [core]
-encoding=$core_encoding
+doctype=$core_doctype
 extension=$core_extension
+encoding=$core_encoding
 editor=$core_editor
 processor=$core_processor
 
