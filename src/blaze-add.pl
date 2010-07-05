@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-add, add a blog post or a page to the BlazeBlogger repository
-# Copyright (C) 2008, 2009 Jaromir Hradilek
+# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -103,7 +103,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -516,7 +516,8 @@ sub add_new {
 
   # Prepare the data for the temporary file header:
   my $title  = $data->{header}->{title} || '';
-  my $author = $data->{header}->{author}|| $conf->{user}->{name} || 'admin';
+  my $author = $data->{header}->{author}|| $conf->{user}->{nickname}
+                                        || $conf->{user}->{name} || 'admin';
   my $date   = $data->{header}->{date}  || date_to_string(time);
   my $tags   = $data->{header}->{tags}  || '';
   my $url    = $data->{header}->{url}   || '';
@@ -846,7 +847,7 @@ directory of the BlazeBlogger source package.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
