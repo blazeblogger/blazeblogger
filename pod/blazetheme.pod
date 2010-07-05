@@ -18,18 +18,17 @@ touching the template file, which generally does not tend to vary much.
 =head2 Creating the Template File
 
 The template file is where the page layout is described. It is a bare HTML
-(or XHTML, it really does not matter) file with various placeholders to be
-substituted by appropriate data. Most of the placeholders are just ordinary
-HTML comments with a reserved strings in them. Note that while the case is
-not significant, the fact that the whole placeholder has to be on a single
-line is.
+(or XHTML) file with various placeholders to be substituted by appropriate
+data. Most of the placeholders are just ordinary comments with reserved
+strings in them. Note that while the case is not significant, the fact that
+the whole placeholder has to be on a single line is.
 
 For the example usage, see the default template file.
 
 =head3 List of Head Placeholders
 
 These are the placeholders that usually appear in the HEAD section of the
-HTML/XHTML document.
+HTML (or XHTML) document.
 
 =over
 
@@ -62,7 +61,7 @@ Current page title, usually used inside TITLE element.
 =head3 List of Body Placeholders
 
 These are the placeholders that usually appear in the BODY section of the
-HTML/XHTML document.
+HTML (or XHTML) document.
 
 =over
 

@@ -25,8 +25,8 @@ form, as it is the most portable variant.
 To create a new blog, you have to create a repository first. Similarly to
 Git, BlazeBlogger repository is just a (usually hidden) directory named
 C<.blaze>, where all the blog data and configuration are stored and from
-which the static content, i.e. the HTML pages, is generated. In most cases,
-it is placed in the same directory as the generated content.
+which the static content, i.e. the HTML (or XHTML) pages, is generated. In
+most cases, it is placed in the same directory as the generated content.
 
 Assuming you are already in the directory where the blog repository is to
 be placed, you can create a new one typing:

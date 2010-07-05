@@ -704,15 +704,20 @@ C<true>, or C<false>. Colours are turned off by default.
 Whether to use coloured log listing; the value has to be either C<true>, or
 C<false>. Colours are turned off by default.
 
-=item B<core.encoding>
+=item B<core.doctype>
 
-Records encoding in the form recognised by the W3C HTML 4.01 standard (e.g.
-the default C<UTF-8>).
+The document type; the value has to be either C<html>, or C<xhtml>. By
+default, C<html> is used as a reasonable choice.
 
 =item B<core.extension>
 
-File extension for the generated pages. By default, the C<html> is used as
-a reasonable choice.
+File extension for the generated pages. By default, C<html> is used as a
+reasonable choice.
+
+=item B<core.encoding>
+
+Records encoding in the form recognised by the W3C (e.g., the default
+C<UTF-8>).
 
 =item B<core.editor>
 
