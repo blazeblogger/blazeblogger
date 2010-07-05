@@ -199,12 +199,15 @@ tags=top
 
 ## The following are the user related settings. The options are as follows:
 ##
-##   name  - User's name  to be used as a default posts' author  and in the
-##           copyright notice.
-##   email - User's e-mail.
+##   name     - User's name; to be used in the copyright notice, and if the
+##              nickname is not set, as the default post author as well.
+##   nickname - User's nickname; to be used as the default post author. The
+##              user name is used by default.
+##   email    - User's e-mail.
 ##
 [user]
 name=admin
+nickname=
 email=admin@localhost
 
 END_CONFIG
