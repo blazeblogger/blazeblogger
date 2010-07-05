@@ -771,8 +771,15 @@ C<none>. Tags are placed above the post (below its heading) by default.
 
 =item B<user.name>
 
-User's name to be used as a default posts' author and optionally anywhere
-on the page, depending on the theme (e.g. in the copyright notice).
+User's name; this is typically used in the copyright notice, but depending
+on the theme, it can be shown anywhere on the page. Also, the value of this
+option is used as the default post author when the C<user.nickname> is left
+empty.
+
+=item B<user.nickname>
+
+User's nickname; to be used as the default post author. Unless this option
+is set, the value of C<user.name> is used by default.
 
 =item B<user.email>
 
