@@ -72,12 +72,13 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-pqCPV] [-b directory] [-a author] [-d date] [-t title]
-                 [-T tags] [-u url] [file...]
+Usage: $NAME [-pqCPV] [-b directory] [-E editor] [-a author] [-d date]
+                 [-t title] [-T tags] [-u url] [file...]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
+  -E, --editor editor         specify the external text editor
   -t, --title title           use given title
   -a, --author author         use given author
   -d, --date date             use given date; has to be in YYYY-MM-DD form
@@ -693,8 +694,9 @@ blaze-add - add a blog post or a page to the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-add> [B<-pqCPV>] [B<-b> I<directory>] [B<-a> I<author>] [B<-d>
-I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
+B<blaze-add> [B<-pqCPV>] [B<-b> I<directory>] [B<-E> I<editor>] [B<-a>
+I<author>] [B<-d> I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>]
+[I<file>...]
 
 B<blaze-add> B<-h> | B<-v>
 
@@ -744,6 +746,14 @@ a part to be displayed on index page.
 
 Specify the I<directory> where the BlazeBlogger repository is placed. The
 default option is the current working directory.
+
+=item B<-E>, B<--editor> I<editor>
+
+Specify the external text I<editor> to be used for editing purposes. By
+default, the C<core.editor> configuration option is used, and unless it is
+set, BlazeBlogger tries to use the system wide settings by looking for the
+C<EDITOR> environment variable. If neither of these options is supplied,
+then C<vi> is used as a considerably reasonable option.
 
 =item B<-t>, B<--title> I<title>
 

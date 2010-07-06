@@ -69,11 +69,12 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-fpqCPV] [-b directory] id
+Usage: $NAME [-fpqCPV] [-b directory] [-E editor] id
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
+  -E, --editor editor         specify the external text editor
   -p, --page                  edit page instead of blog post
   -P, --post                  edit blog post; the default option
   -f, --force                 force creating the raw file if not present
@@ -668,7 +669,7 @@ blaze-edit - edit a blog post or a page in the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-edit> [B<-fpqCPV>] [B<-b> I<directory>] I<id>
+B<blaze-edit> [B<-fpqCPV>] [B<-b> I<directory>] [B<-E> I<editor>] I<id>
 
 B<blaze-edit> B<-h> | B<-v>
 
@@ -717,6 +718,14 @@ a part to be displayed on index page.
 
 Specify the I<directory> where the BlazeBlogger repository is placed. The
 default option is the current working directory.
+
+=item B<-E>, B<--editor> I<editor>
+
+Specify the external text I<editor> to be used for editing purposes. By
+default, the C<core.editor> configuration option is used, and unless it is
+set, BlazeBlogger tries to use the system wide settings by looking for the
+C<EDITOR> environment variable. If neither of these options is supplied,
+then C<vi> is used as a considerably reasonable option.
 
 =item B<-p>, B<--page>
 

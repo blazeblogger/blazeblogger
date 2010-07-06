@@ -99,12 +99,13 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-qV] [-b directory] name [value...]
+Usage: $NAME [-qV] [-b directory] [-E editor] name [value...]
        $NAME -e [-b directory]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
                               repository is placed
+  -E, --editor editor         specify the external text editor
   -e, --edit                  open the config file in the text editor
   -q, --quiet                 avoid displaying unnecessary messages
   -V, --verbose               display all messages; the default option
@@ -618,7 +619,8 @@ blaze-config - display or set the BlazeBlogger repository options
 
 =head1 SYNOPSIS
 
-B<blaze-config> [B<-qV>] [B<-b> I<directory>] I<name> [I<value...>]
+B<blaze-config> [B<-qV>] [B<-b> I<directory>] [B<-E> I<editor>] I<name>
+[I<value...>]
 
 B<blaze-config> B<-e> [B<-b> I<directory>]
 
@@ -645,6 +647,14 @@ explanation of their meaning, see the appropriate section below.
 
 Specify the I<directory> where the BlazeBlogger repository is placed. The
 default option is the current working directory.
+
+=item B<-E>, B<--editor> I<editor>
+
+Specify the external text I<editor> to be used for editing purposes. By
+default, the C<core.editor> configuration option is used, and unless it is
+set, BlazeBlogger tries to use the system wide settings by looking for the
+C<EDITOR> environment variable. If neither of these options is supplied,
+then C<vi> is used as a considerably reasonable option.
 
 =item B<-e>, B<--edit>
 
