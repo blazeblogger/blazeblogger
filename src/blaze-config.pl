@@ -28,6 +28,7 @@ use constant VERSION => '1.0.0';                    # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
+our $editor  = '';                                  # Editor to use.
 our $verbose = 1;                                   # Verbosity level.
 
 # List of valid options and their default values:
@@ -410,7 +411,7 @@ sub edit_options {
   return 0 if (scalar(keys %$conf) == 0);
 
   # Decide which editor to use:
-  my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
+  my $edit = $editor || $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
   # Create the temporary file:
   create_temp($conf, $temp) or return 0;
@@ -564,6 +565,7 @@ GetOptions(
   'quiet|q'       => sub { $verbose = 0;     },
   'verbose|V'     => sub { $verbose = 1;     },
   'blogdir|b=s'   => sub { $blogdir = $_[1]; },
+  'editor|E=s'    => sub { $editor  = $_[1]; },
 );
 
 # Check the repository is present (however naive this method is):

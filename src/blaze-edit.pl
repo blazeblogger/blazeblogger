@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-edit, edit a blog post or a page in the BlazeBlogger repository
-# Copyright (C) 2008, 2009 Jaromir Hradilek
+# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -30,6 +30,7 @@ use constant VERSION => '1.0.0';                    # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
+our $editor  = '';                                  # Editor to use.
 our $force   = 0;                                   # Force raw file?
 our $process = 1;                                   # Use processor?
 our $verbose = 1;                                   # Verbosity level.
@@ -95,7 +96,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -518,7 +519,7 @@ sub edit_record {
   my $temp = catfile($blogdir, '.blaze', 'temp');
 
   # Decide which editor to use:
-  my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
+  my $edit = $editor || $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
   # Create the temporary file:
   unless (read_record($temp, $id, $type)) {
@@ -621,6 +622,7 @@ GetOptions(
   'quiet|q'        => sub { $verbose = 0;      },
   'verbose|V'      => sub { $verbose = 1;      },
   'blogdir|b=s'    => sub { $blogdir = $_[1];  },
+  'editor|E=s'     => sub { $editor  = $_[1];  },
 );
 
 # Check superfluous options:
@@ -804,7 +806,7 @@ directory of the BlazeBlogger source package.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;

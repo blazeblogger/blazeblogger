@@ -30,6 +30,7 @@ use constant VERSION => '1.0.0';                    # Script version.
 
 # General script settings:
 our $blogdir  = '.';                                # Repository location.
+our $editor   = '';                                 # Editor to use.
 our $process  = 1;                                  # Use processor?
 our $verbose  = 1;                                  # Verbosity level.
 
@@ -512,7 +513,7 @@ sub add_new {
   my $data = shift || {};
 
   # Decide which editor to use:
-  my $edit = $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
+  my $edit = $editor || $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
   # Prepare the data for the temporary file header:
   my $title  = $data->{header}->{title} || '';
@@ -632,6 +633,7 @@ GetOptions(
   'quiet|q'        => sub { $verbose = 0;      },
   'verbose|V'      => sub { $verbose = 1;      },
   'blogdir|b=s'    => sub { $blogdir = $_[1];  },
+  'editor|E=s'     => sub { $editor  = $_[1];  },
   'title|t=s'      => sub { $data->{header}->{title}  = $_[1]; },
   'author|a=s'     => sub { $data->{header}->{author} = $_[1]; },
   'date|d=s'       => sub { $data->{header}->{date}   = $_[1]; },
