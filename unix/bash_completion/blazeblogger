@@ -1,0 +1,363 @@
+# blazeblogger -- bash completion script for BlazeBlogger
+# Copyright (C) 2009 Miroslav Hradílek
+
+# This program is  free software:  you can redistribute it and/or modify it
+# under  the terms  of the  GNU General Public License  as published by the
+# Free Software Foundation, version 3 of the License.
+#
+# This program  is  distributed  in the hope  that it will  be useful,  but
+# WITHOUT  ANY WARRANTY;  without  even the implied  warranty of MERCHANTA-
+# BILITY  or  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+# License for more details.
+#
+# You should have received a copy of the  GNU General Public License  along
+# with this program. If not, see <http://www.gnu.org/licenses/>.
+
+# blaze-init function
+_blaze_init()
+{
+  # call _blaze with init as a parameter
+  _blaze "init"
+}
+
+# blaze-config function
+_blaze_config()
+{
+  # call _blaze with config as a parameter
+  _blaze "config"
+}
+
+# blaze-add function
+_blaze_add()
+{
+  # call _blaze with add as a parameter
+  _blaze "add"
+}
+
+# blaze-edit function
+_blaze_edit()
+{
+  # call _blaze with edit as a parameter
+  _blaze "edit"
+}
+
+# blaze-remove function
+_blaze_remove()
+{
+  # call _blaze with remove as a parameter
+  _blaze "remove"
+}
+
+# blaze-list function
+_blaze_list()
+{
+  # call _blaze with list as a parameter
+  _blaze "list"
+}
+
+# blaze-make function
+_blaze_make()
+{
+  # call _blaze with make as a parameter
+  _blaze "make"
+}
+
+# blaze-log function
+_blaze_log()
+{
+  # call _blaze with log as a parameter
+  _blaze "log"
+}
+
+# main function accepts one optional argument utility
+# _blaze [utility]
+_blaze()
+{
+  local cur prev opts params first
+
+  # initial variables
+  COMPREPLY=()
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  prev="${COMP_WORDS[COMP_CWORD-1]}"
+  if [[ "$#" -eq 1 ]]; then
+    # function called with parameter - utility call
+    params="$@" # obligatory to not complete wrapper commands
+    first="$1"
+  else
+    # function called without parameter - wrapper call
+    first="${COMP_WORDS[1]}"
+  fi
+
+  # basic options - blaze utilities - wrapper's first option
+  opts="init config add edit remove list make log help version"
+
+  # handle utility dependent opts
+  case "${first}" in
+    init)
+    # init handler code ---------------------------------------------------
+      # utility specifick options
+      local specopts="-b --blogdir -f --force -q --quiet -V --verbose -h \
+--help -v --version"
+
+      # argument completions
+      case "$prev" in
+        -b|--blogdir)
+          COMPREPLY=( $(compgen -d -- ${cur}) )
+          return 0
+          ;;
+        *)
+          # do nothing
+          ;;
+      esac
+
+      # no argument completions
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "${specopts}" -- ${cur}) )
+        return 0
+      fi
+      ;;
+    config)
+    # config handler code -------------------------------------------------
+      # utility specifick options
+      local specopts="-b --blogdir -e --edit -q --quiet -V --verbose -h \
+--help -v --version"
+      local specnames="blog.title blog.subtitle blog.theme blog.style \
+blog.lang blog.posts blog.url color.list color.log core.editor \
+core.encoding core.extension post.author post.date post.tags user.name \
+user.email"
+
+      # argument completions
+      case "$prev" in
+        -b|--blogdir)
+          COMPREPLY=( $(compgen -d -- ${cur}) )
+          return 0
+          ;;
+        blog.*|color.*|core.*|post.*|user.*|--)
+          COMPREPLY=()
+          return 0
+          ;;
+        *)
+          # do nothing
+          ;;
+      esac
+
+      # no argument completions
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "${specopts}" -- ${cur}) )
+        return 0
+      else
+        COMPREPLY=( $(compgen -W "${specnames}" -- ${cur}) )
+        return 0
+      fi
+      ;;
+    add)
+    # add handler code ----------------------------------------------------
+      # utility specifick options
+      local specopts="-b --blogdir -t --title -a --author -d --date -T \
+--tags -u --url -p --page -P --post -C --no-processor  -q --quiet -V \
+--verbose -h --help -v --version"
+
+      # argument completions
+      case "$prev" in
+        -b|--blogdir)
+          COMPREPLY=( $(compgen -d -- ${cur}) )
+          return 0
+          ;;
+        -d|--date)
+          COMPREPLY=( $(date +%Y-%m-%d) )
+          return 0
+          ;;
+        -t|--title|-a|--author|-T|--tags|-u|-url)
+          COMPREPLY=()
+          return 0
+          ;;
+        *)
+          # do nothing
+          ;;
+      esac
+
+      # no argument completions
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "${specopts}" -- ${cur}) )
+        return 0
+      else
+        COMPREPLY=( $(compgen -f -- ${cur}) )
+        return 0
+      fi
+      ;;
+    edit)
+    # edit handler code ---------------------------------------------------
+      # utility specifick options
+      local specopts="-b --blogdir -p --page -P --post -f --force -C \
+--no-processor -q --quiet -V --verbose -h --help -v --version"
+
+      # argument completions
+      case "$prev" in
+        -b|--blogdir)
+          COMPREPLY=( $(compgen -d -- ${cur}) )
+          return 0
+          ;;
+        *)
+          # do nothing
+          ;;
+      esac
+
+      # no argument completions
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "${specopts}" -- ${cur}) )
+        return 0
+      fi
+      ;;
+    remove)
+    # remove handler code -------------------------------------------------
+      # utility specifick options
+      local specopts="-b --blogdir -p --page -P --post -i --interactive \
+-f --force -q --quiet -V --verbose -h --help -v --version"
+
+      # argument completions
+      case "$prev" in
+        -b|--blogdir)
+          COMPREPLY=( $(compgen -d -- ${cur}) )
+          return 0
+          ;;
+        *)
+          # do nothing
+          ;;
+      esac
+
+      # no argument completions
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "${specopts}" -- ${cur}) )
+        return 0
+      fi
+      ;;
+    list)
+    # list handler code ---------------------------------------------------
+      # utility specifick options
+      local specopts="-b --blogdir -I --id -a --author -t --title -T \
+--tag -d --day -m --month -y --year -n --number -p --pages -P --posts -S \
+--stats -s --short -r --reverse -c --color -C --no-color -q --quiet -V \
+--verbose -h --help -v --version"
+
+      # argument completions
+      case "$prev" in
+        -b|--blogdir)
+          COMPREPLY=( $(compgen -d -- ${cur}) )
+          return 0
+          ;;
+        -d|--day)
+          COMPREPLY=( $(date +%d) )
+          return 0
+          ;;
+        -m|--month)
+          COMPREPLY=( $(date +%m) )
+          return 0
+          ;;
+        -y|--year)
+          COMPREPLY=( $(date +%Y) )
+          return 0
+          ;;
+        -I|--id|-a|--author|-t|--title|-T|--tag|-n|--number)
+          COMPREPLY=()
+          return 0
+          ;;
+        *)
+          # do nothing
+          ;;
+      esac
+
+      # no argument completions
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "${specopts}" -- ${cur}) )
+        return 0
+      fi
+      ;;
+    make)
+    # make handler code ---------------------------------------------------
+      # utility specifick options
+      local specopts="-b --blogdir -d --destdir -c --no-css -I --no-index \
+-p --no-posts -P --no-pages -t --no-tags -r --no-rss -F --full-paths -q \
+--quiet -V --verbose -h --help -v --version"
+
+      # argument completions
+      case "$prev" in
+        -b|--blogdir|-d|--destdir)
+          COMPREPLY=( $(compgen -d -- ${cur}) )
+          return 0
+          ;;
+        *)
+          # do nothing
+          ;;
+      esac
+
+      # no argument completions
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "${specopts}" -- ${cur}) )
+        return 0
+      fi
+      ;;
+    log)
+    # log handler code ----------------------------------------------------
+      # utility specifick options
+      local specopts="-b --blogdir -n --number -s --short -r --reverse -c \
+--color -C --no-color -q --quiet -V --verbose -h --help -v --version"
+
+      # argument completions
+      case "$prev" in
+        -b|--blogdir)
+          COMPREPLY=( $(compgen -d -- ${cur}) )
+          return 0
+          ;;
+        -n|--number)
+          COMPREPLY=()
+          return 0
+          ;;
+        *)
+          # do nothing
+          ;;
+      esac
+
+      # no argument completions
+      if [[ "$cur" == -* ]]; then
+        COMPREPLY=( $(compgen -W "${specopts}" -- ${cur}) )
+        return 0
+      fi
+      ;;
+    help)
+    # help handler code ---------------------------------------------------
+      # no argument completions
+      if [[ "$prev" == "help" ]]; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+      fi
+      ;;
+    *)
+      # do nothing
+      ;;
+  esac
+
+  # handle basic opts ie. blaze utilities
+  # reply only if function was called from wrapper
+  if test "$COMP_CWORD" -eq 1 && test -z "$params"; then
+    COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+    return 0
+  fi
+}
+# bind _blaze function to blaze command
+complete -F _blaze blaze
+# bind _blaze init function to blaze-init command
+complete -F _blaze_init blaze-init
+# bind _blaze_config function to blaze-config command
+complete -F _blaze_config blaze-config
+# bind _blaze_add function to blaze-add command
+complete -F _blaze_add blaze-add
+# bind _blaze_edit function to blaze-edit command
+complete -F _blaze_edit blaze-edit
+# bind _blaze_remove function to blaze-remove command
+complete -F _blaze_remove blaze-remove
+# bind _blaze_list function to blaze-list command
+complete -F _blaze_list blaze-list
+# bind _blaze_make function to blaze-make command
+complete -F _blaze_make blaze-make
+# bind _blaze_log function to blaze-log command
+complete -F _blaze_log blaze-log
