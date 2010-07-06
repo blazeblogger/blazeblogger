@@ -1,0 +1,52 @@
+                  BlazeBlogger - a CMS without boundaries
+
+                 bash completion installation instructions
+
+
+   Copyright (C) 2009, 2010 Jaromir Hradilek
+
+   Permission is granted to copy, distribute and/or modify this document
+   under the terms of the GNU Free Documentation License, Version 1.3 or
+   any later version published by the Free Software Foundation;  with no
+   Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+   A copy  of the license is included  as a file called FDL  in the main
+   directory of the BlazeBlogger source package.
+
+1. GENERAL SYSTEM REQUIREMENTS
+
+You have  to have the  bash completion enabled,  either in /etc/bashrc,  or
+~/.bashrc. To do so, place the following code to any of the above files:
+
+  if [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+
+
+2. INSTALLING ON UNIX SYSTEMS
+
+The easiest way  to install the bash completion  for BlazeBlogger  on  Unix
+operating systems is to use the existing Makefile. As superuser, simply get
+into the directory with this instructions and type:
+
+  make install
+
+This will install the relevant file to the /etc/bash_completion.d/ directo-
+ry; however, if this location do not satisfy your needs, you can change the
+target directory directly on the command line like this:
+
+  make prefix=/some/location install
+
+
+2. UNINSTALLING ON UNIX SYSTEMS
+
+Similarly to the installation, typing
+
+  make uninstall
+
+or, if you have previously changed the destination directory,
+
+  make prefix=/some/location uninstall
+
+will completely remove all installed files from the system.
+
