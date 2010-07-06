@@ -1,5 +1,5 @@
 # makefile for BlazeBlogger, a CMS without boundaries
-# Copyright (C) 2009 Jaromir Hradilek
+# Copyright (C) 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -80,6 +80,7 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 644 lang/cs_CZ $(langdir)
 	$(INSTALL) -m 644 lang/de_DE $(langdir)
 	$(INSTALL) -m 644 lang/en_GB $(langdir)
+	$(INSTALL) -m 644 lang/en_US $(langdir)
 	$(INSTALL) -m 644 lang/es_ES $(langdir)
 	$(INSTALL) -m 644 lang/eu_ES $(langdir)
 	$(INSTALL) -m 644 lang/ja_JP $(langdir)
@@ -113,6 +114,7 @@ uninstall:
 	-rm -f $(langdir)/cs_CZ
 	-rm -f $(langdir)/de_DE
 	-rm -f $(langdir)/en_GB
+	-rm -f $(langdir)/en_US
 	-rm -f $(langdir)/es_ES
 	-rm -f $(langdir)/eu_ES
 	-rm -f $(langdir)/ja_JP
