@@ -83,6 +83,7 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 644 lang/en_US $(langdir)
 	$(INSTALL) -m 644 lang/es_ES $(langdir)
 	$(INSTALL) -m 644 lang/eu_ES $(langdir)
+	$(INSTALL) -m 644 lang/fr_FR $(langdir)
 	$(INSTALL) -m 644 lang/ja_JP $(langdir)
 	$(INSTALL) -m 644 lang/pt_BR $(langdir)
 
@@ -117,6 +118,7 @@ uninstall:
 	-rm -f $(langdir)/en_US
 	-rm -f $(langdir)/es_ES
 	-rm -f $(langdir)/eu_ES
+	-rm -f $(langdir)/fr_FR
 	-rm -f $(langdir)/ja_JP
 	-rm -f $(langdir)/pt_BR
 	@echo "Removing empty directories..."
