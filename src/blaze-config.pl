@@ -38,7 +38,7 @@ our %opt = (
   'blog.subtitle'    => 'yet another blog',         # Blog subtitle.
   'blog.theme'       => 'default.html',             # Blog template file.
   'blog.style'       => 'default.css',              # Blog stylesheet file.
-  'blog.lang'        => 'en_GB',                    # Blog language.
+  'blog.lang'        => 'en_US',                    # Blog language.
   'blog.posts'       => '10',                       # Posts to display.
 
   # Colour related settings:

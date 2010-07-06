@@ -229,7 +229,7 @@ sub read_conf {
 
 # Read the language file:
 sub read_lang {
-  my $name = shift || 'en_GB';
+  my $name = shift || 'en_US';
 
   # Prepare the file name:
   my $file = catfile($blogdir, '.blaze', 'lang', $name);

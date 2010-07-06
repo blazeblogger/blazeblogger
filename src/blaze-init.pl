@@ -134,7 +134,7 @@ title=My Blog
 subtitle=yet another blog
 theme=default.html
 style=default.css
-lang=en_GB
+lang=en_US
 posts=10
 
 ## The following are the colour settings, affecting the way various outputs
@@ -549,7 +549,7 @@ END_STYLE
 # Create the default language file:
 sub create_lang {
   # Prepare the language file name:
-  my $file = catfile($blogdir, '.blaze', 'lang', 'en_GB');
+  my $file = catfile($blogdir, '.blaze', 'lang', 'en_US');
 
   # Skip existing file unless forced:
   return 1 if (-e $file && !$force);
