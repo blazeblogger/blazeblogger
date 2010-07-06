@@ -1,5 +1,6 @@
-# blazeblogger -- bash completion script for BlazeBlogger
+# blazeblogger, a bash completion script for BlazeBlogger
 # Copyright (C) 2009 Miroslav Hradílek
+# Revision  (C) 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -119,12 +120,13 @@ _blaze()
     config)
     # config handler code -------------------------------------------------
       # utility specifick options
-      local specopts="-b --blogdir -e --edit -q --quiet -V --verbose -h \
---help -v --version"
+      local specopts="-b --blogdir -E --editor -e --edit -q --quiet -V \
+--verbose -h --help -v --version"
       local specnames="blog.title blog.subtitle blog.theme blog.style \
-blog.lang blog.posts blog.url color.list color.log core.editor \
-core.encoding core.extension post.author post.date post.tags user.name \
-user.email"
+blog.lang blog.posts color.list color.log core.doctype core.extension \
+core.encoding core.editor core.processor feed.baseurl feed.posts \
+feed.fullposts post.author post.date post.tags user.name \
+user.nickname user.email"
 
       # argument completions
       case "$prev" in
@@ -132,7 +134,11 @@ user.email"
           COMPREPLY=( $(compgen -d -- ${cur}) )
           return 0
           ;;
-        blog.*|color.*|core.*|post.*|user.*|--)
+        -E|--editor)
+          COMPREPLY=()
+          return 0
+          ;;
+        blog.*|color.*|core.*|feed.*|post.*|user.*|--)
           COMPREPLY=()
           return 0
           ;;
@@ -153,9 +159,9 @@ user.email"
     add)
     # add handler code ----------------------------------------------------
       # utility specifick options
-      local specopts="-b --blogdir -t --title -a --author -d --date -T \
---tags -u --url -p --page -P --post -C --no-processor  -q --quiet -V \
---verbose -h --help -v --version"
+      local specopts="-b --blogdir -E --editor -t --title -a --author -d \
+--date -T --tags -u --url -p --page -P --post -C --no-processor  -q \
+--quiet -V --verbose -h --help -v --version"
 
       # argument completions
       case "$prev" in
@@ -167,7 +173,7 @@ user.email"
           COMPREPLY=( $(date +%Y-%m-%d) )
           return 0
           ;;
-        -t|--title|-a|--author|-T|--tags|-u|-url)
+        -E|--editor|-t|--title|-a|--author|-T|--tags|-u|-url)
           COMPREPLY=()
           return 0
           ;;
@@ -188,13 +194,17 @@ user.email"
     edit)
     # edit handler code ---------------------------------------------------
       # utility specifick options
-      local specopts="-b --blogdir -p --page -P --post -f --force -C \
---no-processor -q --quiet -V --verbose -h --help -v --version"
+      local specopts="-b --blogdir -E --editor -p --page -P --post -f \
+--force -C --no-processor -q --quiet -V --verbose -h --help -v --version"
 
       # argument completions
       case "$prev" in
         -b|--blogdir)
           COMPREPLY=( $(compgen -d -- ${cur}) )
+          return 0
+          ;;
+        -E|--editor)
+          COMPREPLY=()
           return 0
           ;;
         *)
