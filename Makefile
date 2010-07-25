@@ -86,6 +86,8 @@ install: $(MAN1) $(MAN7)
 	$(INSTALL) -m 644 lang/fr_FR $(langdir)
 	$(INSTALL) -m 644 lang/ja_JP $(langdir)
 	$(INSTALL) -m 644 lang/pt_BR $(langdir)
+	$(INSTALL) -m 644 lang/ru_RU $(langdir)
+	$(INSTALL) -m 644 lang/uk_UK $(langdir)
 
 uninstall:
 	@echo "Removing scripts..."
@@ -121,6 +123,8 @@ uninstall:
 	-rm -f $(langdir)/fr_FR
 	-rm -f $(langdir)/ja_JP
 	-rm -f $(langdir)/pt_BR
+	-rm -f $(langdir)/ru_RU
+	-rm -f $(langdir)/uk_UK
 	@echo "Removing empty directories..."
 	-rmdir $(bindir) $(man1dir) $(man7dir) $(mandir) $(langdir) \
                $(datadir)
