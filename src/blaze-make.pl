@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-make, generate static content from the BlazeBlogger repository
-# Copyright (C) 2009 Jaromir Hradilek
+# Copyright (C) 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -75,7 +75,7 @@ sub display_help {
 
   # Print the message to the STDOUT:
   print << "END_HELP";
-Usage: $NAME [-cpqrtIFPV] [-b directory] [-d directory]
+Usage: $NAME [-cpqrIFPTV] [-b directory] [-d directory]
        $NAME -h | -v
 
   -b, --blogdir directory     specify the directory where the BlazeBlogger
@@ -86,7 +86,7 @@ Usage: $NAME [-cpqrtIFPV] [-b directory] [-d directory]
   -I, --no-index              disable index page creation
   -p, --no-posts              disable blog posts creation
   -P, --no-pages              disable pages creation
-  -t, --no-tags               disable support for tags
+  -T, --no-tags               disable support for tags
   -r, --no-rss                disable RSS feed creation
   -F, --full-paths            enable full paths creation
   -q, --quiet                 avoid displaying unnecessary messages
@@ -108,7 +108,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2009 Jaromir Hradilek
+Copyright (C) 2009, 2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -1588,7 +1588,7 @@ GetOptions(
   'with-pages'    => sub { $with_pages = 1 },
   'no-pages|P'    => sub { $with_pages = 0 },
   'with-tags'     => sub { $with_tags  = 1 },
-  'no-tags|t'     => sub { $with_tags  = 0 },
+  'no-tags|T'     => sub { $with_tags  = 0 },
   'with-rss'      => sub { $with_rss   = 1 },
   'no-rss|r'      => sub { $with_rss   = 0 },
   'with-css'      => sub { $with_css   = 1 },
@@ -1672,7 +1672,7 @@ blaze-make - generate static content from the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-make> [B<-cpqrtIFPV>] [B<-b> I<directory>] [B<-d> I<directory>]
+B<blaze-make> [B<-cpqrIFPTV>] [B<-b> I<directory>] [B<-d> I<directory>]
 
 B<blaze-make> B<-h> | B<-v>
 
@@ -1716,7 +1716,7 @@ feed. This is especially useful for websites with pages only.
 
 Disable creation of pages.
 
-=item B<-t>, B<--no-tags>
+=item B<-T>, B<--no-tags>
 
 Disable support for tags.
 
@@ -1794,7 +1794,7 @@ directory of the BlazeBlogger source package.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009 Jaromir Hradilek
+Copyright (C) 2009, 2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
