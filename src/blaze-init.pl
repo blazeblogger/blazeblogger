@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-init creates or recovers a BlazeBlogger repository
+# blaze-init - creates or recovers a BlazeBlogger repository
 # Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it

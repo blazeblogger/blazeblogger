@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-config, display or set the BlazeBlogger repository options
+# blaze-config - displays or sets BlazeBlogger configuration options
 # Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -31,30 +31,30 @@ our $blogdir = '.';                                 # Repository location.
 our $editor  = '';                                  # Editor to use.
 our $verbose = 1;                                   # Verbosity level.
 
-# List of valid options and their default values:
+# A list of valid options, and their default values:
 our %opt = (
   # Blog related settings:
   'blog.title'       => 'My Blog',                  # Blog title.
   'blog.subtitle'    => 'yet another blog',         # Blog subtitle.
-  'blog.theme'       => 'default.html',             # Blog template file.
-  'blog.style'       => 'default.css',              # Blog stylesheet file.
-  'blog.lang'        => 'en_US',                    # Blog language.
-  'blog.posts'       => '10',                       # Posts to display.
+  'blog.theme'       => 'default.html',             # Blog theme.
+  'blog.style'       => 'default.css',              # Blog style sheet.
+  'blog.lang'        => 'en_US',                    # Blog localization.
+  'blog.posts'       => '10',                       # Number of posts.
 
   # Colour related settings:
-  'color.list'       => 'false',                    # Coloured listing?
-  'color.log'        => 'false',                    # Coloured log?
+  'color.list'       => 'false',                    # Colored listing?
+  'color.log'        => 'false',                    # Colored log?
 
   # Core settings:
-  'core.encoding'    => 'UTF-8',                    # Posts/pages codepage.
+  'core.encoding'    => 'UTF-8',                    # Character encoding.
   'core.extension'   => 'html',                     # File extension.
   'core.doctype'     => 'html',                     # Document type.
   'core.editor'      => '',                         # External text editor.
   'core.processor'   => '',                         # External processor.
 
   # Feed related settings:
-  'feed.baseurl'     => '',                         # Blog base URL.
-  'feed.posts'       => '10',                       # Posts to list.
+  'feed.baseurl'     => '',                         # Base URL.
+  'feed.posts'       => '10',                       # Number of posts.
   'feed.fullposts'   => 'false',                    # List full posts?
 
   # Post related settings:
@@ -65,31 +65,37 @@ our %opt = (
   # User related settings:
   'user.name'        => 'admin',                    # User's name.
   'user.nickname'    => '',                         # User's nickname.
-  'user.email'       => 'admin@localhost',          # User's e-mail.
+  'user.email'       => 'admin@localhost',          # User's email.
 );
 
-# Command-line options:
-my  $edit = 0;                                      # Edit config directly?
+# Command line options:
+my  $edit = 0;                                      # Open in text editor?
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
   print STDERR NAME . ": " . (shift);
 };
 
-# Display given message and terminate the script:
+# Display an error message, and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occurred.';
+  my $message      = shift || 'An error has occurred.';
   my $return_value = shift || 1;
 
+  # Display the error message:
   print STDERR NAME . ": $message\n";
+
+  # Terminate the script:
   exit $return_value;
 }
 
-# Display given warning message:
+# Display a warning message:
 sub display_warning {
-  my $message = shift || 'An unspecified warning was requested.';
+  my $message = shift || 'A warning was requested.';
 
+  # Display the warning message:
   print STDERR "$message\n";
+
+  # Return success:
   return 1;
 }
 
@@ -97,18 +103,18 @@ sub display_warning {
 sub display_help {
   my $NAME = NAME;
 
-  # Print the message to the STDOUT:
+  # Display the usage:
   print << "END_HELP";
-Usage: $NAME [-qV] [-b directory] [-E editor] name [value...]
-       $NAME -e [-b directory]
-       $NAME -h | -v
+Usage: $NAME [-qV] [-b DIRECTORY] [-E EDITOR] OPTION [VALUE...]
+       $NAME -e [-b DIRECTORY]
+       $NAME -h|-v
 
-  -b, --blogdir directory     specify the directory where the BlazeBlogger
+  -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
                               repository is placed
-  -E, --editor editor         specify the external text editor
-  -e, --edit                  open the config file in the text editor
-  -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages; the default option
+  -E, --editor EDITOR         specify an external text editor
+  -e, --edit                  edit the configuration in a text editor
+  -q, --quiet                 do not display unnecessary messages
+  -V, --verbose               display all messages
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -121,7 +127,7 @@ END_HELP
 sub display_version {
   my ($NAME, $VERSION) = (NAME, VERSION);
 
-  # Print the message to the STDOUT:
+  # Display the version:
   print << "END_VERSION";
 $NAME $VERSION
 
@@ -149,13 +155,13 @@ sub read_ini {
 
   # Process each line:
   while (my $line = <INI>) {
-    # Parse line:
+    # Parse the line:
     if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
       # Change the section:
       $section = $1;
     }
     elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
-      # Add option to the hash:
+      # Add the option to the hash:
       $hash->{$section}->{$1} = $2;
     }
   }
@@ -177,12 +183,12 @@ sub write_ini {
 
   # Process each section:
   foreach my $section (sort(keys(%$hash))) {
-    # Write the section header:
+    # Write the section header to the file:
     print INI "[$section]\n";
 
     # Process each option in the section:
     foreach my $option (sort(keys(%{$hash->{$section}}))) {
-      # Write the option and its value:
+      # Write the option and its value to the file:
       print INI "  $option = $hash->{$section}->{$option}\n";
     }
   }
@@ -194,7 +200,7 @@ sub write_ini {
   return 1;
 }
 
-# Read the configuration file:
+# Read the content of the configuration file:
 sub read_conf {
   # Prepare the file name:
   my $file = catfile($blogdir, '.blaze', 'config');
@@ -208,12 +214,12 @@ sub read_conf {
     # Report failure:
     display_warning("Unable to read configuration.");
 
-    # Return empty configuration:
+    # Return an empty configuration:
     return {};
   }
 }
 
-# Read configuration from the temporary file and save it:
+# Read configuration from the temporary file, and save it:
 sub write_conf {
   my $conf = shift || die 'Missing argument';
 
@@ -233,12 +239,12 @@ sub write_conf {
   return 1;
 }
 
-# Create a human readable version of configuration file:
+# Create a human readable version of the configuration file:
 sub create_temp {
   my $conf = shift || die 'Missing argument';
   my $file = shift || catfile($blogdir, '.blaze', 'temp');
 
-  # Prepare the blog related settings:
+  # Prepare the general blog settings:
   my $blog_title     = $conf->{blog}->{title}     || $opt{'blog.title'};
   my $blog_subtitle  = $conf->{blog}->{subtitle}  || $opt{'blog.subtitle'};
   my $blog_theme     = $conf->{blog}->{theme}     || $opt{'blog.theme'};
@@ -246,58 +252,54 @@ sub create_temp {
   my $blog_lang      = $conf->{blog}->{lang}      || $opt{'blog.lang'};
   my $blog_posts     = $conf->{blog}->{posts}     || $opt{'blog.posts'};
 
-  # Prepare the colour related settings:
+  # Prepare the color settings:
   my $color_list     = $conf->{color}->{list}     || $opt{'color.list'};
   my $color_log      = $conf->{color}->{log}      || $opt{'color.log'};
 
-  # Prepare the core settings:
+  # Prepare the advanced BlazeBlogger settings:
   my $core_doctype   = $conf->{core}->{doctype}   || $opt{'core.doctype'};
   my $core_editor    = $conf->{core}->{editor}    || $opt{'core.editor'};
   my $core_encoding  = $conf->{core}->{encoding}  || $opt{'core.encoding'};
   my $core_extension = $conf->{core}->{extension} || $opt{'core.extension'};
   my $core_processor = $conf->{core}->{processor} || $opt{'core.processor'};
 
-  # Prepare the feed related settings:
+  # Prepare the RSS feed settings:
   my $feed_baseurl   = $conf->{feed}->{baseurl}   || $opt{'feed.baseurl'};
   my $feed_posts     = $conf->{feed}->{posts}     || $opt{'feed.posts'};
   my $feed_fullposts = $conf->{feed}->{fullposts} || $opt{'feed.fullposts'};
 
-  # Prepare the post related settings:
+  # Prepare the advanced post settings:
   my $post_author    = $conf->{post}->{author}    || $opt{'post.author'};
   my $post_date      = $conf->{post}->{date}      || $opt{'post.date'};
   my $post_tags      = $conf->{post}->{tags}      || $opt{'post.tags'};
 
-  # Prepare the user related settings:
+  # Prepare the user settings:
   my $user_name      = $conf->{user}->{name}      || $opt{'user.name'};
   my $user_nickname  = $conf->{user}->{nickname}  || $opt{'user.nickname'};
   my $user_email     = $conf->{user}->{email}     || $opt{'user.email'};
 
-  # Handle the depricated settings; for backward compatibility reasons only
-  # and to be removed in the future:
+  # Handle the deprecated settings. This is for backward compatibility
+  # reasons only, and to be removed in the near future:
   if ((defined $conf->{blog}->{url}) && (not $feed_baseurl)) {
     # Assign the value to the proper option:
     $feed_baseurl    = $conf->{blog}->{url};
   }
 
-  # Open the file for writing:
+  # Open the temporary file for writing:
   if(open(FILE, ">$file")) {
-    # Write to the temporary file:
+    # Write the configuration to the file:
     print FILE << "END_TEMP";
-## The following are the blog related settings, having the direct influence
-## on the way the whole thing looks. The options are as follows:
+## General blog settings. Available options are:
 ##
-##   title    - The blog title.
-##   subtitle - The blog subtitle, supposedly a brief, single-line descrip-
-##              tion of what should the occasional visitor  expect to find.
-##   theme    - The blog theme;  the value should point to an existing file
-##              in the .blaze/theme directory.
-##   style    - The blog style; the value should point to an existing file,
-##              either  in  .blaze/style,  or in the  destination directory
-##              where the static content is to be placed.
-##   lang     - The blog language;  the value  should point to an  existing
-##              file in the .blaze/lang directory.
-##   posts    - Number of posts to be listed on a single page;  the default
-##              value is 10.
+##   title         A title of your blog.
+##   subtitle      A subtitle of your blog.
+##   theme         A theme for your blog. It must point to an existing file
+##                 in the .blaze/theme/ directory.
+##   style         A style sheet for your blog.  It must point to  an exis-
+##                 ting file in the .blaze/style/ directory.
+##   lang          A translation of your blog. It must point to an existing
+##                 file in the .blaze/lang/ directory.
+##   posts         A number of blog posts to be listed on a single page.
 ##
 [blog]
 title=$blog_title
@@ -307,30 +309,30 @@ style=$blog_style
 lang=$blog_lang
 posts=$blog_posts
 
-## The following are the colour settings, affecting the way various outputs
-## look. The options are as follows:
+## Color settings. Available options are:
 ##
-##   list - Whether to use coloured posts/pages listing;  the value  has to
-##          be either true, or false.
-##   log  - Whether to use coloured repository log listing;  the value  has
-##          to be either true, or false.
+##   list          A boolean  to enable (true) or disable (false) colors in
+##                 the blaze-list output.
+##   log           A boolean  to enable (true) or disable (false) colors in
+##                 the blaze-log output.
 ##
 [color]
 list=$color_list
 log=$color_log
 
-## The following are the core settings,  affecting the way the BlazeBlogger
-## works. The options are as follows:
+## Advanced BlazeBlogger settings. Available options are:
 ##
-##   doctype   - The document type;  the value  has to be  either html,  or
-##               xhtml.
-##   extension - The file extension for the generated pages.
-##   encoding  - The encoding in the form recognised by W3C  (e.g., the de-
-##               fault UTF-8).
-##   editor    - An external text editor to be used for editing purposes.
-##   processor - An optional external application to be used to process the
-##               entries;  use %in% and %out% in place of input and  output
-##               files, for example: markdown --html4tags %in% > %out%
+##   doctype       A document type.  It can be  either  html  for HTML,  or
+##                 xhtml for the XHTML standard.
+##   extension     A file extension.
+##   encoding      A character encoding. It has to be in a form that is re-
+##                 cognized by W3C standards.
+##   editor        An external  text  editor.  When  supplied, this  option
+##                 overrides the system-wide settings.
+##   processor     An external application  to be used to process newly ad-
+##                 ded or edited blog posts and pages. You must supply %in%
+##                 and %out% in place of an input and output file name res-
+##                 pectively.
 ##
 [core]
 doctype=$core_doctype
@@ -339,41 +341,42 @@ encoding=$core_encoding
 editor=$core_editor
 processor=$core_processor
 
-## The following are the RSS feed related settings, giving you the opportu-
-## nity to adjust it to your liking. The options are as follows:
+## RSS feed settings. Available options are:
 ##
-##  baseurl   - The blog base URL (e.g. http://blog.example.com/).
-##  posts     - Number of posts to be listed in the feed; the default value
-##              is 10.
-##  fullposts - Whether to list full posts or just excerpts;  the value has
-##              to be either true, or false.
+##  baseurl        A URL of your blog, for example "http://example.com/".
+##  posts          A number of blog posts to be listed in the feed.
+##  fullposts      A boolean to enable (true)  or disable (false) inclusion
+##                 of the whole content of a blog post in the feed.
 ##
 [feed]
 baseurl=$feed_baseurl
 posts=$feed_posts
 fullposts=$feed_fullposts
 
-## The following are the post related settings, making it possible to alter
-## the look of a single post even further. The options are as follows:
+## Advanced post settings. Available options are:
 ##
-##  author - Location of the author; available  options are top, bottom, or
-##           none.
-##  date   - Location of the date of publishing; available options are top,
-##           bottom, or none.
-##  tags   - Location of tags;  available options are top, bottom, or none.
+##  author         A location of a blog post author name.  It can either be
+##                 placed above the post (top),  below it (bottom),  or no-
+##                 where on the page (none).
+##  date           A location  of a date  of publishing.  It can  either be
+##                 placed above the post (top),  below it (bottom),  or no-
+##                 where on the page (none).
+##  tags           A location of post tags. They can either be placed above
+##                 the post (top),  below it (bottom),  or  nowhere  on the
+##                 page (none).
 ##
 [post]
 author=$post_author
 date=$post_date
 tags=$post_tags
 
-## The following are the user related settings. The options are as follows:
+## User settings. Available options are:
 ##
-##   name     - User's name; to be used in the copyright notice, and if the
-##              nickname is not set, as the default post author as well.
-##   nickname - User's nickname; to be used as the default post author. The
-##              user name is used by default.
-##   email    - User's e-mail.
+##   name          Your full name to be used in the copyright notice,  and
+##                 as the default post author.
+##   nickname      Your nickname  to be used  as the  default  post author.
+##                 When supplied, this option overrides the  above setting.
+##   email         Your email address.
 ##
 [user]
 name=$user_name
@@ -390,14 +393,14 @@ END_TEMP
   }
   else {
     # Report failure:
-    display_warning("Unable to create temporary file.");
+    display_warning("Unable to create the temporary file.");
 
     # Return failure:
     return 0;
   }
 }
 
-# Edit the configuration file:
+# Edit the configuration file in a text editor:
 sub edit_options {
   # Initialize required variables:
   my ($before, $after);
@@ -408,7 +411,7 @@ sub edit_options {
   # Read the configuration file:
   my $conf = read_conf();
 
-  # Make sure the configuration was successfully read:
+  # Make sure the configuration was read successfully:
   return 0 if (scalar(keys %$conf) == 0);
 
   # Decide which editor to use:
@@ -419,17 +422,17 @@ sub edit_options {
 
   # Open the file for reading:
   if (open(FILE, "$temp")) {
-    # Set the IO handler to binmode:
+    # Set the input/output handler to "binmode":
     binmode(FILE);
 
-    # Count checksum:
+    # Count the checksum:
     $before = Digest::MD5->new->addfile(*FILE)->hexdigest;
 
     # Close the file:
     close(FILE);
   }
 
-  # Open the temporary file in the external editor:
+  # Open the temporary file in the text editor:
   unless (system("$edit $temp") == 0) {
     # Report failure:
     display_warning("Unable to run `$edit'.");
@@ -443,19 +446,19 @@ sub edit_options {
 
   # Open the file for reading:
   if (open(FILE, "$temp")) {
-    # Set the IO handler to binmode:
+    # Set the input/output handler to "binmode":
     binmode(FILE);
 
-    # Count checksum:
+    # Count the checksum:
     $after = Digest::MD5->new->addfile(*FILE)->hexdigest;
 
     # Close the file:
     close(FILE);
 
-    # Compare the checksum:
+    # Compare the checksums:
     if ($before eq $after) {
-      # Report abortion:
-      display_warning("File have not been changed: aborting.");
+      # Report the abortion:
+      display_warning("File has not been changed: aborting.");
 
       # Remove the temporary file:
       unlink $temp;
@@ -465,7 +468,7 @@ sub edit_options {
     }
   }
 
-  # Read configuration from the temporary file:
+  # Read the configuration from the temporary file:
   if ($conf = read_ini($temp)) {
     # Save the configuration file:
     write_conf($conf) or return 0;
@@ -478,7 +481,7 @@ sub edit_options {
   }
   else {
     # Report failure:
-    display_warning("Unable to read temporary file.");
+    display_warning("Unable to read the temporary file.");
 
     # Remove the temporary file:
     unlink $temp;
@@ -488,7 +491,7 @@ sub edit_options {
   }
 }
 
-# Set the option:
+# Set a configuration option:
 sub set_option {
   my $option = shift || die 'Missing argument';
   my $value  = shift;
@@ -502,16 +505,16 @@ sub set_option {
   # Read the configuration file:
   my $conf = read_conf();
 
-  # Make sure the configuration was successfully read:
+  # Make sure the configuration was read successfully:
   return 0 if (scalar(keys %$conf) == 0);
 
   # Set up the option:
   $conf->{$section}->{$key} = $value;
 
-  # Handle the depricated settings; for backward compatibility reasons only
-  # and to be removed in the future:
+  # Handle deprecated settings. This is for backward compatibility reasons
+  # only, and to be removed in the near future:
   if (defined $conf->{blog}->{url}) {
-    # Check whether the currently set option is the affected one:
+    # Check whether the current option is the affected one:
     if ($option ne 'feed.baseurl') {
       # Assign the value to the proper option:
       $conf->{feed}->{baseurl} = $conf->{blog}->{url};
@@ -528,7 +531,7 @@ sub set_option {
   return 1;
 }
 
-# Display the option:
+# Display an option:
 sub display_option {
   my $option = shift || die 'Missing argument';
 
@@ -538,7 +541,7 @@ sub display_option {
   # Read the configuration file:
   my $conf = read_conf();
 
-  # Make sure the configuration was successfully read:
+  # Make sure the configuration was read successfully:
   return 0 if (scalar(keys %$conf) == 0);
 
   # Check whether the option is set:
@@ -555,10 +558,10 @@ sub display_option {
   return 1;
 }
 
-# Set up the options parser:
+# Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
-# Process command-line options:
+# Process command line options:
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
@@ -569,7 +572,8 @@ GetOptions(
   'editor|E=s'    => sub { $editor  = $_[1]; },
 );
 
-# Check the repository is present (however naive this method is):
+# Check whether the repository is present, no matter how naive this method
+# actually is:
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
@@ -579,10 +583,10 @@ if ($edit) {
   exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 0);
 
   # Edit the configuration file:
-  edit_options() or exit_with_error("Cannot edit configuration.", 13);
+  edit_options() or exit_with_error("Cannot edit the configuration.", 13);
 
   # Report success:
-  print "Your changes have been successfully saved.\n" if $verbose;
+  print "Your changes have been saved successfully.\n" if $verbose;
 }
 else {
   # Check missing options:
@@ -599,7 +603,7 @@ else {
       or exit_with_error("Cannot set the option.", 13);
 
     # Report success:
-    print "The option has been successfully saved.\n" if $verbose;
+    print "The option has been saved successfully.\n" if $verbose;
   }
   else {
     # Display the option:
