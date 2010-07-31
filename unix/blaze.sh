@@ -19,46 +19,46 @@
 NAME=${0##*/}
 VERSION='1.0.0'
 
-# Get user supplied command (if any):
+# Get the command, if any:
 COMMAND=$1
 
-# Shift command-line options:
+# Shift command line options:
 shift
 
-# Parse command and perform appropriate action:
+# Parse the command and perform an appropriate action:
 case "$COMMAND" in
   "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove")
-    # Run selected core utility:
+    # Run the selected utility:
     exec blaze-$COMMAND "$@"
     ;;
   "-h" | "--help" | "help")
-    # Get user supplied command (if any):
+    # Get the command, if any:
     COMMAND=$1
 
-    # Parse command and display its usage:
+    # Parse the command, and display its usage:
     case "$COMMAND" in
       "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove")
-        # Display core utility usage information:
+        # Display the utility usage information:
         exec blaze-$COMMAND --help
         ;;
       *)
-        # Display list of available commands:
+        # Display the list of available commands:
         echo "Usage: $NAME COMMAND [OPTION...]"
         echo
         echo "Basic commands:"
-        echo "  init     Create or recover a BlazeBlogger repository."
-        echo "  config   Display or set the BlazeBlogger repository options."
-        echo "  add      Add new post or a page to the BlazeBlogger repository."
-        echo "  edit     Edit a post or page in the BlazeBlogger repository."
-        echo "  remove   Remove a post or page from the BlazeBlogger repository."
-        echo "  list     Browse the content of the BlazeBlogger repository."
-        echo "  make     Generate static content from the BlazeBlogger repository."
-        echo "  log      Display the BlazeBlogger repository log."
+        echo "  init     Creates or recovers a BlazeBlogger repository."
+        echo "  config   Displays or sets BlazeBlogger configuration options."
+        echo "  add      Adds a blog post or a page to the BlazeBlogger repository."
+        echo "  edit     Edits a blog post or a page in the BlazeBlogger repository."
+        echo "  remove   Removes a blog post or a page from the BlazeBlogger repository."
+        echo "  list     Lists blog posts or pages in the BlazeBlogger repository."
+        echo "  make     Generates a blog from the BlazeBlogger repository."
+        echo "  log      Displays the BlazeBlogger repository log."
         echo
         echo "Additional commands:"
-        echo "  help [COMMAND]  Display usage information (on specified command)."
-        echo "  man [COMMAND]   Display manual page (on specified command)."
-        echo "  version         Display version information."
+        echo "  help [COMMAND]  Displays usage information on the selected command."
+        echo "  man [COMMAND]   Displays a man page for the selected command."
+        echo "  version         Displays version information."
         echo
         echo "Type \`$NAME help COMMAND' for command details."
 
@@ -68,13 +68,13 @@ case "$COMMAND" in
     esac
     ;;
   "man")
-    # Get user supplied command (if any):
+    # Get the command, if any:
     COMMAND=$1
 
-    # Parse command and display its manual page:
+    # Parse the command, and display its man page:
     case "$COMMAND" in
       "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove")
-        # Display core utility usage information:
+        # Display the utility usage information:
         exec man blaze-$COMMAND
         ;;
       *)
@@ -97,7 +97,7 @@ case "$COMMAND" in
     exit 0
     ;;
   *)
-    # Respond to wrong/missing command:
+    # Respond to a wrong or missing command:
     echo "Usage: $NAME COMMAND [OPTION...]" >&2
     echo "Try \`$NAME help' for more information." >&2
 
