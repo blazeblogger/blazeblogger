@@ -212,7 +212,7 @@ sub read_conf {
   }
   else {
     # Report failure:
-    display_warning("Unable to read configuration.");
+    display_warning("Unable to read the configuration.");
 
     # Return an empty configuration:
     return {};

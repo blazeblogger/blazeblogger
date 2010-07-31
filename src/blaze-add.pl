@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-add, add a blog post or a page to the BlazeBlogger repository
+# blaze-add - adds a blog post or a page to the BlazeBlogger repository
 # Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -36,33 +36,39 @@ our $verbose  = 1;                                  # Verbosity level.
 
 # Global variables:
 our $chosen   = 1;                                  # Available ID guess.
-our $reserved = undef;                              # Reserved IDs list.
+our $reserved = undef;                              # Reserved ID list.
 our $conf     = {};                                 # Configuration.
 
-# Command-line options:
+# Command line options:
 my  $type     = 'post';                             # Type: post or page.
 my  $added    = '';                                 # List of added IDs.
-my  $data     = {};                                 # Post/page metadata.
+my  $data     = {};                                 # Post/page meta data.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
   print STDERR NAME . ": " . (shift);
 };
 
-# Display given message and terminate the script:
+# Display an error message, and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occurred.';
+  my $message      = shift || 'An error has occurred.';
   my $return_value = shift || 1;
 
+  # Display the error message:
   print STDERR NAME . ": $message\n";
+
+  # Terminate the script:
   exit $return_value;
 }
 
-# Display given warning message:
+# Display a warning message:
 sub display_warning {
-  my $message = shift || 'An unspecified warning was requested.';
+  my $message = shift || 'A warning was requested.';
 
+  # Display the warning message:
   print STDERR "$message\n";
+
+  # Terminate the script:
   return 1;
 }
 
@@ -70,25 +76,26 @@ sub display_warning {
 sub display_help {
   my $NAME = NAME;
 
-  # Print the message to the STDOUT:
+  # Display the usage:
   print << "END_HELP";
-Usage: $NAME [-pqCPV] [-b directory] [-E editor] [-a author] [-d date]
-                 [-t title] [-T tags] [-u url] [file...]
-       $NAME -h | -v
+Usage: $NAME [-pqCPV] [-b DIRECTORY] [-E EDITOR] [-a AUTHOR] [-d DATE]
+                 [-t TITLE] [-T TAGS] [-u URL] [FILE...]
+       $NAME -h|-v
 
-  -b, --blogdir directory     specify the directory where the BlazeBlogger
+  -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
                               repository is placed
-  -E, --editor editor         specify the external text editor
-  -t, --title title           use given title
-  -a, --author author         use given author
-  -d, --date date             use given date; has to be in YYYY-MM-DD form
-  -T, --tags tags             tag the blog post; pages ignore these
-  -u, --url url               use given url; based on the title by default
-  -p, --page                  add page instead of blog post
-  -P, --post                  add blog post; the default option
-  -C, --no-processor          disable the use of external processor
-  -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages; the default option
+  -E, --editor EDITOR         specify an external text editor
+  -t, --title TITLE           specify a title
+  -a, --author AUTHOR         specify an author
+  -d, --date DATE             specify a date of publishing
+  -T, --tags TAGS             specify a comma-separated list of tags
+  -u, --url URL               specify a URL
+  -p, --page                  add a page or pages
+  -P, --post                  add a blog post or blog posts
+  -C, --no-processor          disable processing the blog post or page with
+                              an external application
+  -q, --quiet                 do not display unnecessary messages
+  -V, --verbose               display all messages
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -101,7 +108,7 @@ END_HELP
 sub display_version {
   my ($NAME, $VERSION) = (NAME, VERSION);
 
-  # Print the message to the STDOUT:
+  # Display the version:
   print << "END_VERSION";
 $NAME $VERSION
 
@@ -116,7 +123,7 @@ END_VERSION
   return 1;
 }
 
-# Translate given date to YYYY-MM-DD string:
+# Translate a date to the YYYY-MM-DD form:
 sub date_to_string {
   my @date = localtime(shift);
   return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
@@ -135,13 +142,13 @@ sub read_ini {
 
   # Process each line:
   while (my $line = <INI>) {
-    # Parse line:
+    # Parse the line:
     if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
       # Change the section:
       $section = $1;
     }
     elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
-      # Add option to the hash:
+      # Add the option to the hash:
       $hash->{$section}->{$1} = $2;
     }
   }
@@ -163,12 +170,12 @@ sub write_ini {
 
   # Process each section:
   foreach my $section (sort(keys(%$hash))) {
-    # Write the section header:
+    # Write the section header to the file::
     print INI "[$section]\n";
 
     # Process each option in the section:
     foreach my $option (sort(keys(%{$hash->{$section}}))) {
-      # Write the option and its value:
+      # Write the option and its value to the file:
       print INI "  $option = $hash->{$section}->{$option}\n";
     }
   }
@@ -180,7 +187,7 @@ sub write_ini {
   return 1;
 }
 
-# Read the configuration file:
+# Read the content of the configuration file:
 sub read_conf {
   # Prepare the file name:
   my $file = catfile($blogdir, '.blaze', 'config');
@@ -192,14 +199,14 @@ sub read_conf {
   }
   else {
     # Report failure:
-    display_warning("Unable to read configuration.");
+    display_warning("Unable to read the configuration.");
 
     # Return empty configuration:
     return {};
   }
 }
 
-# Make proper URL from given string, stripping all forbidden characters:
+# Make proper URL from the string while stripping all forbidden characters:
 sub make_url {
   my $url = shift || return '';
 
@@ -216,7 +223,7 @@ sub make_url {
   return $url;
 }
 
-# Fix the erroneous or missing header data:
+# Fix erroneous or missing header data:
 sub fix_header {
   my $data = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
@@ -292,8 +299,8 @@ sub fix_header {
       # Make sure the result is not empty:
       unless ($tag_url) {
         # Report missing tag URL:
-        display_warning("Unable to derive URL from tag `$tag'. " .
-                        "You might want to use ASCII only.");
+        display_warning("Unable to derive a URL from the tag `$tag'. " .
+                        "Please use ASCII characters only.");
       }
     }
   }
@@ -308,20 +315,20 @@ sub fix_header {
       # Report invalid URL:
       display_warning("Invalid URL in the $type with ID $id. " .
                       ($url ? "Stripping to `$url'."
-                            : "It will be derived from title."));
+                            : "It will be derived from the title."));
     }
   }
 
-  # Make sure the URL can be derived from title if necessary:
+  # Make sure the URL can be derived from the title if necessary:
   unless ($data->{header}->{url}) {
-    # Derive URL from the post/page title:
+    # Derive the URL from the post/page title:
     my $url = make_url(lc($data->{header}->{title}));
 
     # Check whether the URL is not empty:
     unless ($url) {
       # Report missing URL:
-      display_warning("Unable to derive URL in the $type with ID $id. " .
-                      "You might want to specify it yourself.");
+      display_warning("Unable to derive a URL in the $type with ID $id. " .
+                      "Please specify it yourself.");
     }
   }
 
@@ -329,7 +336,7 @@ sub fix_header {
   return 1;
 }
 
-# Create a record from the single file:
+# Create a record from a single file:
 sub save_record {
   my $file = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
@@ -359,7 +366,7 @@ sub save_record {
 
   # Check whether the processor is enabled:
   if ($process) {
-    # Substitute the placeholders with actual file names:
+    # Substitute placeholders with actual file names:
     $processor  =~ s/%in%/$temp_raw/ig;
     $processor  =~ s/%out%/$temp_body/ig;
   }
@@ -369,10 +376,10 @@ sub save_record {
 
   # Parse the file header:
   while ($line = <FIN>) {
-    # Header ends with the first line not beginning with `#':
+    # Header ends with the first line not beginning with "#":
     last unless $line =~ /^#/;
 
-    # Collect the data for the record header:
+    # Collect data for the record header:
     if ($line =~ /(title|author|date|tags|url):\s*(\S.*)$/) {
       $data->{header}->{$1} = $2;
     }
@@ -437,14 +444,14 @@ sub save_record {
   return 1;
 }
 
-# Collect reserved posts/pages IDs:
+# Collect reserved post or page IDs:
 sub collect_ids {
   my $type = shift || 'post';
 
-  # Prepare the posts/pages directory name:
+  # Prepare the post or page directory name:
   my $head = catdir($blogdir, '.blaze', "${type}s", 'head');
 
-  # Open the headers directory:
+  # Open the header directory:
   opendir(HEADS, $head) or return 0;
 
   # Build a list of used IDs:
@@ -464,11 +471,11 @@ sub choose_id {
   # Get the list of reserved IDs unless already done:
   @$reserved = collect_ids($type) unless defined $reserved;
 
-  # Iterate through used IDs:
+  # Iterate through the used IDs:
   while (my $used = shift(@$reserved)) {
     # Check whether the candidate ID is really free:
     if ($chosen == $used) {
-      # Try next ID:
+      # Try the next ID:
       $chosen++;
     }
     else {
@@ -480,7 +487,7 @@ sub choose_id {
     }
   }
 
-  # Return the result and increase the next candidate:
+  # Return the result, and increase the next candidate number:
   return $chosen++;
 }
 
@@ -508,7 +515,7 @@ sub add_files {
   return @list;
 }
 
-# Add new record to the repository:
+# Add a new record to the repository:
 sub add_new {
   my $type = shift || 'post';
   my $data = shift || {};
@@ -569,12 +576,12 @@ END_HEAD
     exit_with_error("Unable to run `$edit'.", 1);
   }
 
-  # Opent the file for reading:
+  # Open the file for reading:
   if (open(FILE, "$temp")) {
-    # Set the IO handler to binmode:
+    # Set the input/output handler to "binmode":
     binmode(FILE);
 
-    # Count checksums:
+    # Count the checksums:
     my $before = Digest::MD5->new->add($head)->hexdigest;
     my $after  = Digest::MD5->new->addfile(*FILE)->hexdigest;
 
@@ -584,14 +591,14 @@ END_HEAD
     # Compare the checksums:
     if ($before eq $after) {
       # Report abortion:
-      display_warning("File have not been changed: aborting.");
+      display_warning("File has not been changed: aborting.");
 
       # Return success:
       exit 0;
     }
   }
 
-  # Add file to the repository:
+  # Add the file to the repository:
   my @list = add_files($type, $data, [ $temp ]);
 
   # Remove the temporary file:
@@ -601,7 +608,7 @@ END_HEAD
   return shift(@list);
 }
 
-# Add given string to the log file
+# Add the event to the log:
 sub add_to_log {
   my $text = shift || 'Something miraculous has just happened!';
 
@@ -611,7 +618,7 @@ sub add_to_log {
   # Open the log file for appending:
   open(LOG, ">>$file") or return 0;
 
-  # Write to the log file:
+  # Write the event to the file:
   print LOG localtime(time) . " - $text\n";
 
   # Close the file:
@@ -621,10 +628,10 @@ sub add_to_log {
   return 1;
 }
 
-# Set up the options parser:
+# Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
-# Process command-line options:
+# Process command line options:
 GetOptions(
   'help|h'         => sub { display_help();    exit 0; },
   'version|v'      => sub { display_version(); exit 0; },
@@ -642,7 +649,8 @@ GetOptions(
   'url|u=s'        => sub { $data->{header}->{url}    = $_[1]; },
 );
 
-# Check the repository is present (however naive this method is):
+# Check whether the repository is present, no matter how naive this method
+# actually is:
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
@@ -660,16 +668,16 @@ else {
   $process = 0;
 }
 
-# Check whether any file is supplied:
+# Check whether a file is supplied:
 if (scalar(@ARGV) == 0) {
-  # Add new record to the repository:
+  # Add a new record to the repository:
   $added   = add_new($type, $data)
-    or exit_with_error("Cannot add $type to the repository.", 13);
+    or exit_with_error("Cannot add the $type to the repository.", 13);
 }
 else {
   # Add given files to the repository:
   my @list = add_files($type, $data, \@ARGV)
-    or exit_with_error("Cannot add ${type}s to the repository.", 13);
+    or exit_with_error("Cannot add the ${type}s to the repository.", 13);
 
   # Prepare the list of successfully added IDs:
   $added   =  join(', ', sort(@list));
