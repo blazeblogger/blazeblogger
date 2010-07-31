@@ -229,7 +229,7 @@ sub write_conf {
   # Save the configuration file:
   unless (write_ini($file, $conf)) {
     # Report failure:
-    display_warning("Unable to write configuration.");
+    display_warning("Unable to write the configuration.");
 
     # Return failure:
     return 0;
@@ -458,7 +458,7 @@ sub edit_options {
     # Compare the checksums:
     if ($before eq $after) {
       # Report the abortion:
-      display_warning("File has not been changed: aborting.");
+      display_warning("The file has not been changed: aborting.");
 
       # Remove the temporary file:
       unlink $temp;
@@ -586,7 +586,7 @@ if ($edit) {
   edit_options() or exit_with_error("Cannot edit the configuration.", 13);
 
   # Report success:
-  print "Your changes have been saved successfully.\n" if $verbose;
+  print "Your changes have been successfully saved.\n" if $verbose;
 }
 else {
   # Check missing options:
@@ -603,7 +603,7 @@ else {
       or exit_with_error("Cannot set the option.", 13);
 
     # Report success:
-    print "The option has been saved successfully.\n" if $verbose;
+    print "The option has been successfully saved.\n" if $verbose;
   }
   else {
     # Display the option:

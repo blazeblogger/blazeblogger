@@ -201,7 +201,7 @@ sub read_conf {
     # Report failure:
     display_warning("Unable to read the configuration.");
 
-    # Return empty configuration:
+    # Return an empty configuration:
     return {};
   }
 }
@@ -249,7 +249,7 @@ sub fix_header {
     my $author = $data->{header}->{author}
                = $conf->{user}->{name} || 'admin';
 
-    # Report missing author:
+    # Report the missing author:
     display_warning("Missing author in the $type with ID $id. " .
                     "Using `$author' instead.");
   }
@@ -261,7 +261,7 @@ sub fix_header {
       # Use current date instead:
       $date = $data->{header}->{date} = date_to_string(time);
 
-      # Report invalid date:
+      # Report the invalid date:
       display_warning("Invalid date in the $type with ID $id. " .
                       "Using `$date' instead.");
     }
@@ -270,7 +270,7 @@ sub fix_header {
     # Use current date instead:
     my $date = $data->{header}->{date} = date_to_string(time);
 
-    # Report missing date:
+    # Report the missing date:
     display_warning("Missing date in the $type with ID $id. " .
                     "Using `$date' instead.");
   }
@@ -291,15 +291,15 @@ sub fix_header {
     my %temp = map { $_, 1 } split(/,+\s*/, $tags);
     $data->{header}->{tags} = join(', ', sort(keys %temp));
 
-    # Make sure non of the tags will have empty URL:
+    # Make sure none of the tags will have an empty URL:
     foreach my $tag (keys %temp) {
-      # Derive URL from tag name:
+      # Derive the URL from the tag name:
       my $tag_url = make_url($tag);
 
       # Make sure the result is not empty:
       unless ($tag_url) {
-        # Report missing tag URL:
-        display_warning("Unable to derive a URL from the tag `$tag'. " .
+        # Report the missing tag URL:
+        display_warning("Unable to derive the URL from the tag `$tag'. " .
                         "Please use ASCII characters only.");
       }
     }
@@ -312,7 +312,7 @@ sub fix_header {
       # Strip forbidden characters:
       $data->{header}->{url} = $url = make_url($url);
 
-      # Report invalid URL:
+      # Report the invalid URL:
       display_warning("Invalid URL in the $type with ID $id. " .
                       ($url ? "Stripping to `$url'."
                             : "It will be derived from the title."));
@@ -321,13 +321,13 @@ sub fix_header {
 
   # Make sure the URL can be derived from the title if necessary:
   unless ($data->{header}->{url}) {
-    # Derive the URL from the post/page title:
+    # Derive the URL from the post or page title:
     my $url = make_url(lc($data->{header}->{title}));
 
     # Check whether the URL is not empty:
     unless ($url) {
-      # Report missing URL:
-      display_warning("Unable to derive a URL in the $type with ID $id. " .
+      # Report the missing URL:
+      display_warning("Unable to derive the URL in the $type with ID $id. " .
                       "Please specify it yourself.");
     }
   }
@@ -376,7 +376,7 @@ sub save_record {
 
   # Parse the file header:
   while ($line = <FIN>) {
-    # Header ends with the first line not beginning with "#":
+    # The header ends with the first line not beginning with "#":
     last unless $line =~ /^#/;
 
     # Collect data for the record header:
@@ -420,7 +420,7 @@ sub save_record {
       eval { mkpath($raw_dir, 0); };
 
       # Make sure the directory creation was successful:
-      exit_with_error("Creating directory tree: $@", 13) if $@;
+      exit_with_error("Creating the directory tree: $@", 13) if $@;
     }
 
     # Create the raw record file:
@@ -433,7 +433,7 @@ sub save_record {
     eval { mkpath([$head_dir, $body_dir], 0); };
 
     # Make sure the directory creation was successful:
-    exit_with_error("Creating directory tree: $@", 13) if $@;
+    exit_with_error("Creating the directory tree: $@", 13) if $@;
   }
 
   # Create the record body and header files:
@@ -564,7 +564,7 @@ END_HEAD
   }
   else {
     # Report failure:
-    display_warning("Unable to create temporary file.");
+    display_warning("Unable to create the temporary file.");
 
     # Return failure:
     return 0;
@@ -591,7 +591,7 @@ END_HEAD
     # Compare the checksums:
     if ($before eq $after) {
       # Report abortion:
-      display_warning("File has not been changed: aborting.");
+      display_warning("The file has not been changed: aborting.");
 
       # Return success:
       exit 0;

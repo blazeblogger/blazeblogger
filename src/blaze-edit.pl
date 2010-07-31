@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-edit, edit a blog post or a page in the BlazeBlogger repository
+# blaze-edit - edits a blog post or a page in the BlazeBlogger repository
 # Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -46,20 +46,26 @@ $SIG{__WARN__} = sub {
   print STDERR NAME . ": " . (shift);
 };
 
-# Display given message and terminate the script:
+# Display an error message, and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occurred.';
+  my $message      = shift || 'An error has occurred.';
   my $return_value = shift || 1;
 
+  # Display the error message:
   print STDERR NAME . ": $message\n";
+
+  # Terminate the script:
   exit $return_value;
 }
 
-# Display given warning message:
+# Display a warning message:
 sub display_warning {
-  my $message = shift || 'An unspecified warning was requested.';
+  my $message = shift || 'A warning was requested.';
 
+  # Display the warning message:
   print STDERR "$message\n";
+
+  # Terminate the script:
   return 1;
 }
 
@@ -67,20 +73,22 @@ sub display_warning {
 sub display_help {
   my $NAME = NAME;
 
-  # Print the message to the STDOUT:
+  # Display the usage:
   print << "END_HELP";
-Usage: $NAME [-fpqCPV] [-b directory] [-E editor] id
-       $NAME -h | -v
+Usage: $NAME [-fpqCPV] [-b DIRECTORY] [-E EDITOR] ID
+       $NAME -h|-v
 
-  -b, --blogdir directory     specify the directory where the BlazeBlogger
+  -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
                               repository is placed
-  -E, --editor editor         specify the external text editor
-  -p, --page                  edit page instead of blog post
-  -P, --post                  edit blog post; the default option
-  -f, --force                 force creating the raw file if not present
-  -C, --no-processor          disable the use of external processor
-  -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages; the default option
+  -E, --editor EDITOR         specify an external text editor
+  -p, --page                  edit a page
+  -P, --post                  edit a blog post
+  -f, --force                 create an empty source file in case it does
+                              not already exist
+  -C, --no-processor          disable processing the blog post or page with
+                              an external application
+  -q, --quiet                 do not display unnecessary messages
+  -V, --verbose               display all messages
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -93,7 +101,7 @@ END_HELP
 sub display_version {
   my ($NAME, $VERSION) = (NAME, VERSION);
 
-  # Print the message to the STDOUT:
+  # Display the version:
   print << "END_VERSION";
 $NAME $VERSION
 
@@ -108,7 +116,7 @@ END_VERSION
   return 1;
 }
 
-# Translate given date to YYYY-MM-DD string:
+# Translate a date to the YYYY-MM-DD form:
 sub date_to_string {
   my @date = localtime(shift);
   return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
@@ -127,7 +135,7 @@ sub read_ini {
 
   # Process each line:
   while (my $line = <INI>) {
-    # Parse line:
+    # Parse the line:
     if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
       # Change the section:
       $section = $1;
@@ -155,12 +163,12 @@ sub write_ini {
 
   # Process each section:
   foreach my $section (sort(keys(%$hash))) {
-    # Write the section header:
+    # Write the section header to the file:
     print INI "[$section]\n";
 
     # Process each option in the section:
     foreach my $option (sort(keys(%{$hash->{$section}}))) {
-      # Write the option and its value:
+      # Write the option and its value to the file:
       print INI "  $option = $hash->{$section}->{$option}\n";
     }
   }
@@ -172,7 +180,7 @@ sub write_ini {
   return 1;
 }
 
-# Read the configuration file:
+# Read the content of the configuration file:
 sub read_conf {
   # Prepare the file name:
   my $file = catfile($blogdir, '.blaze', 'config');
@@ -184,14 +192,14 @@ sub read_conf {
   }
   else {
     # Report failure:
-    display_warning("Unable to read configuration.");
+    display_warning("Unable to read the configuration.");
 
-    # Return empty configuration:
+    # Return an empty configuration:
     return {};
   }
 }
 
-# Make proper URL from given string, stripping all forbidden characters:
+# Make proper URL from the string while stripping all forbidden characters:
 sub make_url {
   my $url = shift || return '';
 
@@ -208,7 +216,7 @@ sub make_url {
   return $url;
 }
 
-# Fix the erroneous or missing header data:
+# Fix erroneous or missing header data:
 sub fix_header {
   my $data = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
@@ -234,7 +242,7 @@ sub fix_header {
     my $author = $data->{header}->{author}
                = $conf->{user}->{name} || 'admin';
 
-    # Report missing author:
+    # Report the missing author:
     display_warning("Missing author in the $type with ID $id. " .
                     "Using `$author' instead.");
   }
@@ -246,7 +254,7 @@ sub fix_header {
       # Use current date instead:
       $date = $data->{header}->{date} = date_to_string(time);
 
-      # Report invalid date:
+      # Report the invalid date:
       display_warning("Invalid date in the $type with ID $id. " .
                       "Using `$date' instead.");
     }
@@ -255,7 +263,7 @@ sub fix_header {
     # Use current date instead:
     my $date = $data->{header}->{date} = date_to_string(time);
 
-    # Report missing date:
+    # Report the missing date:
     display_warning("Missing date in the $type with ID $id. " .
                     "Using `$date' instead.");
   }
@@ -276,16 +284,16 @@ sub fix_header {
     my %temp = map { $_, 1 } split(/,+\s*/, $tags);
     $data->{header}->{tags} = join(', ', sort(keys %temp));
 
-    # Make sure non of the tags will have empty URL:
+    # Make sure none of the tags will have an empty URL:
     foreach my $tag (keys %temp) {
-      # Derive URL from tag name:
+      # Derive the URL from the tag name:
       my $tag_url = make_url($tag);
 
       # Make sure the result is not empty:
       unless ($tag_url) {
-        # Report missing tag URL:
-        display_warning("Unable to derive URL from tag `$tag'. " .
-                        "You might want to use ASCII only.");
+        # Report the missing tag URL:
+        display_warning("Unable to derive a URL from the tag `$tag'. " .
+                        "Please use ASCII characters only.");
       }
     }
   }
@@ -297,23 +305,23 @@ sub fix_header {
       # Strip forbidden characters:
       $data->{header}->{url} = $url = make_url($url);
 
-      # Report invalid URL:
+      # Report the invalid URL:
       display_warning("Invalid URL in the $type with ID $id. " .
                       ($url ? "Stripping to `$url'."
-                            : "It will be derived from title."));
+                            : "It will be derived from the title."));
     }
   }
 
-  # Make sure the URL can be derived from title if necessary:
+  # Make sure the URL can be derived from the title if necessary:
   unless ($data->{header}->{url}) {
-    # Derive URL from the post/page title:
+    # Derive the URL from the post or page title:
     my $url = make_url(lc($data->{header}->{title}));
 
     # Check whether the URL is not empty:
     unless ($url) {
-      # Report missing URL:
-      display_warning("Unable to derive URL in the $type with ID $id. " .
-                      "You might want to specify it yourself.");
+      # Report the missing URL:
+      display_warning("Unable to derive the URL in the $type with ID $id. " .
+                      "Please specify it yourself.");
     }
   }
 
@@ -321,7 +329,7 @@ sub fix_header {
   return 1;
 }
 
-# Create a single file from the record:
+# Create a single file from a record:
 sub read_record {
   my $file = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
@@ -332,9 +340,9 @@ sub read_record {
   my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
   my $raw  = catfile($blogdir, '.blaze', "${type}s", 'raw',  $id);
 
-  # If processor is enabled, make sure the raw file exist:
+  # If the processor is enabled, make sure the raw file exists:
   if ($process && ! -e $raw) {
-    exit_with_error("Raw file does not exist. Use `--force' to create " .
+    exit_with_error("The raw file does not exist. Use `--force' to create " .
                     "a new one, or `--no-processor' to disable the " .
                     "processor.", 1)
       unless $force;
@@ -376,7 +384,7 @@ END_HEADER
       # Open the record for the reading:
       open(FIN, ($process ? $raw : $body)) or return 0;
 
-      # Add content of the record body to the file:
+      # Add the content of the record body to the file:
       while (my $line = <FIN>) {
         print FOUT $line;
       }
@@ -393,7 +401,7 @@ END_HEADER
   }
   else {
     # Report failure:
-    display_warning("Unable to create temporary file.");
+    display_warning("Unable to create the temporary file.");
 
     # Return failure:
     return 0;
@@ -430,7 +438,7 @@ sub save_record {
 
   # Check whether the processor is enabled:
   if ($process) {
-    # Substitute the placeholders with actual file names:
+    # Substitute placeholders with actual file names:
     $processor  =~ s/%in%/$temp_raw/ig;
     $processor  =~ s/%out%/$temp_body/ig;
   }
@@ -440,10 +448,10 @@ sub save_record {
 
   # Parse the file header:
   while ($line = <FIN>) {
-    # Header ends with the first line not beginning with `#':
+    # The header ends with the first line not beginning with "#":
     last unless $line =~ /^#/;
 
-    # Collect the data for the record header:
+    # Collect data for the record header:
     if ($line =~ /(title|author|date|tags|url):\s*(\S.*)$/) {
       $data->{header}->{$1} = $2;
     }
@@ -484,7 +492,7 @@ sub save_record {
       eval { mkpath($raw_dir, 0); };
 
       # Make sure the directory creation was successful:
-      exit_with_error("Creating directory tree: $@", 13) if $@;
+      exit_with_error("Creating the directory tree: $@", 13) if $@;
     }
 
     # Create the raw record file:
@@ -497,7 +505,7 @@ sub save_record {
     eval { mkpath([$head_dir, $body_dir], 0); };
 
     # Make sure the directory creation was successful:
-    exit_with_error("Creating directory tree: $@", 13) if $@;
+    exit_with_error("Creating the directory tree: $@", 13) if $@;
   }
 
   # Create the record body and header files:
@@ -508,7 +516,7 @@ sub save_record {
   return 1;
 }
 
-# Edit record in the repository:
+# Edit a record in the repository:
 sub edit_record {
   my $id   = shift || die 'Missing argument';
   my $type = shift || 'post';
@@ -525,7 +533,7 @@ sub edit_record {
   # Create the temporary file:
   unless (read_record($temp, $id, $type)) {
     # Report failure:
-    display_warning("Unable to read record with ID $id.");
+    display_warning("Unable to read the $type with ID $id.");
 
     # Return failure:
     return 0;
@@ -533,10 +541,10 @@ sub edit_record {
 
   # Open the file for reading:
   if (open(FILE, "$temp")) {
-    # Set the IO handler to binmode:
+    # Set the input/output handler to "binmode":
     binmode(FILE);
 
-    # Count checksum:
+    # Count the checksum:
     $before = Digest::MD5->new->addfile(*FILE)->hexdigest;
 
     # Close the file:
@@ -554,10 +562,10 @@ sub edit_record {
 
   # Open the file for reading:
   if (open(FILE, "$temp")) {
-    # Set the IO handler to binmode:
+    # Set the input/output handler to "binmode":
     binmode(FILE);
 
-    # Count checksum:
+    # Count the checksum:
     $after = Digest::MD5->new->addfile(*FILE)->hexdigest;
 
     # Close the file:
@@ -566,7 +574,7 @@ sub edit_record {
     # Compare the checksums:
     if ($before eq $after) {
       # Report abortion:
-      display_warning("File have not been changed: aborting.");
+      display_warning("The file has not been changed: aborting.");
 
       # Return success:
       exit 0;
@@ -576,7 +584,7 @@ sub edit_record {
   # Save the record:
   unless (save_record($temp, $id, $type)) {
     # Report failure:
-    display_warning("Unable to write the record with ID $id.");
+    display_warning("Unable to write the $type with ID $id.");
 
     # Return failure:
     return 0
@@ -589,7 +597,7 @@ sub edit_record {
   return 1;
 }
 
-# Add given string to the log file
+# Add the event to the log:
 sub add_to_log {
   my $text = shift || 'Something miraculous has just happened!';
 
@@ -599,7 +607,7 @@ sub add_to_log {
   # Open the log file for appending:
   open(LOG, ">>$file") or return 0;
 
-  # Write to the log file:
+  # Write the event to the file:
   print LOG localtime(time) . " - $text\n";
 
   # Close the file:
@@ -609,10 +617,10 @@ sub add_to_log {
   return 1;
 }
 
-# Set up the options parser:
+# Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
-# Process command-line options:
+# Process command line options:
 GetOptions(
   'help|h'         => sub { display_help();    exit 0; },
   'version|v'      => sub { display_version(); exit 0; },
@@ -629,7 +637,8 @@ GetOptions(
 # Check superfluous options:
 exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) != 1);
 
-# Check the repository is present (however naive this method is):
+# Check whether the repository is present, no matter how naive this method
+# actually is:
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
@@ -647,7 +656,7 @@ else {
   $process = 0;
 }
 
-# Edit given record:
+# Edit the record:
 edit_record($ARGV[0], $type)
   or exit_with_error("Cannot edit the $type in the repository.", 13);
 
