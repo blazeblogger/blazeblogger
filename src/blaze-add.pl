@@ -68,7 +68,7 @@ sub display_warning {
   # Display the warning message:
   print STDERR "$message\n";
 
-  # Terminate the script:
+  # Return success:
   return 1;
 }
 

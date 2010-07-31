@@ -1,7 +1,8 @@
 #!/usr/bin/env perl
 
-# blaze-remove, remove a post/page from the BlazeBlogger repository
-# Copyright (C) 2008, 2009 Jaromir Hradilek
+# blaze-remove - removes a blog post or a page  from the BlazeBlogger repo-
+# sitory
+# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -39,20 +40,26 @@ $SIG{__WARN__} = sub {
   print STDERR NAME . ": " . (shift);
 };
 
-# Display given message and terminate the script:
+# Display an error message, and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occurred.';
+  my $message      = shift || 'An error has occurred.';
   my $return_value = shift || 1;
 
+  # Display the error message:
   print STDERR NAME . ": $message\n";
+
+  # Terminate the script:
   exit $return_value;
 }
 
-# Display given warning message:
+# Display a warning message:
 sub display_warning {
-  my $message = shift || 'An unspecified warning was requested.';
+  my $message = shift || 'A warning was requested.';
 
+  # Display the warning message:
   print STDERR "$message\n";
+
+  # Return success:
   return 1;
 }
 
@@ -60,19 +67,19 @@ sub display_warning {
 sub display_help {
   my $NAME = NAME;
 
-  # Print the message to the STDOUT:
+  # Display the usage:
   print << "END_HELP";
-Usage: $NAME [-fipqPV] [-b directory] id...
-       $NAME -h | -v
+Usage: $NAME [-fipqPV] [-b DIRECTORY] ID...
+       $NAME -h|-v
 
-  -b, --blogdir directory     specify the directory where the BlazeBlogger
+  -b, --blogdir directory     specify a directory in which the BlazeBlogger
                               repository is placed
-  -p, --page                  remove pages instead of blog posts
-  -P, --post                  remove blogs posts; the default option
-  -i, --interactive           prompt before removal
-  -f, --force                 do not prompt; the default option
-  -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages; the default option
+  -p, --page                  remove a page or pages
+  -P, --post                  remove a blog post or blog posts
+  -i, --interactive           require manual confirmation of each removal
+  -f, --force                 do not require manual confirmation
+  -q, --quiet                 do not display unnecessary messages
+  -V, --verbose               display all messages
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -85,36 +92,16 @@ END_HELP
 sub display_version {
   my ($NAME, $VERSION) = (NAME, VERSION);
 
-  # Print the message to the STDOUT:
+  # Display the version:
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
 TICULAR PURPOSE.
 END_VERSION
-
-  # Return success:
-  return 1;
-}
-
-# Add given string to the log file
-sub add_to_log {
-  my $text = shift || 'Something miraculous has just happened!';
-
-  # Prepare the log file name:
-  my $file = catfile($blogdir, '.blaze', 'log');
-
-  # Open the log file for appending:
-  open(LOG, ">>$file") or return 0;
-
-  # Write to the log file:
-  print LOG localtime(time) . " - $text\n";
-
-  # Close the file:
-  close(LOG);
 
   # Return success:
   return 1;
@@ -133,13 +120,13 @@ sub read_ini {
 
   # Process each line:
   while (my $line = <INI>) {
-    # Parse line:
+    # Parse the line:
     if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
       # Change the section:
       $section = $1;
     }
     elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
-      # Add option to the hash:
+      # Add the option to the hash:
       $hash->{$section}->{$1} = $2;
     }
   }
@@ -151,7 +138,7 @@ sub read_ini {
   return $hash;
 }
 
-# Remove given records from the repository:
+# Remove a record or records from the repository:
 sub remove_records {
   my $type = shift || 'post';
   my $ids  = shift || die 'Missing argument';
@@ -173,14 +160,14 @@ sub remove_records {
 
       # Check whether the ID exists:
       unless ($data) {
-        # Display appropriate warning:
+        # Display the appropriate warning:
         display_warning("Unable to read the $type with ID $id.");
 
         # Move on to the next ID:
         next;
       }
 
-      # Display prompt:
+      # Display the prompt:
       print "Remove $type with ID $id titled `" .
             ($data->{header}->{title} || '') . "'? ";
 
@@ -193,7 +180,7 @@ sub remove_records {
       # Remove the remaining record data:
       unlink($body, $raw);
 
-      # Add record to the list of successfully removed IDs:
+      # Add the record to the list of successfully removed IDs:
       push(@list, $id);
     }
     else {
@@ -206,10 +193,30 @@ sub remove_records {
   return @list;
 }
 
-# Set up the options parser:
+# Add the event to the log:
+sub add_to_log {
+  my $text = shift || 'Something miraculous has just happened!';
+
+  # Prepare the log file name:
+  my $file = catfile($blogdir, '.blaze', 'log');
+
+  # Open the log file for appending:
+  open(LOG, ">>$file") or return 0;
+
+  # Write the event to the file:
+  print LOG localtime(time) . " - $text\n";
+
+  # Close the file:
+  close(LOG);
+
+  # Return success:
+  return 1;
+}
+
+# Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
-# Process command-line options:
+# Process command line options:
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
@@ -225,11 +232,12 @@ GetOptions(
 # Check missing options:
 exit_with_error("Wrong number of options.", 22) if (scalar(@ARGV) < 1);
 
-# Check the repository is present (however naive this method is):
+# Check whether the repository is present, no matter how naive this method
+# actually is:
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# Remove given records from the repository:
+# Remove the records from the repository:
 my @list = remove_records($type, \@ARGV);
 
 # End here unless at least one record was actually removed:
@@ -237,7 +245,7 @@ unless (@list) {
   # Report abortion:
   print "Aborted.\n" if $verbose;
 
-  # Return failure/success:
+  # Return failure or success:
   exit (($prompt) ? 0 : 13);
 }
 
