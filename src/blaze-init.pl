@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-init, create or recover a BlazeBlogger repository
+# blaze-init creates or recovers a BlazeBlogger repository
 # Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -36,20 +36,26 @@ $SIG{__WARN__} = sub {
   print STDERR NAME . ": " . (shift);
 };
 
-# Display given message and terminate the script:
+# Display an error message, and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occurred.';
+  my $message      = shift || 'An error has occurred.';
   my $return_value = shift || 1;
 
+  # Display the error message:
   print STDERR NAME . ": $message\n";
+
+  # Terminate the script:
   exit $return_value;
 }
 
-# Display given warning message:
+# Display a warning message:
 sub display_warning {
-  my $message = shift || 'An unspecified warning was requested.';
+  my $message = shift || 'A warning was requested.';
 
+  # Display the warning message:
   print STDERR "$message\n";
+
+  # Return success:
   return 1;
 }
 
@@ -57,16 +63,17 @@ sub display_warning {
 sub display_help {
   my $NAME = NAME;
 
-  # Print the message to the STDOUT:
+  # Display the usage:
   print << "END_HELP";
-Usage: $NAME [-fqV] [-b directory]
-       $NAME -h | -v
+Usage: $NAME [-fqV] [-b DIRECTORY]
+       $NAME -h|-v
 
-  -b, --blogdir directory     specify the directory where the BlazeBlogger
+  -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
                               repository is to be placed
-  -f, --force                 force rewrite of already existing files
-  -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages including the list of
+  -f, --force                 revert existing configuration, theme, and
+                              language files to their initial state
+  -q, --quiet                 do not display unnecessary messages
+  -V, --verbose               display all messages, including a list of
                               created files
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
@@ -80,7 +87,7 @@ END_HELP
 sub display_version {
   my ($NAME, $VERSION) = (NAME, VERSION);
 
-  # Print the message to the STDOUT:
+  # Display the version:
   print << "END_VERSION";
 $NAME $VERSION
 
@@ -100,67 +107,64 @@ sub create_conf {
   # Prepare the configuration file name:
   my $file = catfile($blogdir, '.blaze', 'config');
 
-  # Skip existing file unless forced:
+  # Unless explicitly requested, do not overwrite the existing file:
   return 1 if (-e $file && !$force);
 
   # Open the file for writing:
   open(FILE, ">$file") or return 0;
 
-  # Write given string to the file:
+  # Write the default configuration to the file:
   print FILE << 'END_CONFIG';
 ## This is the default BlazeBlogger configuration file. The recommended way
-## to set up your blog is to leave this file intact and use blaze-config(1)
-## instead.  Nevertheless, if you prefer to configure the settings by hand,
-## simply replace the value next to the equal sign.
+## to set up your blog is to leave  this file intact,  and use blaze-config
+## instead.  However, if you prefer to configure BlazeBlogger by hand, read
+## the instructions below,  and replace the value on the right of the equal
+## sign.
 
-## The following are the blog related settings, having the direct influence
-## on the way the whole thing looks. The options are as follows:
+## General blog settings. Available options are:
 ##
-##   title    - The blog title.
-##   subtitle - The blog subtitle, supposedly a brief, single-line descrip-
-##              tion of what should the occasional visitor  expect to find.
-##   theme    - The blog theme;  the value should point to an existing file
-##              in the .blaze/theme directory.
-##   style    - The blog style; the value should point to an existing file,
-##              either  in  .blaze/style,  or in the  destination directory
-##              where the static content is to be placed.
-##   lang     - The blog language;  the value  should point to an  existing
-##              file in the .blaze/lang directory.
-##   posts    - Number of posts to be listed on a single page;  the default
-##              value is 10.
+##   title         A title of your blog.
+##   subtitle      A subtitle of your blog.
+##   theme         A theme for your blog. It must point to an existing file
+##                 in the .blaze/theme/ directory.
+##   style         A style sheet for your blog.  It must point to  an exis-
+##                 ting file in the .blaze/style/ directory.
+##   lang          A translation of your blog. It must point to an existing
+##                 file in the .blaze/lang/ directory.
+##   posts         A number of blog posts to be listed on a single page.
 ##
 [blog]
-title=My Blog
-subtitle=yet another blog
+title=Blog Title
+subtitle=blog subtitle
 theme=default.html
 style=default.css
 lang=en_US
 posts=10
 
-## The following are the colour settings, affecting the way various outputs
-## look. The options are as follows:
+## Color settings. Available options are:
 ##
-##   list - Whether to use coloured posts/pages listing;  the value  has to
-##          be either true, or false.
-##   log  - Whether to use coloured repository log listing;  the value  has
-##          to be either true, or false.
+##   list          A boolean  to enable (true) or disable (false) colors in
+##                 the blaze-list output.
+##   log           A boolean  to enable (true) or disable (false) colors in
+##                 the blaze-log output.
 ##
 [color]
 list=false
 log=false
 
-## The following are the core settings,  affecting the way the BlazeBlogger
-## works. The options are as follows:
+## Advanced BlazeBlogger settings. Available options are:
 ##
-##   doctype   - The document type;  the value  has to be  either html,  or
-##               xhtml.
-##   extension - The file extension for the generated pages.
-##   encoding  - The encoding in the form recognised by W3C  (e.g., the de-
-##               fault UTF-8).
-##   editor    - An external text editor to be used for editing purposes.
-##   processor - An optional external application to be used to process the
-##               entries;  use %in% and %out% in place of input and  output
-##               files, for example: markdown --html4tags %in% > %out%
+##   doctype       A document type.  It can be  either  html  for HTML,  or
+##                 xhtml for the XHTML standard.
+##   extension     A file extension.
+##   encoding      A character encoding. It has to be in a form that is re-
+##                 cognized by W3C standards.
+##   editor        An external  text  editor.  When  supplied, this  option
+##                 overrides the system-wide settings.
+##   processor     An external application  to be used to process newly ad-
+##                 ded or edited blog posts and pages. You must supply %in%
+##                 and %out% in place of an input and output file name res-
+##                 pectively.
 ##
 [core]
 doctype=html
@@ -169,41 +173,42 @@ encoding=UTF-8
 editor=
 processor=
 
-## The following are the RSS feed related settings, giving you the opportu-
-## nity to adjust it to your liking. The options are as follows:
+## RSS feed settings. Available options are:
 ##
-##  baseurl   - The blog base URL (e.g. http://blog.example.com/).
-##  posts     - Number of posts to be listed in the feed; the default value
-##              is 10.
-##  fullposts - Whether to list full posts or just excerpts;  the value has
-##              to be either true, or false.
+##  baseurl        A URL of your blog, for example "http://example.com/".
+##  posts          A number of blog posts to be listed in the feed.
+##  fullposts      A boolean to enable (true)  or disable (false) inclusion
+##                 of the whole content of a blog post in the feed.
 ##
 [feed]
 baseurl=
 posts=10
 fullposts=false
 
-## The following are the post related settings, making it possible to alter
-## the look of a single post even further. The options are as follows:
+## Advanced post settings. Available options are:
 ##
-##  author - Location of the author; available  options are top, bottom, or
-##           none.
-##  date   - Location of the date of publishing; available options are top,
-##           bottom, or none.
-##  tags   - Location of tags;  available options are top, bottom, or none.
+##  author         A location of a blog post author name.  It can either be
+##                 placed above the post (top),  below it (bottom),  or no-
+##                 where on the page (none).
+##  date           A location  of a date  of publishing.  It can  either be
+##                 placed above the post (top),  below it (bottom),  or no-
+##                 where on the page (none).
+##  tags           A location of post tags. They can either be placed above
+##                 the post (top),  below it (bottom),  or  nowhere  on the
+##                 page (none).
 ##
 [post]
 author=top
 date=top
 tags=top
 
-## The following are the user related settings. The options are as follows:
+## User settings. Available options are:
 ##
-##   name     - User's name; to be used in the copyright notice, and if the
-##              nickname is not set, as the default post author as well.
-##   nickname - User's nickname; to be used as the default post author. The
-##              user name is used by default.
-##   email    - User's e-mail.
+##   name          Your full name to be used in the copyright notice,  and
+##                 as the default post author.
+##   nickname      Your nickname  to be used  as the  default  post author.
+##                 When supplied, this option overrides the  above setting.
+##   email         Your email address.
 ##
 [user]
 name=admin
@@ -227,13 +232,13 @@ sub create_theme {
   # Prepare the theme file name:
   my $file = catfile($blogdir, '.blaze', 'theme', 'default.html');
 
-  # Skip existing file unless forced:
+  # Unless explicitly requested, do not overwrite the existing file:
   return 1 if (-e $file && !$force);
 
   # Open the file for writing:
   open(FILE, ">$file") or return 0;
 
-  # Write given string to the file:
+  # Write the default theme to the file:
   print FILE << 'END_THEME';
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
                       "http://www.w3.org/TR/html4/strict.dtd">
@@ -305,21 +310,21 @@ END_THEME
   return 1;
 }
 
-# Create the default style file:
+# Create the default style sheet:
 sub create_style {
-  # Prepare the style file name:
+  # Prepare the style sheet file name:
   my $file = catfile($blogdir, '.blaze', 'style', 'default.css');
 
-  # Skip existing file unless forced:
+  # Unless explicitly requested, do not overwrite the existing file:
   return 1 if (-e $file && !$force);
 
   # Open the file for writing:
   open(FILE, ">$file") or return 0;
 
-  # Write given string to the file:
+  # Write the default style style sheet to the file:
   print FILE << 'END_STYLE';
-/* default.css - the default BlazeBlogger theme
- * Copyright (C) 2009 Jaromir Hradilek
+/* default.css, the default theme for BlazeBlogger
+ * Copyright (C) 2009, 2010 Jaromir Hradilek
  *
  * This program is free software:  you can redistribute it and/or modify it
  * under  the terms of the  GNU General Public License  as published by the
@@ -546,18 +551,18 @@ END_STYLE
   return 1;
 }
 
-# Create the default language file:
+# Create the default localization file:
 sub create_lang {
-  # Prepare the language file name:
+  # Prepare the localization file name:
   my $file = catfile($blogdir, '.blaze', 'lang', 'en_US');
 
-  # Skip existing file unless forced:
+  # Unless explicitly requested, do not overwrite the existing file:
   return 1 if (-e $file && !$force);
 
   # Open the file for writing:
   open(FILE, ">$file") or return 0;
 
-  # Write given string to the file:
+  # Write the default localization to the file:
   print FILE << 'END_LANG';
 [lang]
 archive=Archive for
@@ -593,7 +598,7 @@ END_LANG
   return 1;
 }
 
-# Add given string to the log file:
+# Add the event to the log:
 sub add_to_log {
   my $text = shift || 'Something miraculous has just happened!';
 
@@ -603,7 +608,7 @@ sub add_to_log {
   # Open the log file for appending:
   open(LOG, ">>$file") or return 0;
 
-  # Write to the log file:
+  # Write the event to the file:
   print LOG localtime(time) . " - $text\n";
 
   # Close the file:
@@ -613,10 +618,10 @@ sub add_to_log {
   return 1;
 }
 
-# Set up the options parser:
+# Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
-# Process command-line options:
+# Process command line options:
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
@@ -646,7 +651,7 @@ eval {
       catdir($blogdir, '.blaze', 'posts', 'body'),
       catdir($blogdir, '.blaze', 'posts', 'raw'),
     ],
-    0 # Don't be verbose.
+    0 # Do not be verbose.
   );
 };
 
@@ -655,21 +660,21 @@ exit_with_error("Creating directory tree: $@", 13) if $@;
 
 # Create the default configuration file:
 create_conf()
-  or display_warning("Unable to create the configuration file.");
+  or display_warning("Unable to create the default configuration file.");
 
-# Create the default theme file:
+# Create the default theme:
 create_theme()
-  or display_warning("Unable to create the default theme file.");
+  or display_warning("Unable to create the default theme.");
 
-# Create the default style file:
+# Create the default style sheet:
 create_style()
-  or display_warning("Unable to create the default style file.");
+  or display_warning("Unable to create the default style sheet.");
 
-# Create the default language file:
+# Create the default localization:
 create_lang()
-  or display_warning("Unable to create the default language file.");
+  or display_warning("Unable to create the default localization.");
 
-# Write to / create the log file:
+# Create the default log file:
 add_to_log("$action a BlazeBlogger repository.")
   or display_warning("Unable to log the event.");
 
