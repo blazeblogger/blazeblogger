@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-# blaze-list, browse the content of the BlazeBlogger repository
-# Copyright (C) 2009 Jaromir Hradilek
+# blaze-list - lists blog posts or pages in the BlazeBlogger repository
+# Copyright (C) 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -31,14 +31,14 @@ use constant VERSION => '1.0.0';                    # Script version.
 our $blogdir    = '.';                              # Repository location.
 our $verbose    = 1;                                # Verbosity level.
 our $compact    = 0;                                # Use compact listing?
-our $coloured   = undef;                            # Use coloured listing?
+our $coloured   = undef;                            # Use colors?
 our $reverse    = 0;                                # Use reverse order?
 our $number     = 0;                                # Listed records limit.
 
 # Global variables:
 our $conf       = {};                               # Configuration.
 
-# Command-line options:
+# Command line options:
 my  $type       = 'post';                           # Type: post or page.
 my  $id         = '';                               # ID search pattern.
 my  $title      = '';                               # Title search pattern.
@@ -55,18 +55,24 @@ $SIG{__WARN__}  = sub {
 
 # Display given message and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occurred.';
+  my $message      = shift || 'An error has occurred.';
   my $return_value = shift || 1;
 
+  # Display the error message:
   print STDERR NAME . ": $message\n";
+
+  # Terminate the script:
   exit $return_value;
 }
 
 # Display given warning message:
 sub display_warning {
-  my $message = shift || 'An unspecified warning was requested.';
+  my $message = shift || 'A warning was requested.';
 
+  # Display the warning message:
   print STDERR "$message\n";
+
+  # Return success:
   return 1;
 }
 
@@ -74,32 +80,33 @@ sub display_warning {
 sub display_help {
   my $NAME = NAME;
 
-  # Print the message to the STDOUT:
+  # Display the usage:
   print << "END_HELP";
-Usage: $NAME [-cpqrsCPSV] [-b directory] [-I id] [-a author]
-                  [-t title] [-T tag] [-d day] [-m month] [-y year]
-                  [-n number]
-       $NAME -h | -v
+Usage: $NAME [-cpqrsCPSV] [-b DIRECTORY] [-I ID] [-a AUTHOR]
+                  [-t TITLE] [-T TAG] [-d DAY] [-m MONTH] [-y YEAR]
+                  [-n NUMBER]
+       $NAME -h|-v
 
-  -b, --blogdir directory     specify the directory where the BlazeBlogger
+  -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
                               repository is placed
-  -I, --id id                 display record with specified ID
-  -a, --author author         list records by specified author
-  -t, --title title           list records with matching title
-  -T, --tag tag               list records with matching tag
-  -d, --day day               list records from the day in the DD form
-  -m, --month month           list records from the month in the MM form
-  -y, --year year             list records from the year in the YYYY form
-  -n, --number number         list selected number of records only
-  -p, --pages                 list pages instead of blog posts
-  -P, --posts                 list blog posts; the default option
-  -S, --stats                 show repository statistics instead of posts
-  -s, --short                 display each record on a single line
-  -r, --reverse               display records in reverse order
-  -c, --color                 enable coloured output
-  -C, --no-color              disable coloured output
-  -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages; the default option
+  -I, --id ID                 display a single blog post or a page
+  -a, --author AUTHOR         list blog posts or pages by selected author
+  -t, --title TITLE           list blog posts or pages with matching title
+  -T, --tag TAG               list blog posts or pages with matching tag
+  -d, --day DAY               list blog posts or pages from selected day
+  -m, --month MONTH           list blog posts or pages from selected month
+  -y, --year YEAR             list blog posts or pages from selected year
+  -n, --number NUMBER         specify a number of blog posts or pages to
+                              be listed
+  -p, --pages                 list pages
+  -P, --posts                 list blog posts
+  -S, --stats                 display repository statistics
+  -s, --short                 display blog posts or pages on a single line
+  -r, --reverse               display blog posts or pages in reverse order
+  -c, --color                 enable colored output
+  -C, --no-color              disable colored output
+  -q, --quiet                 do not display unnecessary messages
+  -V, --verbose               display all messages
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -112,11 +119,11 @@ END_HELP
 sub display_version {
   my ($NAME, $VERSION) = (NAME, VERSION);
 
-  # Print the message to the STDOUT:
+  # Display the version:
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2009 Jaromir Hradilek
+Copyright (C) 2009, 2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -127,7 +134,7 @@ END_VERSION
   return 1;
 }
 
-# Translate given date to YYYY-MM-DD string:
+# Translate a date to the YYYY-MM-DD form:
 sub date_to_string {
   my @date = localtime(shift);
   return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
@@ -146,7 +153,7 @@ sub read_ini {
 
   # Process each line:
   while (my $line = <INI>) {
-    # Parse line:
+    # Parse the line:
     if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
       # Change the section:
       $section = $1;
@@ -164,7 +171,7 @@ sub read_ini {
   return $hash;
 }
 
-# Read the configuration file:
+# Read the content of the configuration file:
 sub read_conf {
   # Prepare the file name:
   my $file = catfile($blogdir, '.blaze', 'config');
@@ -176,14 +183,14 @@ sub read_conf {
   }
   else {
     # Report failure:
-    display_warning("Unable to read configuration.");
+    display_warning("Unable to read the configuration.");
 
-    # Return empty configuration:
+    # Return an empty configuration:
     return {};
   }
 }
 
-# Compose a post/page record:
+# Compose a blog post or page record:
 sub make_record {
   my $type = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
@@ -208,7 +215,7 @@ sub make_record {
     # Assign the default value:
     $author = $conf->{user}->{name} || 'admin';
 
-    # Report missing author:
+    # Report the missing author:
     display_warning("Missing author in the $type with ID $id. " .
                     "Using `$author' instead.");
   }
@@ -220,7 +227,7 @@ sub make_record {
       # Use current date instead:
       $date = date_to_string(time);
 
-      # Report invalid date:
+      # Report the invalid date:
       display_warning("Invalid date in the $type with ID $id. " .
                       "Using `$date' instead.");
     }
@@ -229,7 +236,7 @@ sub make_record {
     # Use current date instead:
     $date = date_to_string(time);
 
-    # Report missing date:
+    # Report the missing date:
     display_warning("Missing date in the $type with ID $id. " .
                     "Using `$date' instead.");
   }
@@ -277,7 +284,7 @@ sub compare_records {
   }
 }
 
-# Return the list of posts/pages header records:
+# Return a list of blog post or page header records:
 sub collect_headers {
   my $type    = shift || 'post';
 
@@ -318,20 +325,20 @@ sub collect_headers {
   return sort compare_records @records;
 }
 
-# Display given record:
+# Display a record:
 sub display_record {
   my $record = shift || die 'Missing argument';
 
   # Check whether to use compact listing:
   unless ($compact) {
-    # Check whether to use colours:
+    # Check whether colors are enabled:
     unless ($coloured) {
-      # Display the plain record header:
+      # Display plain record header:
       print "ID: $record->{id} | $record->{date} | " .
             "$record->{author}\n\n";
     }
     else {
-      # Display the coloured record header:
+      # Display colored record header:
       print colored ("ID: $record->{id} | $record->{date} | " .
                      "$record->{author}", 'yellow');
       print "\n\n";
@@ -353,7 +360,7 @@ sub display_record {
 }
 
 
-# Display the list of matching records:
+# Display a list of matching records:
 sub display_records {
   my $type    = shift || 'post';
   my $id      = shift || '.*';
@@ -367,7 +374,7 @@ sub display_records {
   # Initialize required variables:
   my $count   = 0;
 
-  # Collect the pages/posts headers:
+  # Collect blog post or page headers:
   my @headers = collect_headers($type);
 
   # Process each header:
@@ -387,10 +394,10 @@ sub display_records {
 
     # Check whether the limited number of displayed records is requested:
     if ($number > 0) {
-      # Increase displayed records counter:
+      # Increase the displayed records counter:
       $count++;
 
-      # End loop when counter reaches the limit:
+      # End loop when the counter reaches the limit:
       last if $count == $number;
     }
   }
@@ -399,7 +406,7 @@ sub display_records {
   return 1;
 }
 
-# Display repository statistics:
+# Display the repository statistics:
 sub display_statistics {
   # Collect the necessary metadata:
   my @pages = collect_headers('page');
@@ -413,7 +420,7 @@ sub display_statistics {
 
   # Check whether to use compact listing:
   unless ($compact) {
-    # Display the full results:
+    # Display full results:
     print "Number of pages: $pages_count\n";
     print "Number of posts: $posts_count\n";
     print "Last post date:  $last_post\n"  if @posts;
@@ -431,10 +438,10 @@ sub display_statistics {
   return 1;
 }
 
-# Set up the options parser:
+# Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
-# Process command-line options:
+# Process command line options:
 GetOptions(
   'help|h'               => sub { display_help();    exit 0; },
   'version|v'            => sub { display_version(); exit 0; },
@@ -461,15 +468,16 @@ GetOptions(
 # Detect superfluous options:
 exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 
-# Check the repository is present (however naive this method is):
+# Check whether the repository is present, no matter how naive this method
+# actually is:
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# Read the configuration:
+# Read the configuration file:
 $conf = read_conf();
 
-# Unless specified on the command line, read the colour setup from the
-# configuration:
+# Unless specified on the command line, read the color setup from the
+# configuration file:
 unless (defined $coloured) {
   # Read required data from the configuration:
   my $temp  = $conf->{color}->{list} || 'false';
@@ -478,12 +486,13 @@ unless (defined $coloured) {
   $coloured = ($temp =~ /^(true|auto)\s*$/i) ? 1 : 0;
 }
 
-# Check whether to post/pages, or show statistics:
+# Check whether to list blog posts or pages, or display repository
+# statistics:
 unless ($type eq 'stats') {
   # Prepare the list of reserved characters:
   my $reserved  = '[\\\\\^\.\$\|\(\)\[\]\*\+\?\{\}]';
 
-  # Escape reserved characters:
+  # Escape all reserved characters:
   $id     =~ s/($reserved)/\\$1/g if $id;
   $author =~ s/($reserved)/\\$1/g if $author;
   $title  =~ s/($reserved)/\\$1/g if $title;
@@ -497,7 +506,7 @@ unless ($type eq 'stats') {
     or exit_with_error("Cannot read repository data.", 13);
 }
 else {
-  # Display repository statistics:
+  # Display the repository statistics:
   display_statistics()
     or exit_with_error("Cannot read repository data.", 13);
 }

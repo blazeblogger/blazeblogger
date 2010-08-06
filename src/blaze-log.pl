@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-# blaze-log, display the BlazeBlogger repository log
-# Copyright (C) 2009 Jaromir Hradilek
+# blaze-log - displays the BlazeBlogger repository log
+# Copyright (C) 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -29,7 +29,7 @@ use constant VERSION => '1.0.0';                    # Script version.
 
 # General script settings:
 our $blogdir    = '.';                              # Repository location.
-our $coloured   = undef;                            # Use coloured listing?
+our $coloured   = undef;                            # Use colors?
 our $compact    = 0;                                # Use compact listing?
 our $number     = 0;                                # Listed records limit.
 our $reverse    = 0;                                # Use reverse order?
@@ -42,18 +42,24 @@ $SIG{__WARN__}  = sub {
 
 # Display given message and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occurred.';
+  my $message      = shift || 'An error has occurred.';
   my $return_value = shift || 1;
 
+  # Display the error message:
   print STDERR NAME . ": $message\n";
+
+  # Terminate the script:
   exit $return_value;
 }
 
 # Display given warning message:
 sub display_warning {
-  my $message = shift || 'An unspecified warning was requested.';
+  my $message = shift || 'A warning was requested.';
 
+  # Display the warning message:
   print STDERR "$message\n";
+
+  # Return success:
   return 1;
 }
 
@@ -61,20 +67,20 @@ sub display_warning {
 sub display_help {
   my $NAME = NAME;
 
-  # Print the message to the STDOUT:
+  # Display the usage:
   print << "END_HELP";
-Usage: $NAME [-cqrsCV] [-b directory] [-n number]
-       $NAME -h | -v
+Usage: $NAME [-cqrsCV] [-b DIRECTORY] [-n NUMBER]
+       $NAME -h|-v
 
-  -b, --blogdir directory     specify the directory where the BlazeBlogger
+  -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
                               repository is placed
-  -n, --number number         list selected number of log records only
-  -s, --short                 display each log record on a single line
-  -r, --reverse               display log records in reverse order
-  -c, --color                 enable coloured output
-  -C, --no-color              disable coloured output
-  -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages; the default option
+  -n, --number NUMBER         specify a number of log entries to be listed
+  -s, --short                 display each log entry on a single line
+  -r, --reverse               display log entries in reverse order
+  -c, --color                 enable colored output
+  -C, --no-color              disable colored output
+  -q, --quiet                 do not display unnecessary messages
+  -V, --verbose               display all messages
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
 END_HELP
@@ -87,11 +93,11 @@ END_HELP
 sub display_version {
   my ($NAME, $VERSION) = (NAME, VERSION);
 
-  # Print the message to the STDOUT:
+  # Display the version:
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2009 Jaromir Hradilek
+Copyright (C) 2009, 2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -115,7 +121,7 @@ sub read_ini {
 
   # Process each line:
   while (my $line = <INI>) {
-    # Parse line:
+    # Parse the line:
     if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
       # Change the section:
       $section = $1;
@@ -133,7 +139,7 @@ sub read_ini {
   return $hash;
 }
 
-# Read the configuration file:
+# Read the content of the configuration file:
 sub read_conf {
   # Prepare the file name:
   my $file = catfile($blogdir, '.blaze', 'config');
@@ -145,14 +151,14 @@ sub read_conf {
   }
   else {
     # Report failure:
-    display_warning("Unable to read configuration.");
+    display_warning("Unable to read the configuration.");
 
-    # Return empty configuration:
+    # Return an empty configuration:
     return {};
   }
 }
 
-# Display given log record:
+# Display a log entry:
 sub display_record {
   my $record = shift || die 'Missing argument';
 
@@ -161,13 +167,13 @@ sub display_record {
     # Decompose the record:
     my ($date, $message) = split(/\s+-\s+/, $record, 2);
 
-    # Check whether to use colours:
+    # Check whether colors are enabled:
     unless ($coloured) {
-      # Display the plain record header:
+      # Display plain record header:
       print "Date: $date\n\n";
     }
     else {
-      # Display the coloured record header:
+      # Display colored record header:
       print colored ("Date: $date", 'yellow');
       print "\n\n";
     }
@@ -185,7 +191,7 @@ sub display_record {
   return 1;
 }
 
-# Display log records:
+# Display log entries:
 sub display_log {
   # Initialize required variables:
   my @lines = ();
@@ -197,24 +203,24 @@ sub display_log {
   # Open the log file for reading:
   open(LOG, "$file") or return 0;
 
-  # Process each record:
+  # Process each entŕy:
   while (my $record = <LOG>) {
     # Check whether to use reverse order:
     if ($reverse) {
-      # Display the log record immediately:
+      # Display the log entry immediately:
       display_record($record);
 
-      # Check whether the limited number of displayed records is requested:
+      # Check whether the limited number of displayed entries is requested:
       if ($number > 0) {
-        # Increase displayed records counter:
+        # Increase the displayed entries counter:
         $count++;
 
-        # End loop when counter reaches the limit:
+        # End loop when the counter reaches the limit:
         last if $count == $number;
       }
     }
     else {
-      # Prepend the log record to the list to be displayed later:
+      # Prepend the log entry to the list of records to be displayed later:
       unshift(@lines, $record);
     }
   }
@@ -222,20 +228,20 @@ sub display_log {
   # Close the file:
   close(LOG);
 
-  # Unless  the reverse order was requested and therefore records have been
+  # Unless the reverse order was requested, and therefore records have been
   # already displayed, display them now:
   unless ($reverse) {
-    # Process each log record:
+    # Process each log entry:
     foreach my $record (@lines) {
-      # Display the log record:
+      # Display the log entry:
       display_record($record);
 
-      # Check whether the limited number of displayed records is requested:
+      # Check whether the limited number of displayed entries is requested:
       if ($number > 0) {
-        # Increase displayed records counter:
+        # Increase the displayed entries counter:
         $count++;
 
-        # End loop when counter reaches the limit:
+        # End loop when the counter reaches the limit:
         last if $count == $number;
       }
     }
@@ -245,10 +251,10 @@ sub display_log {
   return 1;
 }
 
-# Set up the options parser:
+# Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
-# Process command-line options:
+# Process command line options:
 GetOptions(
   'help|h'               => sub { display_help();    exit 0; },
   'version|v'            => sub { display_version(); exit 0; },
@@ -265,12 +271,13 @@ GetOptions(
 # Detect superfluous options:
 exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 
-# Check the repository is present (however naive this method is):
+# Check whether the repository is present, no matter how naive this method
+# actually is:
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# Unless specified on the command line, read the colour setup from the
-# configuration:
+# Unless specified on the command line, read the color setup from the
+# configuration file:
 unless (defined $coloured) {
   # Read the configuration file:
   my $conf  = read_conf();
@@ -284,7 +291,7 @@ unless (defined $coloured) {
 
 # Display log records:
 display_log()
-  or exit_with_error("Cannot read log file.", 13);
+  or exit_with_error("Cannot read the log file.", 13);
 
 # Return success:
 exit 0;
