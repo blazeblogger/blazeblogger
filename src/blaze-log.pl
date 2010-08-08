@@ -127,7 +127,7 @@ sub read_ini {
       $section = $1;
     }
     elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
-      # Add option to the hash:
+      # Add the option to the hash:
       $hash->{$section}->{$1} = $2;
     }
   }

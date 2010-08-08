@@ -53,7 +53,7 @@ $SIG{__WARN__}  = sub {
   print STDERR NAME . ": " . (shift);
 };
 
-# Display given message and terminate the script:
+# Display an error message, and terminate the script:
 sub exit_with_error {
   my $message      = shift || 'An error has occurred.';
   my $return_value = shift || 1;
@@ -65,7 +65,7 @@ sub exit_with_error {
   exit $return_value;
 }
 
-# Display given warning message:
+# Display a warning message:
 sub display_warning {
   my $message = shift || 'A warning was requested.';
 
@@ -159,7 +159,7 @@ sub read_ini {
       $section = $1;
     }
     elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
-      # Add option to the hash:
+      # Add the option to the hash:
       $hash->{$section}->{$1} = $2;
     }
   }
@@ -190,7 +190,7 @@ sub read_conf {
   }
 }
 
-# Compose a blog post or page record:
+# Compose a blog post or a page record:
 sub make_record {
   my $type = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';

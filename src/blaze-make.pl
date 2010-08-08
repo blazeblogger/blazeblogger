@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-make, generate static content from the BlazeBlogger repository
+# blaze-make - generates a blog from the BlazeBlogger repository
 # Copyright (C) 2009, 2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -52,20 +52,26 @@ $SIG{__WARN__}  = sub {
   print STDERR NAME . ": " . (shift);
 };
 
-# Display given message and terminate the script:
+# Display an error message, and terminate the script:
 sub exit_with_error {
-  my $message      = shift || 'An unspecified error has occurred.';
+  my $message      = shift || 'An error has occurred.';
   my $return_value = shift || 1;
 
+  # Display the error message:
   print STDERR NAME . ": $message\n";
+
+  # Terminate the script:
   exit $return_value;
 }
 
-# Display given warning message:
+# Display a warning message:
 sub display_warning {
-  my $message = shift || 'An unspecified warning was requested.';
+  my $message = shift || 'A warning was requested.';
 
+  # Display the warning message:
   print STDERR "$message\n";
+
+  # Return success:
   return 1;
 }
 
@@ -73,24 +79,25 @@ sub display_warning {
 sub display_help {
   my $NAME = NAME;
 
-  # Print the message to the STDOUT:
+  # Display the usage:
   print << "END_HELP";
-Usage: $NAME [-cpqrIFPTV] [-b directory] [-d directory]
-       $NAME -h | -v
+Usage: $NAME [-cpqrIFPTV] [-b DIRECTORY] [-d DIRECTORY]
+       $NAME -h|-v
 
-  -b, --blogdir directory     specify the directory where the BlazeBlogger
+  -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
                               repository is placed
-  -d, --destdir directory     specify the directory where the generated
-                              static content is to be placed
-  -c, --no-css                disable stylesheet creation
-  -I, --no-index              disable index page creation
-  -p, --no-posts              disable blog posts creation
-  -P, --no-pages              disable pages creation
-  -T, --no-tags               disable support for tags
-  -r, --no-rss                disable RSS feed creation
-  -F, --full-paths            enable full paths creation
-  -q, --quiet                 avoid displaying unnecessary messages
-  -V, --verbose               display all messages including the list of
+  -d, --destdir DIRECTORY     specify a directory in which the generated
+                              blog is to be placed
+  -c, --no-css                disable creating a style sheet
+  -I, --no-index              disable creating the index page
+  -p, --no-posts              disable creating blog posts
+  -P, --no-pages              disable creating pages
+  -T, --no-tags               disable creating tags
+  -r, --no-rss                disable creating the RSS feed
+  -F, --full-paths            enable including page names in generated
+                              links
+  -q, --quiet                 do not display unnecessary messages
+  -V, --verbose               display all messages, including a list of
                               created files
   -h, --help                  display this help and exit
   -v, --version               display version information and exit
@@ -104,7 +111,7 @@ END_HELP
 sub display_version {
   my ($NAME, $VERSION) = (NAME, VERSION);
 
-  # Print the message to the STDOUT:
+  # Display the version:
   print << "END_VERSION";
 $NAME $VERSION
 
@@ -125,11 +132,11 @@ sub date_to_string {
   return sprintf("%d-%02d-%02d", ($date[5] + 1900), ++$date[4], $date[3]);
 }
 
-# Translate given date to RFC 822 format string:
+# Translate a date to a string in the RFC 822 form:
 sub rfc_822_date {
   my @date = localtime(shift);
 
-  # Prepare the aliases:
+  # Prepare aliases:
   my @months = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec );
   my @days   = qw( Sun Mon Tue Wed Thu Fri Sat );
 
@@ -145,10 +152,10 @@ sub fix_link {
 
   # Check whether the full path is enabled:
   if ($full_paths) {
-    # Append slash if missing:
+    # Append the slash if missing:
     $link .= '/' if ($link && $link !~ /\/$/);
 
-    # Append index file name:
+    # Append the index file name:
     $link .= 'index.' . ($conf->{core}->{extension} || 'html');
   }
 
@@ -156,21 +163,21 @@ sub fix_link {
   return $link;
 }
 
-# Strip HTML elements:
+# Strip all HTML elements:
 sub strip_html {
   my $string = shift || return '';
 
-  # Substitute most common HTML entities:
+  # Substitute common HTML entities:
   $string =~ s/&[mn]dash;/--/ig;
   $string =~ s/&[lrb]dquo;/"/ig;
   $string =~ s/&[lr]squo;/'/ig;
   $string =~ s/&hellip;/.../ig;
   $string =~ s/&nbsp;/ /ig;
 
-  # Strip other HTML elements and forbidded characters:
+  # Strip HTML elements and other forbidded characters:
   $string =~ s/(<[^>]*>|&[^;]*;|<|>|&)//g;
 
-  # Strip superfluous whitespace characters:
+  # Strip superfluous whitespaces:
   $string =~ s/\s{2,}/ /g;
 
   # Return the result:
@@ -190,13 +197,13 @@ sub read_ini {
 
   # Process each line:
   while (my $line = <INI>) {
-    # Parse line:
+    # Parse the line:
     if ($line =~ /^\s*\[([^\]]+)\]\s*$/) {
       # Change the section:
       $section = $1;
     }
     elsif ($line =~ /^\s*(\S+)\s*=\s*(\S.*)$/) {
-      # Add option to the hash:
+      # Add the option to the hash:
       $hash->{$section}->{$1} = $2;
     }
   }
@@ -208,7 +215,7 @@ sub read_ini {
   return $hash;
 }
 
-# Read the configuration file:
+# Read the content of the configuration file:
 sub read_conf {
   # Prepare the file name:
   my $file = catfile($blogdir, '.blaze', 'config');
@@ -220,14 +227,14 @@ sub read_conf {
   }
   else {
     # Report failure:
-    display_warning("Unable to read configuration.");
+    display_warning("Unable to read the configuration.");
 
-    # Return empty configuration:
+    # Return an empty configuration:
     return {};
   }
 }
 
-# Read the language file:
+# Read the content of the localization file:
 sub read_lang {
   my $name = shift || 'en_US';
 
@@ -241,14 +248,14 @@ sub read_lang {
   }
   else {
     # Report failure:
-    display_warning("Unable to read selected language file.");
+    display_warning("Unable to read the localization file.");
 
-    # Return empty language settings:
+    # Return an empty language settings:
     return {};
   }
 }
 
-# Make proper URL from given string, stripping all forbidden characters:
+# Make proper URL from a string, stripping all forbidden characters:
 sub make_url {
   my $url = shift || return '';
 
@@ -265,7 +272,7 @@ sub make_url {
   return $url;
 }
 
-# Compose a post/page record:
+# Compose a blog post or a page record:
 sub make_record {
   my $type = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
@@ -290,7 +297,7 @@ sub make_record {
     # Assign the default value:
     $author = $conf->{user}->{name} || 'admin';
 
-    # Report missing author:
+    # Report the missing author:
     display_warning("Missing author in the $type with ID $id. " .
                     "Using `$author' instead.");
   }
@@ -302,7 +309,7 @@ sub make_record {
       # Use current date instead:
       $date = date_to_string(time);
 
-      # Report invalid date:
+      # Report the invalid date:
       display_warning("Invalid date in the $type with ID $id. " .
                       "Using `$date' instead.");
     }
@@ -311,7 +318,7 @@ sub make_record {
     # Use current date instead:
     $date = date_to_string(time);
 
-    # Report missing date:
+    # Report the missing date:
     display_warning("Missing date in the $type with ID $id. " .
                     "Using `$date' instead.");
   }
@@ -344,26 +351,27 @@ sub make_record {
       # Strip forbidden characters:
       $url = make_url($url);
 
-      # Report invalid URL:
+      # Report the invalid URL:
       display_warning("Invalid URL in the $type with ID $id. " .
                       ($url ? "Stripping to `$url'."
-                            : "Deriving from title."));
+                            : "Deriving from the title."));
     }
   }
 
-  # Unless already created, derive URL from the post/page title:
+  # Unless already created, derive the URL from the blog post or page
+  # title:
   unless ($url) {
-    # Derive URL from the post/page title:
+    # Derive the URL from the blog post or page title:
     $url = make_url(lc($title));
   }
 
-  # Finalise the URL:
+  # Finalize the URL:
   if ($url) {
-    # Prepend ID to the post URL:
+    # Prepend the ID to the blog post URL:
     $url = "$id-$url" if $type eq 'post';
   }
   else {
-    # Base URL on ID:
+    # Base the URL on the ID:
     $url = ($type eq 'post') ? $id : "page$id";
 
     # Report missing URL:
@@ -382,7 +390,7 @@ sub make_record {
   };
 }
 
-# Return the list of posts/pages header records:
+# Return a list of blog post or page header records:
 sub collect_headers {
   my $type    = shift || 'post';
 
@@ -392,7 +400,7 @@ sub collect_headers {
   # Prepare the file name:
   my $head    = catdir($blogdir, '.blaze', "${type}s", 'head');
 
-  # Open the headers directory:
+  # Open the directory:
   opendir(HEAD, $head) or return @records;
 
   # Process each file:
@@ -400,7 +408,7 @@ sub collect_headers {
     # Skip both . and ..:
     next if $id =~ /^\.\.?$/;
 
-    # Parse the header data:
+    # Parse header data:
     my $data   = read_ini(catfile($head, $id)) or next;
     my $date   = $data->{header}->{date};
     my $tags   = $data->{header}->{tags};
@@ -428,7 +436,7 @@ sub collect_headers {
   }
 }
 
-# Collect the necessary metadata:
+# Collect metadata:
 sub collect_metadata {
   # Initialize required variables:
   my $post_links  = {};
@@ -440,13 +448,13 @@ sub collect_metadata {
   my @month_name  = qw( january february march april may june july
                         august september october november december );
 
-  # Collect the pages headers:
+  # Collect the page headers:
   my @pages  = collect_headers('page');
 
-  # Collect the posts headers:
+  # Collect the blog post headers:
   my @posts  = collect_headers('post');
 
-  # Process each post header:
+  # Process each blog post header:
   foreach my $record (@posts) {
     # Decompose the record:
     my ($year, $month) = split(/-/, $record->{date});
@@ -456,7 +464,7 @@ sub collect_metadata {
     my $url            = $record->{url};
     my $id             = $record->{id};
 
-    # Set up the post URL:
+    # Set up the blog post URL:
     $post_links->{$id}->{url} = "$year/$month/$url";
 
     # Check whether the month is already present:
@@ -480,16 +488,16 @@ sub collect_metadata {
         $tag_links->{$tag}->{count}++;
       }
       else {
-        # Derive URL from tag name:
+        # Derive the URL from the tag name:
         my $tag_url = make_url($tag);
 
-        # Make sure the URL is not empty:
+        # Make sure the URL string is not empty:
         unless ($tag_url) {
-          # Use MD5 checksum instead:
+          # Use an MD5 checksum instead:
           $tag_url = Digest::MD5->new->add($tag)->hexdigest;
 
-          # Report missing URL:
-          display_warning("Unable to derive URL from tag `$tag'. " .
+          # Report the missing URL:
+          display_warning("Unable to derive the URL from tag `$tag'. " .
                           "Using `$tag_url' instead.");
         }
 
@@ -523,12 +531,12 @@ sub collect_metadata {
   };
 }
 
-# Return the list of tags:
+# Return a list of tags:
 sub list_of_tags {
   my $tags = shift || die 'Missing argument';
   my $root = shift || '';
 
-  # Check whether the tags generation is eneabled:
+  # Check whether the tag creation is eneabled:
   return '' unless $with_tags;
 
   # Check whether the list is not empty:
@@ -545,13 +553,13 @@ sub list_of_tags {
   }
 }
 
-# Return the list of months:
+# Return a list of months:
 sub list_of_months {
   my $months = shift || die 'Missing argument';
   my $root   = shift || '';
   my $year   = shift || '';
 
-  # Check whether the posts generation is enabled:
+  # Check whether the post creation is enabled:
   return '' unless $with_posts;
 
   # Check whether the list is not empty:
@@ -568,7 +576,7 @@ sub list_of_months {
   }
 }
 
-# Return the list of pages:
+# Return a list of pages:
 sub list_of_pages {
   my $pages = shift || die 'Missing argument';
   my $root  = shift || '';
@@ -576,7 +584,7 @@ sub list_of_pages {
   # Initialize required variables:
   my $list  = '';
 
-  # Check whether the pages generation is enabled:
+  # Check whether the page creation is enabled:
   return '' unless $with_pages;
 
   # Process each page separately:
@@ -596,7 +604,7 @@ sub list_of_pages {
   return $list;
 }
 
-# Return the list of posts:
+# Return a list of blog posts:
 sub list_of_posts {
   my $posts = shift || die 'Missing argument';
   my $root  = shift || '';
@@ -605,7 +613,7 @@ sub list_of_posts {
   # Initialize required variables:
   my $list  = '';
 
-  # Check whether the posts generation is enabled:
+  # Check whether the blog post creation is enabled:
   return '' unless $with_posts;
 
   # Initialize the counter:
@@ -633,11 +641,11 @@ sub list_of_posts {
   # Strip trailing line break:
   chomp($list);
 
-  # Return the list of posts:
+  # Return the list of blog posts:
   return $list;
 }
 
-# Return post/page body or excerpt:
+# Return the blog post or page body or synopsis:
 sub read_entry {
   my $id      = shift || die 'Missing argument';
   my $type    = shift || 'post';
@@ -650,23 +658,23 @@ sub read_entry {
   # Initialize required variables:
   my $result  = '';
 
-  # Open the post/page body file for reading:
+  # Open the file for reading:
   open (FILE, $file) or return '';
 
   # Read the content of the file:
   while (my $line = <FILE>) {
-    # When excerpt is requested, look for a break mark:
+    # When the synopsis is requested, look for a break mark:
     if ($excerpt && $line =~ /<!--\s*break\s*-->/i) {
       # Check whether the link is provided:
       if ($link) {
-        # Read required data from the language file:
+        # Read required data from the localization file:
         my $more = $locale->{lang}->{more} || 'Read more &raquo;';
 
-        # Add the `Read more' link to the end of the excerpt:
+        # Add the `Read more' link to the end of the synopsis:
         $result .= "<p><a href=\"$link\" class=\"more\">$more</a></p>\n";
       }
 
-      # Stop reading here:
+      # Stop the parsing here:
       last;
     }
 
@@ -681,7 +689,7 @@ sub read_entry {
   return $result;
 }
 
-# Return formatted post/page heading:
+# Return a formatted blog post or page heading:
 sub format_heading {
   my $title = shift || die 'Missing argument';
   my $link  = shift || '';
@@ -691,7 +699,7 @@ sub format_heading {
                : "<h2 class=\"post\">$title</h2>\n";
 }
 
-# Return formatted post/page information:
+# Return formatted blog post or page information:
 sub format_information {
   my $record = shift || die 'Missing argument';
   my $tags   = shift || die 'Missing argument';
@@ -707,7 +715,7 @@ sub format_information {
   my $date_location   = $conf->{post}->{date}   || 'top';
   my $tags_location   = $conf->{post}->{tags}   || 'top';
 
-  # Read required data from the language file:
+  # Read required data from the localization file:
   my $posted_on = $locale->{lang}->{postedon}   || '';
   my $posted_by = $locale->{lang}->{postedby}   || 'by';
   my $tagged_as = $locale->{lang}->{taggedas}   || 'tagged as';
@@ -727,7 +735,7 @@ sub format_information {
     $author = " $author" if $date;
   }
 
-  # Check whether the tags are to be included (and there are any):
+  # Check whether the tags are to be included (and if there are any):
   if ($tags_location eq $type && $with_tags && $record->{tags}) {
     # Convert tags to proper links:
     $taglist = join(', ', map {
@@ -737,22 +745,22 @@ sub format_information {
     # Format the tags:
     $taglist = "$tagged_as <span class=\"tags\">$taglist</span>";
 
-    # Prepend a comma if the date of publishing or author are included:
+    # Prepend a comma if the date of publishing or the author are included:
     $taglist = ", $taglist" if $date || $author;
   }
 
-  # Check whether there is anything to return:
+  # Check if there is anything to return:
   if ($date || $author || $taglist) {
     # Return the result:
     return "<div class=\"$class\">\n  \u$date$author$taglist\n</div>\n";
   }
   else {
-    # Return empty string:
+    # Return an empty string:
     return '';
   }
 }
 
-# Return formatted post/page entry:
+# Return a formatted blog post or page entry:
 sub format_entry {
   my $data    = shift || die 'Missing argument';
   my $record  = shift || die 'Missing argument';
@@ -766,9 +774,9 @@ sub format_entry {
   my $id      = $record->{id};
   my ($link, $information, $post_footer) = ('', '', '');
 
-  # If the excerpt is requested, prepare the entry link:
+  # If the synopsis is requested, prepare the entry link:
   if ($excerpt) {
-    # Check whether the entry is post or page:
+    # Check whether the entry is a blog post, or a page:
     if ($type eq 'post') {
       # Decompose the record:
       my ($year, $month) = split(/-/, $record->{date});
@@ -782,11 +790,11 @@ sub format_entry {
     }
   }
 
-  # Prepare the post/page heading and body/excerpt:
+  # Prepare the blog post or page heading, and the body or the synopsis:
   my $heading = format_heading($title, $link);
   my $body    = read_entry($id, $type, $link, $excerpt);
 
-  # For posts, prepare its additional information:
+  # For blog posts, prepare its additional information:
   if ($type eq 'post') {
     $information = format_information($record, $tags, $root, 'top');
     $post_footer = format_information($record, $tags, $root, 'bottom');
@@ -796,7 +804,7 @@ sub format_entry {
   return "\n$heading$information$body$post_footer";
 }
 
-# Return formatted section title:
+# Return a formatted section title:
 sub format_section {
   my $title = shift || die 'Missing argument';
 
@@ -804,7 +812,7 @@ sub format_section {
   return "<div class=\"section\">$title</div>\n";
 }
 
-# Return formatted navigation:
+# Return a formatted navigation links:
 sub format_navigation {
   my $type  = shift || die 'Missing argument';
   my $index = shift || '';
@@ -852,16 +860,16 @@ sub write_page {
     my $theme    = $conf->{blog}->{theme}     || 'default.html';
     my $title    = $conf->{blog}->{title}     || 'My Blog';
 
-    # Prepare the posts, pages, tags and months lists:
+    # Prepare the post, page, tag, and month lists:
     my $tags     = list_of_tags($data->{links}->{tags}, $root);
     my $archive  = list_of_months($data->{links}->{months}, $root);
     my $pages    = list_of_pages($data->{headers}->{pages}, $root);
     my $posts    = list_of_posts($data->{headers}->{posts}, $root);
 
-    # Get the current year:
+    # Get current year:
     my $year     = substr(date_to_string(time), 0, 4);
 
-    # Declare the required variables:
+    # Declare required variables:
     my ($date, $content_type, $generator, $stylesheet, $rss);
 
     # Check which doctype to use:
@@ -906,7 +914,7 @@ sub write_page {
     $template =~ s/<!--\s*generator\s*-->/$generator/ig;
     $template =~ s/<!--\s*date\s*-->/$date/ig;
 
-    # Substitute lists placeholders:
+    # Substitute list placeholders:
     $template =~ s/<!--\s*tags\s*-->/$tags/ig;
     $template =~ s/<!--\s*archive\s*-->/$archive/ig;
     $template =~ s/<!--\s*pages\s*-->/$pages/ig;
@@ -926,27 +934,28 @@ sub write_page {
   # Load the template from the cache:
   my $template = $cache->{theme}->{$temp};
 
-  # Substitute page title:
+  # Substitute the page title:
   $template   =~ s/<!--\s*page-title\s*-->/$heading/ig;
 
-  # Add page content:
+  # Add the page content:
   $template   =~ s/<!--\s*content\s*-->/$content/ig;
 
-  # Substitute the root directory placeholder:
+  # Substitute the root directory:
   $template   =~ s/%root%/$root/ig;
 
-  # Substitute the home page placeholder:
+  # Substitute the home page:
   $template   =~ s/%home%/$home/ig;
 
-  # Substitute the `post/page/tag with selected ID' placeholder:
+  # Substitute the `blog post / page / tag with the selected ID'
+  # placeholder:
   while ($template =~ /%(post|page|tag)\[([^\]]+)\]%/i) {
     # Decompose the placeholder:
     my $type = $1;
     my $id   = lc($2);
 
-    # Check whether the selected post/page/tag exists:
+    # Check whether the selected blog post / page / tag exists:
     if (defined $data->{links}->{"${type}s"}->{$id}) {
-      # Get the post/page/tag link:
+      # Get the blog post / page / tag link:
       my $link = $data->{links}->{"${type}s"}->{$id}->{url};
 
       # Compose the URL:
@@ -958,7 +967,7 @@ sub write_page {
       $template =~ s/%$type\[$id\]%/$link/ig;
     }
     else {
-      # Report invalid reference:
+      # Report the invalid reference:
       display_warning("Invalid reference to $type with ID $id.");
 
       # Disable the placeholder:
@@ -993,14 +1002,14 @@ sub write_page {
   return 1;
 }
 
-# Copy the stylesheet:
+# Copy the style sheet:
 sub copy_stylesheet {
-  # Prepare the file names:
+  # Prepare file names:
   my $style = $conf->{blog}->{style} || 'default.css';
   my $from  = catfile($blogdir, '.blaze', 'style', $style);
   my $to    = ($destdir eq '.') ? $style : catfile($destdir, $style);
 
-  # Check whether the existing stylesheet differs:
+  # Check whether the existing style sheet differs:
   if (compare($from,$to)) {
     # Copy the file:
     copy($from, $to) or return 0;
@@ -1013,7 +1022,7 @@ sub copy_stylesheet {
   return 1;
 }
 
-# Generate RSS feed:
+# Generate the RSS feed:
 sub generate_rss {
   my $data          = shift || die 'Missing argument';
 
@@ -1025,8 +1034,8 @@ sub generate_rss {
   my $feed_posts     = $conf->{feed}->{posts}     || 10;
   my $feed_baseurl   = $conf->{feed}->{baseurl};
 
-  # Handle the deprecated setting; for backward compatibility reasons only
-  # and to be removed in the future:
+  # Handle a deprecated setting; for the backward compatibility reasons
+  # only, and to be removed in the near future:
   if ((defined $conf->{blog}->{url}) && (not $feed_baseurl)) {
     # Use the value from the deprecated option:
     $feed_baseurl = $conf->{blog}->{url};
@@ -1049,16 +1058,16 @@ sub generate_rss {
     return 1;
   }
 
-  # Make sure the posts number is a valid integer:
+  # Make sure the blog post number is a valid integer:
   unless ($feed_posts =~ /^\d+$/) {
     # Use default value:
     $feed_posts = 10;
 
-    # Display warning:
+    # Display a warning:
     display_warning("Invalid feed.posts option. Using the default value.");
   }
 
-  # Set up the post item type:
+  # Set up the blog post item type:
   my $fullposts  = ($feed_fullposts =~ /^(true|auto)\s*$/i) ? 1 : 0;
 
   # Initialize necessary variables:
@@ -1071,7 +1080,7 @@ sub generate_rss {
   # Strip trailing forward slash from the base URL:
   $feed_baseurl  =~ s/\/+$//;
 
-  # Prepare the RSS file name:
+  # Prepare the RSS feed file name:
   my $file = ($destdir eq '.') ? 'index.rss'
                                : catfile($destdir, 'index.rss');
 
@@ -1099,28 +1108,28 @@ sub generate_rss {
     my $time       = timelocal_nocheck(1, 0, 0, $day, ($month - 1), $year);
     my $date_time  = rfc_822_date($time);
 
-    # Prepare the post title:
+    # Prepare the blog post title:
     my $post_title = strip_html($record->{title});
 
-    # Open the post item:
+    # Open the blog post item:
     print RSS "  <item>\n    <title>$post_title</title>\n  " .
               "  <link>$feed_baseurl/$year/$month/$url/</link>\n  " .
               "  <guid>$feed_baseurl/$year/$month/$url/</guid>\n  " .
               "  <pubDate>$date_time</pubDate>\n  ";
 
-    # Check whether to list full posts:
+    # Check whether to list full blog posts:
     unless ($fullposts) {
-      # Read the post excerpt:
+      # Read the blog post synopsis:
       my $post_body = read_entry($record->{id}, 'post', '', 1);
 
       # Strip HTML elements:
       my $post_desc = substr(strip_html($post_body), 0, 500);
 
-      # Add the post excerpt:
+      # Add the blog post synopsis:
       print RSS "  <description>$post_desc    </description>\n";
     }
     else {
-      # Read the post body:
+      # Read the blog post body:
       my $post_desc = read_entry($record->{id}, 'post', '', 0);
 
       # Substitute the root directory placeholder:
@@ -1129,11 +1138,11 @@ sub generate_rss {
       # Substitute the home page placeholder:
       $post_desc =~ s/%home%/$feed_baseurl\//ig;
 
-      # Add the post body:
+      # Add the blog post body:
       print RSS "  <description><![CDATA[$post_desc    ]]></description>\n";
     }
 
-    # Close the post item:
+    # Close the blog post item:
     print RSS "  </item>\n";
 
     # Increase the number of listed items:
@@ -1153,7 +1162,7 @@ sub generate_rss {
   return 1;
 }
 
-# Generate index page:
+# Generate the index page:
 sub generate_index {
   my $data       = shift || die 'Missing argument';
 
@@ -1171,25 +1180,25 @@ sub generate_index {
 
   # Make sure the posts number is a valid integer:
   unless ($blog_posts =~ /^\d+$/) {
-    # Use default value:
+    # Use the default value:
     $blog_posts = 10;
 
-    # Display warning:
+    # Display a warning:
     display_warning("Invalid blog.posts option. Using the default value.");
   }
 
-  # Check whether the posts are enabled:
+  # Check whether the blog posts are enabled:
   if ($with_posts) {
-    # Process the requested number of posts:
+    # Process the requested number of blog posts:
     foreach my $record (@{$data->{headers}->{posts}}) {
-      # Check whether the number of listed posts reached the limit:
+      # Check whether the number of listed blog posts reached the limit:
       if ($count == $blog_posts) {
         # Prepare information for the page navigation:
         my $index = $page     || '';
         my $next  = $page - 1 || '';
         my $prev  = $page + 1;
 
-        # Add navigation:
+        # Add the navigation:
         $body .= format_navigation('previous', $prev);
         $body .= format_navigation('next', $next) if $page;
 
@@ -1200,17 +1209,17 @@ sub generate_index {
         # Clear the page body:
         $body  = '';
 
-        # Reset the post counter:
+        # Reset the blog post counter:
         $count = 0;
 
         # Increase the page counter:
         $page++;
       }
 
-      # Add the post excerpt to the page body:
+      # Add the blog post synopsis to the page body:
       $body .= format_entry($data, $record, '', 'post', 1);
 
-      # Increase the number of listed posts:
+      # Increase the number of listed blog posts:
       $count++;
     }
 
@@ -1229,7 +1238,7 @@ sub generate_index {
     }
   }
   else {
-    # Write empty index page:
+    # Write an empty index page:
     write_page($data, $target, '', $body, $blog_title) or return 0;
   }
 
@@ -1237,7 +1246,7 @@ sub generate_index {
   return 1;
 }
 
-# Generate posts:
+# Generate the blog posts:
 sub generate_posts {
   my $data         = shift || die 'Missing argument';
 
@@ -1254,12 +1263,12 @@ sub generate_posts {
   # Initialize post related variables:
   my $post_body    = '';                            # Blog post content.
 
-  # Inicialize yearly archive related variables:
+  # Inicialize yearly archive-related variables:
   my $year_body    = '';                            # List of months.
   my $year_curr    = '';                            # Current year.
   my $year_last    = '';                            # Last processed year.
 
-  # Initialize monthly archive related variables:
+  # Initialize monthly archive-related variables:
   my $month_body   = '';                            # List of posts.
   my $month_curr   = '';                            # Current month.
   my $month_last   = '';                            # Last processed month.
@@ -1269,12 +1278,12 @@ sub generate_posts {
   # Declare other necessary variables:
   my ($year, $month, $target);
 
-  # Make sure the posts number is a valid integer:
+  # Make sure the blog post number is a valid integer:
   unless ($blog_posts =~ /^\d+$/) {
-    # Use default value:
+    # Use the default value:
     $blog_posts = 10;
 
-    # Display warning:
+    # Display a warning:
     display_warning("Invalid blog.posts option. Using the default value.");
   }
 
@@ -1283,7 +1292,7 @@ sub generate_posts {
     # Decompose the record:
     ($year, $month) = split(/-/, $record->{date});
 
-    # Prepare the post body:
+    # Prepare the blog post body:
     $post_body = format_entry($data, $record, '../../../', 'post', 0);
 
     # Prepare the target directory name:
@@ -1291,11 +1300,11 @@ sub generate_posts {
                ? catdir($year, $month, $record->{url})
                : catdir($destdir, $year, $month, $record->{url});
 
-    # Write the post:
+    # Write the blog post:
     write_page($data, $target, '../../../', $post_body, $record->{title})
       or return 0;
 
-    # Set the current year:
+    # Set the year:
     $year_curr = $year;
 
     # Check whether the year has changed:
@@ -1303,31 +1312,31 @@ sub generate_posts {
       # Prepare the section title:
       my $title   = "$title_string $year";
 
-      # Add this year's archive section title:
+      # Add the yearly archive section title:
       $year_body  = format_section($title);
 
-      # Add this year's archive list of months:
+      # Add the yearly archive list of months:
       $year_body .= "<ul>\n" . list_of_months($data->{links}->{months},
                                               '../', $year) . "\n</ul>";
 
-      # Prepare this year's archive target directory name:
+      # Prepare the yearly archive target directory name:
       $target = ($destdir eq '.') ? $year : catdir($destdir, $year);
 
-      # Write this year's archive index page:
+      # Write the yearly archive index page:
       write_page($data, $target, '../', $year_body, $title) or return 0;
 
-      # Make the previous year the current one:
+      # Change the previous year to the currently processed one:
       $year_last = $year_curr;
     }
 
     # If this is the first loop, fake the previous month as the current:
     $month_last = "$year/$month" unless $month_last;
 
-    # Set the current month:
+    # Set the month:
     $month_curr = "$year/$month";
 
-    # Check whether the month has changed  or whether the  number of listed
-    # posts reached the limit:
+    # Check whether the month has changed, or whether the  number of listed
+    # posts has reached the limit:
     if (($month_last ne $month_curr) || ($month_count == $blog_posts)) {
       # Prepare information for the page navigation:
       my $index = $month_page     || '';
@@ -1342,21 +1351,21 @@ sub generate_posts {
       my $name  = ($locale->{lang}->{$temp} || $temp) . " $year";
       my $title = "$title_string $name";
 
-      # Add section title:
+      # Add the section title:
       $month_body  = format_section($title) . $month_body;
 
-      # Add navigation:
+      # Add the navigation:
       $month_body .= format_navigation('previous', $prev)
                      if $month_curr eq $month_last;
       $month_body .= format_navigation('next', $next)
                      if $month_page;
 
-      # Prepare this month's archive target directory name:
+      # Prepare the monthly archive target directory name:
       $target = ($destdir eq '.')
               ? catdir($year, $month)
               : catdir($destdir, $year, $month);
 
-      # Write this month's archive index page:
+      # Write the monthly archive index page:
       write_page($data, $target, '../../', $month_body, $title, $index)
         or return 0;
 
@@ -1370,20 +1379,20 @@ sub generate_posts {
         $month_page++;
       }
 
-      # Make the previous month the current one:
+      # Change the previous month to the currently processed one:
       $month_last = $month_curr;
 
       # Clear the monthly archive body:
       $month_body = '';
 
-      # Reset the post counter:
+      # Reset the blog post counter:
       $month_count = 0;
     }
 
-    # Add the post excerpt:
+    # Add the blog post synopsis:
     $month_body .= format_entry($data, $record, '../../', 'post', 1);
 
-    # Increase the number of listed posts:
+    # Increase the number of listed blog posts:
     $month_count++;
   }
 
@@ -1401,18 +1410,18 @@ sub generate_posts {
     my $name  = ($locale->{lang}->{$temp} || $temp) . " $year";
     my $title = "$title_string $name";
 
-    # Add section title:
+    # Add the section title:
     $month_body  = format_section($title) . $month_body;
 
-    # Add navigation:
+    # Add the navigation:
     $month_body .= format_navigation('next', $next) if $month_page;
 
-    # Prepare this month's archive target directory name:
+    # Prepare the monthly archive target directory name:
     $target = ($destdir eq '.')
             ? catdir($year, $month)
             : catdir($destdir, $year, $month);
 
-    # Write this month's archive index page:
+    # Write the monthly archive index page:
     write_page($data, $target, '../../', $month_body, $title, $index)
       or return 0;
   }
@@ -1421,7 +1430,7 @@ sub generate_posts {
   return 1;
 }
 
-# Generate tags:
+# Generate the tags:
 sub generate_tags {
   my $data         = shift || die 'Missing argument';
 
@@ -1432,12 +1441,12 @@ sub generate_tags {
   my $title_string = $locale->{lang}->{tags}     || 'Posts tagged as';
   my $tags_string  = $locale->{lang}->{taglist}  || 'List of tags';
 
-  # Make sure the posts number is a valid integer:
+  # Make sure the blog post number is a valid integer:
   unless ($blog_posts =~ /^\d+$/) {
-    # Use default value:
+    # Use the default value:
     $blog_posts = 10;
 
-    # Display warning:
+    # Display a warning:
     display_warning("Invalid blog.posts option. Using the default value.");
   }
 
@@ -1453,10 +1462,10 @@ sub generate_tags {
 
     # Process each record:
     foreach my $record (@{$data->{headers}->{posts}}) {
-      # Check whether the post contains the current tag:
+      # Check whether the blog post contains the current tag:
       next unless $record->{tags} =~ /(^|,\s*)$tag(,\s*|$)/;
 
-      # Check whether the number of listed posts reached the limit:
+      # Check whether the number of listed blog posts reached the limit:
       if ($tag_count == $blog_posts) {
         # Prepare information for the page navigation:
         my $index = $tag_page     || '';
@@ -1466,37 +1475,37 @@ sub generate_tags {
         # Prepare the section title:
         my $title = "$title_string $tag";
 
-        # Add section title:
+        # Add the section title:
         $tag_body  = format_section($title) . $tag_body;
 
-        # Add navigation:
+        # Add the navigation:
         $tag_body .= format_navigation('previous', $prev);
         $tag_body .= format_navigation('next', $next) if $tag_page;
 
-        # Prepare this tag's target directory name:
+        # Prepare the tag target directory name:
         $target = ($destdir eq '.')
                 ? catdir('tags', $data->{links}->{tags}->{$tag}->{url})
                 : catdir($destdir, 'tags',
                          $data->{links}->{tags}->{$tag}->{url});
 
-        # Write this tag's index page:
+        # Write the tag index page:
         write_page($data, $target, '../../', $tag_body, $title, $index)
           or return 0;
 
         # Clear the tag body:
         $tag_body  = '';
 
-        # Reset the post counter:
+        # Reset the blog post counter:
         $tag_count = 0;
 
         # Increase the page counter:
         $tag_page++;
       }
 
-      # Add the post excerpt:
+      # Add the blog post synopsis:
       $tag_body .= format_entry($data, $record, '../../', 'post', 1);
 
-      # Increase the number of listed posts:
+      # Increase the number of listed blog posts:
       $tag_count++;
     }
 
@@ -1509,25 +1518,25 @@ sub generate_tags {
       # Prepare the section title:
       my $title = "$title_string $tag";
 
-      # Add section title:
+      # Add the section title:
       $tag_body  = format_section($title) . $tag_body;
 
-      # Add navigation:
+      # Add the navigation:
       $tag_body .= format_navigation('next', $next) if $tag_page;
 
-      # Prepare this tag's target directory name:
+      # Prepare the tag target directory name:
       $target = ($destdir eq '.')
               ? catdir('tags', $data->{links}->{tags}->{$tag}->{url})
               : catdir($destdir, 'tags',
                        $data->{links}->{tags}->{$tag}->{url});
 
-      # Write this tag's index page:
+      # Write the tag index page:
       write_page($data, $target, '../../', $tag_body, $title, $index)
         or return 0;
     }
   }
 
-  # Create the tag list if any:
+  # Create the tag list, if any:
   if (%{$data->{links}->{tags}}) {
     # Add the tag list section title:
     my $taglist_body = format_section($tags_string);
@@ -1548,7 +1557,7 @@ sub generate_tags {
   return 1;
 }
 
-# Generate pages:
+# Generate the pages:
 sub generate_pages {
   my $data = shift || die 'Missing argument';
 
@@ -1570,10 +1579,10 @@ sub generate_pages {
   return 1;
 }
 
-# Set up the options parser:
+# Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
-# Process command-line options:
+# Process command line options:
 GetOptions(
   'help|h'        => sub { display_help();    exit 0; },
   'version|v'     => sub { display_version(); exit 0; },
@@ -1600,11 +1609,12 @@ GetOptions(
 # Check superfluous options:
 exit_with_error("Invalid option `$ARGV[0]'.", 22) if (scalar(@ARGV) != 0);
 
-# Check the repository is present (however naive this method is):
+# Check whether the repository is present, no matter how naive this method
+# actually is:
 exit_with_error("Not a BlazeBlogger repository! Try `blaze-init' first.",1)
   unless (-d catdir($blogdir, '.blaze'));
 
-# Check whether there is anything to do:
+# Make sure there is something to do at all:
 unless ($with_posts || $with_pages) {
   # Report success:
   print "Nothing to do.\n" if $verbose;
@@ -1613,7 +1623,8 @@ unless ($with_posts || $with_pages) {
   exit 0;
 }
 
-# When posts are disabled, disable RSS and tags as well:
+# When the blog post creation is disabled, disable the RSS feed and the tag
+# creation as well:
 unless ($with_posts) {
   $with_tags = 0;
   $with_rss  = 0;
@@ -1622,40 +1633,40 @@ unless ($with_posts) {
 # Read the configuration file:
 $conf    = read_conf();
 
-# Read the language file:
+# Read the localization file:
 $locale  = read_lang($conf->{blog}->{lang});
 
-# Collect the necessary metadata:
+# Collect the metadata:
 my $data = collect_metadata();
 
-# Copy the stylesheet:
+# Copy the style sheet:
 copy_stylesheet()
-  or exit_with_error("An error has occurred while creating stylesheet.", 1)
+  or exit_with_error("An error has occurred while creating the stylesheet.")
   if $with_css;
 
 # Generate RSS feed:
 generate_rss($data)
-  or exit_with_error("An error has occurred while creating RSS feed.", 1)
+  or exit_with_error("An error has occurred while creating the RSS feed.")
   if $with_rss;
 
 # Generate index page:
 generate_index($data)
-  or exit_with_error("An error has occurred while creating index page.", 1)
+  or exit_with_error("An error has occurred while creating the index page.")
   if $with_index;
 
 # Generate posts:
 generate_posts($data)
-  or exit_with_error("An error has occurred while creating posts.", 1)
+  or exit_with_error("An error has occurred while creating the blog posts.")
   if $with_posts;
 
 # Generate tags:
 generate_tags($data)
-  or exit_with_error("An error has occurred while creating tags.", 1)
+  or exit_with_error("An error has occurred while creating the tags.")
   if $with_tags;
 
 # Generate pages:
 generate_pages($data)
-  or exit_with_error("An error has occurred while creating pages.", 1)
+  or exit_with_error("An error has occurred while creating the pages.")
   if $with_pages;
 
 # Report success:
