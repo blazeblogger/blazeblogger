@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-add - adds a blog post or a page to the BlazeBlogger repository
-# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+# Copyright (C) 2008-2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -112,7 +112,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -698,124 +698,125 @@ __END__
 
 =head1 NAME
 
-blaze-add - add a blog post or a page to the BlazeBlogger repository
+blaze-add - adds a blog post or a page to the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-add> [B<-pqCPV>] [B<-b> I<directory>] [B<-E> I<editor>] [B<-a>
-I<author>] [B<-d> I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>]
-[I<file>...]
+B<blaze-add> [B<-pqCPV>] [B<-b> I<directory>] [B<-E> I<editor>] [B<-a> I<author>] [B<-d> I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
 
-B<blaze-add> B<-h> | B<-v>
+B<blaze-add> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-add> adds new blog posts or pages to the BlazeBlogger repository.
-If supplied, it tries to read data from the existing I<file>s, otherwise an
-external editor is opened to let you create a new content.
+B<blaze-add> adds a blog post or a page to the BlazeBlogger repository. If
+a I<file> is supplied, it adds the content of that file, otherwise an
+external text editor is opened for you. Note that there are several special
+forms and placeholders that can be used in the text, and that will be
+replaced with a proper data when the blog is generated.
 
-Note that inside your posts and pages, you can use several special
-placeholders to be replaced by appropriate data later, when the static
-content is being generated; the case is not significant, and supported
-placeholders are as follows:
+=head2 Special Forms
+
+=over
+
+=item B<< <!-- break --> >>
+
+A mark to delimit a blog post synopsis.
+
+=back
+
+=head2 Placeholders
 
 =over
 
 =item B<%root%>
 
-Relative path to the root directory of the blog; to be used inside links.
+A relative path to the root directory of the blog.
 
 =item B<%home%>
 
-Relative path to the website home (index) page; to be used inside links.
+A relative path to the index page of the blog.
 
 =item B<%page[>I<id>B<]%>
 
-Relative path to the page with given I<id>; to be used inside links.
+A relative path to a page with the supplied I<id>.
 
 =item B<%post[>I<id>B<]%>
 
-Relative path to the post with given I<id>; to be used inside links.
+A relative path to a blog post with the supplied I<id>.
 
 =item B<%tag[>I<name>B<]%>
 
-Relative path to the tag with given I<name>; to be used inside links.
+A relative path to a tag with the supplied I<name>.
 
 =back
-
-You can also use a special form, B<< <!-- break --> >>, to mark the end of
-a part to be displayed on index page.
 
 =head1 OPTIONS
 
 =over
 
-=item B<-b>, B<--blogdir> I<directory>
+=item B<-b> I<directory>, B<--blogdir> I<directory>
 
-Specify the I<directory> where the BlazeBlogger repository is placed. The
-default option is the current working directory.
+Allows you to specify a I<directory> in which the BlazeBlogger repository
+is placed. The default option is a current working directory.
 
-=item B<-E>, B<--editor> I<editor>
+=item B<-E> I<editor>, B<--editor> I<editor>
 
-Specify the external text I<editor> to be used for editing purposes. By
-default, the C<core.editor> configuration option is used, and unless it is
-set, BlazeBlogger tries to use the system wide settings by looking for the
-C<EDITOR> environment variable. If neither of these options is supplied,
-then C<vi> is used as a considerably reasonable option.
+Allows you to specify an external text I<editor>. When supplied, this
+option overrides the relevant configuration option.
 
-=item B<-t>, B<--title> I<title>
+=item B<-t> I<title>, B<--title> I<title>
 
-Specify the post/page I<title>.
+Allows you to specify the I<title> of a blog post or page.
 
-=item B<-a>, B<--author> I<author>
+=item B<-a> I<author>, B<--author> I<author>
 
-Specify the post/page I<author>.
+Allows you to specify the I<author> of a blog post or page.
 
-=item B<-d>, B<--date> I<date>
+=item B<-d> I<date>, B<--date> I<date>
 
-Specify the post/page date of publishing; the I<date> has to be in the
-YYYY-MM-DD form.
+Allows you to specify the I<date> of publishing of a blog post or page.
 
-=item B<-T>, B<--tags> I<tags>
+=item B<-T> I<tags>, B<--tags> I<tags>
 
-Specify the comma separated list of I<tags> attached to the blog post;
-pages ignore these.
+Allows you to supply a comma-separated list of I<tags> attached to a blog
+post.
 
-=item B<-u>, B<--url> I<url>
+=item B<-u> I<url>, B<--url> I<url>
 
-Specify the post/page I<url> to be used instead of the one based on the
-post/page title. It should consist of alphanumeric characters, hyphens and
-underscores only, and it is especially useful if non-ASCII characters are
-present in the title.
+Allows you to specify the I<url> of a blog post or page. Allowed characters
+are letters, numbers, hyphens, and underscores.
 
 =item B<-p>, B<--page>, B<--pages>
 
-Add page instead of blog post.
+Tells B<blaze-add> to add a page or pages.
 
 =item B<-P>, B<--post>, B<--posts>
 
-Add blog post; this is the default option.
+Tells B<blaze-add> to add a blog post or blog posts. This is the default
+option.
 
 =item B<-C>, B<--no-processor>
 
-Disable the use of external processor. Unless the C<core.processor> is
-enabled in the configuration, this is the default behaviour.
+Disables processing a blog post or page with an external application. For
+example, if you use Markdown to convert the lightweight markup language to
+the valid HTML output, this will enable you to write this particular post
+in plain HTML directly.
 
 =item B<-q>, B<--quiet>
 
-Avoid displaying messages that are not necessary.
+Disables displaying of unnecessary messages.
 
 =item B<-V>, B<--verbose>
 
-Display all messages. This is the default option.
+Enables displaying of all messages. This is the default option.
 
 =item B<-h>, B<--help>
 
-Display usage information and exit.
+Displays usage information and exits.
 
 =item B<-v>, B<--version>
 
-Display version information and exit.
+Displays version information and exits.
 
 =back
 
@@ -825,49 +826,44 @@ Display version information and exit.
 
 =item B<EDITOR>
 
-Unless the BlazeBlogger specific option I<core.editor> is set, blaze-edit
-tries to use system wide settings to decide which editor to run. If neither
-of these options are supplied, the B<vi> is used instead as a considerably
-reasonable choice.
+Unless the B<core.editor> option is set, BlazeBlogger tries to use
+system-wide settings to decide which editor to use.
 
 =back
 
-=head1 FILES
+=head1 EXAMPLE USAGE
 
-=over
+Write a new blog post in an external text editor:
 
-=item I<.blaze/config>
+  ~]$ blaze-add
 
-BlazeBlogger configuration file.
+Add a new blog post from a file:
 
-=back
+  ~]$ blaze-add new_packages.txt
+  Successfully added the post with ID 10.
+
+Write a new page in an external text editor:
+
+  ~]$ blaze-add -p
+
+Write a new page in nano:
+
+  ~]$ blaze-add -p -E nano
 
 =head1 SEE ALSO
 
-B<blaze-config>(1), B<perl>(1).
+B<blaze-init>(1), B<blaze-config>(1), B<blaze-edit>(1), B<blaze-remove>(1),
+B<blaze-make>(1)
 
 =head1 BUGS
 
-To report bug or even send patch, either add new issue to the project
-bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
-the discussion group at <http://groups.google.com/group/blazeblogger/>. You
-can also contact the author directly via e-mail.
-
-=head1 AUTHOR
-
-Written by Jaromir Hradilek <jhradilek@gmail.com>.
-
-Permission is granted to copy, distribute and/or modify this document under
-the terms of the GNU Free Documentation License, Version 1.3 or any later
-version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-A copy of the license is included as a file called FDL in the main
-directory of the BlazeBlogger source package.
+To report a bug or to send a patch, please, add a new issue to the bug
+tracker at <http://code.google.com/p/blazeblogger/issues/>, or visit the
+discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
