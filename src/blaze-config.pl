@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-config - displays or sets BlazeBlogger configuration options
-# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+# Copyright (C) 2008-2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -131,7 +131,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -619,189 +619,174 @@ __END__
 
 =head1 NAME
 
-blaze-config - display or set the BlazeBlogger repository options
+blaze-config - displays or sets BlazeBlogger configuration options
 
 =head1 SYNOPSIS
 
-B<blaze-config> [B<-qV>] [B<-b> I<directory>] [B<-E> I<editor>] I<name>
-[I<value...>]
+B<blaze-config> [B<-qV>] [B<-b> I<directory>] [B<-E> I<editor>] I<option>
+[I<value>...]
 
 B<blaze-config> B<-e> [B<-b> I<directory>]
 
-B<blaze-config> B<-h> | B<-v>
+B<blaze-config> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-config> is a simple configuration tool for the BlazeBlogger.
-Depending on the number of given command-line arguments, it either displays
-the current value of the specified option, or sets/replaces it with the new
-one.
-
-The accepted option I<name> is in the form of dot separated section and key
-(e.g. user.name). For the complete list of available options along with the
-explanation of their meaning, see the appropriate section below.
+B<blaze-config> either sets BlazeBlogger configuration options, or displays
+their current value. Additionally, it can also open a configuration file in
+an external text editor.
 
 =head1 OPTIONS
 
-=head2 Command-line Options
+=head2 Command Line Options
 
 =over
 
-=item B<-b>, B<--blogdir> I<directory>
+=item B<-b> I<directory>, B<--blogdir> I<directory>
 
-Specify the I<directory> where the BlazeBlogger repository is placed. The
-default option is the current working directory.
+Allows you to specify a I<directory> in which the BlazeBlogger repository
+is placed. The default option is a current working directory.
 
-=item B<-E>, B<--editor> I<editor>
+=item B<-E> I<editor>, B<--editor> I<editor>
 
-Specify the external text I<editor> to be used for editing purposes. By
-default, the C<core.editor> configuration option is used, and unless it is
-set, BlazeBlogger tries to use the system wide settings by looking for the
-C<EDITOR> environment variable. If neither of these options is supplied,
-then C<vi> is used as a considerably reasonable option.
+Allows you to specify an external text I<editor>. When supplied, this
+option overrides the relevant configuration option.
 
 =item B<-e>, B<--edit>
 
-Open the configuration file in the external text editor.
+Allows you to edit the configuration in a text editor.
 
 =item B<-q>, B<--quiet>
 
-Avoid displaying messages that are not necessary.
+Disables displaying of unnecessary messages.
 
 =item B<-V>, B<--verbose>
 
-Display all messages. This is the default option.
+Enables displaying of all messages. This is the default option.
 
 =item B<-h>, B<--help>
 
-Display usage information and exit.
+Displays usage information and exits.
 
 =item B<-v>, B<--version>
 
-Display version information and exit.
+Displays version information and exits.
 
 =back
 
-=head2 Available Option Names
+=head2 Configuration Options
 
 =over
 
-=item B<blog.title>
+=item B<blog.title>=I<string>
 
-Blog title.
+A title of your blog.
 
-=item B<blog.subtitle>
+=item B<blog.subtitle>=I<string>
 
-Blog subtitle, supposedly a brief, single-line description of what should
-an occasional visitor expect to find.
+A subtitle of your blog.
 
-=item B<blog.theme>
+=item B<blog.theme>=I<string>
 
-Blog theme; the value should point to an existing file in the
-C<.blaze/theme> directory.
+A theme for your blog. Note that it must point to an existing file in the
+C<.blaze/theme/> directory. The default option is C<default.html>.
 
-=item B<blog.style>
+=item B<blog.style>=I<string>
 
-Blog stylesheet; the value should point to an existing file, either in
-C<.blaze/style> (recommended), or in the destination directory where the
-static content is to be placed.
+A style sheet for your blog. Note that it must point to an existing file in
+the C<.blaze/style/> directory. The default option is C<default.css>.
 
-=item B<blog.lang>
+=item B<blog.lang>=I<string>
 
-Blog language; the value should point to an existing file in the
-C<.blaze/lang> directory.
+A translation of your blog. Note that it must point to an existing file in
+the C<.blaze/lang/> directory. The default option is C<en_US>.
 
-=item B<blog.posts>
+=item B<blog.posts>=I<integer>
 
-Number of posts to be listed on a single page; the default value is C<10>.
+A number of blog posts to be listed on a single page. The default option is
+C<10>.
 
-=item B<color.list>
+=item B<color.list>=I<boolean>
 
-Whether to use coloured post/pages listing; the value has to be either
-C<true>, or C<false>. Colours are turned off by default.
+A boolean to enable (C<true>) or disable (C<false>) colors in the
+B<blaze-list> output. The default option is C<false>.
 
-=item B<color.log>
+=item B<color.log>=I<boolean>
 
-Whether to use coloured log listing; the value has to be either C<true>, or
-C<false>. Colours are turned off by default.
+A boolean to enable (C<true>) or disable (C<false>) colors in the
+B<blaze-log> output. The default option is C<false>.
 
-=item B<core.doctype>
+=item B<core.doctype>=I<string>
 
-The document type; the value has to be either C<html>, or C<xhtml>. By
-default, C<html> is used as a reasonable choice.
+A document type. It can be either C<html> for HTML, or C<xhtml> for the
+XHTML standard. The default option is C<html>.
 
-=item B<core.extension>
+=item B<core.extension>=I<string>
 
-File extension for the generated pages. By default, C<html> is used as a
-reasonable choice.
+A file extension. The default option is C<html>.
 
-=item B<core.encoding>
+=item B<core.encoding>=I<string>
 
-Records encoding in the form recognised by the W3C (e.g., the default
-C<UTF-8>).
+A character encoding. Note that it has to be in a form that is recognized
+by W3C standards. The default option is C<UTF-8>.
 
-=item B<core.editor>
+=item B<core.editor>=I<string>
 
-Text editor to be used for editing purposes. Unless this option is set,
-BlazeBlogger tries to use system wide settings by looking for C<EDITOR>
-environment variable, and if neither of these options is supplied, C<vi> is
-used as a considerably reasonable option.
+An external text editor. When supplied, this option overrides the
+system-wide settings.
 
-=item B<core.processor>
+=item B<core.processor>=I<string>
 
-Optional external application to be used to process the entries; use
-C<%in%> and C<%out%> in place of input and output file names (e.g.
-C<< markdown --html4tags %in% > %out% >>). Nevertheless, if you intend to
-write your content in HTML directly, feel free to leave this option empty
-(the default setting).
+An external application to be used to process newly added or edited blog
+posts and pages. Note that you must supply C<%in%> and C<%out%> in place of
+an input and output file name respectively. This option is disabled by
+default.
 
-=item B<feed.baseurl>
+=item B<feed.baseurl>=I<string>
 
-The blog base URL (e.g. C<http://blog.example.com>).
+A URL of your blog, for example C<http://example.com>.
 
-=item B<feed.posts>
+=item B<feed.posts>=I<integer>
 
-Number of posts to be listed in the feed; the default value is C<10>.
+A number of blog posts to be listed in the feed. The default option is
+C<10>.
 
-=item B<feed.fullposts>
+=item B<feed.fullposts>=I<boolean>
 
-Whether to list full posts or just excerpts; the value has to be either
-C<true>, or C<false>. Full posts are turned off by default.
+A boolean to enable (C<true>) or disable (C<false>) inclusion of the whole
+content of a blog post in the feed. The default option is C<false>.
 
-=item B<post.author>
+=item B<post.author>=I<string>
 
-Location of the post author information; available options are C<top>,
-C<bottom>, or C<none>. Author is placed above the post (below its heading)
-by default.
+A location of a blog post author name. It can be placed above the post
+(C<top>), below it (C<bottom>), or nowhere on the page (C<none>). The
+default option is C<top>.
 
-=item B<post.date>
+=item B<post.date>=I<string>
 
-Location of the post date of publishing information; available options are
-C<top>, C<bottom>, or C<none>. Date of publishing is placed above the post
-(below its heading) by default.
+A location of a date of publishing. It can be placed above the post
+(C<top>), below it (C<bottom>), or nowhere on the page (C<none>). The
+default option is top.
 
-=item B<post.tags>
+=item B<post.tags>=I<string>
 
-Location of the post tags; available options are C<top>, C<bottom>, or
-C<none>. Tags are placed above the post (below its heading) by default.
+A location of post tags. They can be placed above the post (C<top>), below
+it (C<bottom>), or nowhere on the page (C<none>). The default option is
+C<top>.
 
-=item B<user.name>
+=item B<user.name>=I<string>
 
-User's name; this is typically used in the copyright notice, but depending
-on the theme, it can be shown anywhere on the page. Also, the value of this
-option is used as the default post author when the C<user.nickname> is left
-empty.
+Your full name to be used in the copyright notice, and as the default post
+author. The default option is C<admin>.
 
-=item B<user.nickname>
+=item B<user.nickname>=I<string>
 
-User's nickname; to be used as the default post author. Unless this option
-is set, the value of C<user.name> is used by default.
+Your nickname to be used as the default post author. When supplied, it
+overrides the B<user.name> setting. This option is disabled by default.
 
-=item B<user.email>
+=item B<user.email>=I<string>
 
-User's e-mail. Depending on the theme, it can be used anywhere on the page
-(e.g. in the copyright notice). However, non of the official themes
-actually use it.
+Your email address. The default option is C<admin@localhost>.
 
 =back
 
@@ -811,10 +796,8 @@ actually use it.
 
 =item B<EDITOR>
 
-Unless the BlazeBlogger specific option I<core.editor> is set, blaze-edit
-tries to use system wide settings to decide which editor to run. If neither
-of these options are supplied, the B<vi> is used instead as a considerably
-reasonable choice.
+Unless the B<core.editor> option is set, BlazeBlogger tries to use system-wide
+settings to decide which editor to use.
 
 =back
 
@@ -824,36 +807,73 @@ reasonable choice.
 
 =item I<.blaze/config>
 
-BlazeBlogger configuration file.
+A file containing the configuration.
+
+=item I<.blaze/theme/>
+
+A directory containing blog themes.
+
+=item I<.blaze/style/>
+
+A directory containing style sheets.
+
+=item I<.blaze/lang/>
+
+A directory containing language files.
 
 =back
 
+=head1 EXAMPLE USAGE
+
+Configure the default text editor:
+
+  ~]$ blaze-config core.editor nano
+  The option has been successfully saved.
+
+Configure the user information:
+
+  ~]$ blaze-config user.name Jaromir Hradilek
+  The option has been successfully saved.
+  ~]$ blaze-config user.email jhradilek@gmail.com
+  The option has been successfully saved.
+
+Configure the blog appearance:
+
+  ~]$ blaze-config blog.title BlazeBlogger
+  The option has been successfully saved.
+  ~]$ blaze-config blog.subtitle a CMS without boundaries
+  The option has been successfully saved.
+  ~]$ blaze-config blog.theme keepitsimple.html
+  The option has been successfully saved.
+  ~]$ blaze-config blog.style keepitsimple.css
+  The option has been successfully saved.
+
+Configure the RSS feed:
+
+  ~]$ blaze-config feed.fullposts true
+  The option has been successfully saved.
+  ~]$ blaze-config feed.posts 10
+  The option has been successfully saved.
+  ~]$ blaze-config feed.baseurl http://blaze.blackened.cz/
+  The option has been successfully saved.
+
+Open the configuration in a text editor:
+
+  ~]$ blaze-config -e
+
 =head1 SEE ALSO
 
-B<perl>(1).
+B<blaze-init>(1)
 
 =head1 BUGS
 
-To report bug or even send patch, either add new issue to the project
-bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
-the discussion group at <http://groups.google.com/group/blazeblogger/>. You
-can also contact the author directly via e-mail.
-
-=head1 AUTHOR
-
-Written by Jaromir Hradilek <jhradilek@gmail.com>.
-
-Permission is granted to copy, distribute and/or modify this document under
-the terms of the GNU Free Documentation License, Version 1.3 or any later
-version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-A copy of the license is included as a file called FDL in the main
-directory of the BlazeBlogger source package.
+To report a bug or to send a patch, please, add a new issue to the bug
+tracker at <http://code.google.com/p/blazeblogger/issues/>, or visit the
+discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
