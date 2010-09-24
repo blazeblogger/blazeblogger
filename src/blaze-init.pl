@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-init - creates or recovers a BlazeBlogger repository
-# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+# Copyright (C) 2008-2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -91,7 +91,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -689,79 +689,92 @@ __END__
 
 =head1 NAME
 
-blaze-init - create or recover a BlazeBlogger repository
+blaze-init - creates or recovers a BlazeBlogger repository
 
 =head1 SYNOPSIS
 
 B<blaze-init> [B<-fqV>] [B<-b> I<directory>]
 
-B<blaze-init> B<-h> | B<-v>
+B<blaze-init> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-init>'s job is either to create a fresh new BlazeBlogger
-repository, or to recover an existing one, optionally changing the
-configuration and template files back to their original state while leaving
-the user data (i.e. both pages and blog posts) untouched.
+B<blaze-init> either creates a fresh new BlazeBlogger repository, or
+recovers an existing one in case it is corrupted. Optionally, it can also
+revert a configuration and default templates to their original state,
+leaving all user data (that is, both blog posts and pages) intact.
 
 =head1 OPTIONS
 
 =over
 
-=item B<-b>, B<--blogdir> I<directory>
+=item B<-b> I<directory>, B<--blogdir> I<directory>
 
-Specify the I<directory> where the BlazeBlogger repository is to be placed.
-The default option is the current working directory.
+Allows you to specify a I<directory> in which the BlazeBlogger repository
+is to be blaced. The default option is a current working directory.
 
 =item B<-f>, B<--force>
 
-Force rewrite of already existing configuration, style, theme and language
-files.
+Reverts existing configuration, theme, and language files to their initial
+state. By default, these files are kept intact.
 
 =item B<-q>, B<--quiet>
 
-Avoid displaying messages that are not necessary.
+Disables displaying of unnecessary messages.
 
 =item B<-V>, B<--verbose>
 
-Display all messages including the list of created files.
+Enables displaying of all messages, including a list of created files.
 
 =item B<-h>, B<--help>
 
-Display usage information and exit.
+Displays usage information and exits.
 
 =item B<-v>, B<--version>
 
-Display version information and exit.
+Displays version information and exits.
 
 =back
 
+=head1 EXAMPLE USAGE
+
+Create a new blog in a current directory:
+
+  ~]$ blaze-init
+  Created a BlazeBlogger repository in .blaze.
+
+Create a new blog in ~/public_html:
+
+  ~]$ blaze-init -b ~/public_html
+  Created a BlazeBlogger repository in /home/joe/public_html/.blaze.
+
+Revert a configuration file and default templates to their initial state:
+
+  ~]$ blaze-init -f
+  Recovered a BlazeBlogger repository in .blaze.
+
+Or if you want to see what files have been reverted:
+
+  ~]$ blaze-init -fV
+  Created .blaze/config
+  Created .blaze/theme/default.html
+  Created .blaze/style/default.css
+  Created .blaze/lang/en_US
+  Recovered a BlazeBlogger repository in .blaze.
+
 =head1 SEE ALSO
 
-B<blaze-config>(1), B<perl>(1).
+B<blaze-config>(1), B<blaze-add>(1)
 
 =head1 BUGS
 
-To report bug or even send patch, either add new issue to the project
-bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
-the discussion group at <http://groups.google.com/group/blazeblogger/>. You
-can also contact the author directly via e-mail.
-
-=head1 AUTHOR
-
-Written by Jaromir Hradilek <jhradilek@gmail.com>.
-
-Permission is granted to copy, distribute and/or modify this document under
-the terms of the GNU Free Documentation License, Version 1.3 or any later
-version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-A copy of the license is included as a file called FDL in the main
-directory of the BlazeBlogger source package.
+To report a bug or to send a patch, please, add a new issue to the bug
+tracker at <http://code.google.com/p/blazeblogger/issues/>, or visit the
+discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
