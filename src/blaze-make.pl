@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-make - generates a blog from the BlazeBlogger repository
-# Copyright (C) 2009, 2010 Jaromir Hradilek
+# Copyright (C) 2009-2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -115,7 +115,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2009, 2010 Jaromir Hradilek
+Copyright (C) 2009-2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -1679,82 +1679,77 @@ __END__
 
 =head1 NAME
 
-blaze-make - generate static content from the BlazeBlogger repository
+blaze-make - generates a blog from the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
 B<blaze-make> [B<-cpqrIFPTV>] [B<-b> I<directory>] [B<-d> I<directory>]
 
-B<blaze-make> B<-h> | B<-v>
+B<blaze-make> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-make> reads the BlazeBlogger repository and generates a complete
-directory tree of static pages, optionally including all blog posts, single
-pages, browsable yearly and monthly archives, tags and even a RSS feed.
-This way, you can benefit from most of the features other CMS usually have,
-but without any additional hosting requirements.
+B<blaze-make> reads the BlazeBlogger repository, and generates a complete
+directory tree of static pages, including blog posts, single pages, monthly
+and yearly archives, tags, and even an RSS feed.
 
 =head1 OPTIONS
 
 =over
 
-=item B<-b>, B<--blogdir> I<directory>
+=item B<-b> I<directory>, B<--blogdir> I<directory>
 
-Specify the I<directory> where the BlazeBlogger repository is placed. The
-default option is the current working directory.
+Allows you to specify a I<directory> in which the BlazeBlogger repository
+is placed. The default option is a current working directory.
 
-=item B<-d>, B<--destdir> I<directory>
+=item B<-d> I<directory>, B<--destdir> I<directory>
 
-Specify the I<directory> where the generated static content is to be
-placed. The default option is the current working directory.
+Allows you to specify a I<directory> in which the generated blog is to be
+placed. The default option is a current working directory.
 
 =item B<-c>, B<--no-css>
 
-Disable creation of stylesheet.
+Disables creating a style sheet.
 
 =item B<-I>, B<--no-index>
 
-Disable creation of index page. This is especially useful for websites with
-pages only.
+Disables creating the index page.
 
 =item B<-p>, B<--no-posts>
 
-Disable creation of posts as well as any related pages, i.e. tags and RSS
-feed. This is especially useful for websites with pages only.
+Disables creating blog posts.
 
 =item B<-P>, B<--no-pages>
 
-Disable creation of pages.
+Disables creating pages.
 
 =item B<-T>, B<--no-tags>
 
-Disable support for tags.
+Disables creating tags.
 
 =item B<-r>, B<--no-rss>
 
-Disable creation of RSS feed.
+Disables creating the RSS feed.
 
 =item B<-F>, B<--full-paths>
 
-Enable full paths creation, i.e. always include page names in generated
-links.
+Enables including page names in generated links.
 
 =item B<-q>, B<--quiet>
 
-Avoid displaying messages that are not necessary.
+Disables displaying of unnecessary messages.
 
 =item B<-V>, B<--verbose>
 
-Display all messages including the list of created files.
+Enables displaying of all messages, including a list of created files.
 
 =item B<-h>, B<--help>
 
-Display usage information and exit.
+Displays usage information and exits.
 
 =item B<-v>, B<--version>
 
-Display version information and exit.
+Displays version information and exits.
 
 =back
 
@@ -1762,50 +1757,50 @@ Display version information and exit.
 
 =over
 
-=item I<.blaze/config>
-
-BlazeBlogger configuration file.
-
 =item I<.blaze/theme/>
 
-BlazeBlogger themes directory.
+A directory containing blog themes.
 
 =item I<.blaze/style/>
 
-BlazeBlogger stylesheets directory.
+A directory containing style sheets.
 
-=item I<.blaze/lang/>
+=item B<.blaze/lang/>
 
-BlazeBlogger language files directory.
+A directory containing language files.
 
 =back
 
+=head1 EXAMPLE USAGE
+
+Generate a blog in a current working directory:
+
+  ~]$ blaze-make
+  Done.
+
+Generate a blog in the C<~/public_html/> directory:
+
+  ~]$ blaze-make -d ~/public_html
+  Done.
+
+Generate a blog with full paths enabled:
+
+  ~]$ blaze-make -F
+  Done.
+
 =head1 SEE ALSO
 
-B<blazetheme>(7), B<blaze-config>(1), B<perl>(1).
+B<blaze-init>(1), B<blaze-config>(1), B<blaze-add>(1)
 
 =head1 BUGS
 
-To report bug or even send patch, either add new issue to the project
-bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
-the discussion group at <http://groups.google.com/group/blazeblogger/>. You
-can also contact the author directly via e-mail.
-
-=head1 AUTHOR
-
-Written by Jaromir Hradilek <jhradilek@gmail.com>.
-
-Permission is granted to copy, distribute and/or modify this document under
-the terms of the GNU Free Documentation License, Version 1.3 or any later
-version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-A copy of the license is included as a file called FDL in the main
-directory of the BlazeBlogger source package.
+To report a bug or to send a patch, please, add a new issue to the bug
+tracker at <http://code.google.com/p/blazeblogger/issues/>, or visit the
+discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009, 2010 Jaromir Hradilek
+Copyright (C) 2009-2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;

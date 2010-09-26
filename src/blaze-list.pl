@@ -540,90 +540,90 @@ repository. Additionally, it can also display basic repository statistics.
 =item B<-b> I<directory>, B<--blogdir> I<directory>
 
 Allows you to specify a I<directory> in which the BlazeBlogger repository
-is placed. The default option is a current working directory. 
+is placed. The default option is a current working directory.
 
 =item B<-I> I<id>, B<--id> I<id>
 
 Allows you to display a single blog post or a page with the specified
-I<id>. 
+I<id>.
 
 =item B<-a> I<author>, B<--author> I<author>
 
-Allows you to list blog posts or pages by the selected I<author>. 
+Allows you to list blog posts or pages by the selected I<author>.
 
 =item B<-t> I<title>, B<--title> I<title>
 
-Allows you to list blog posts or pages with matching I<title>. 
+Allows you to list blog posts or pages with matching I<title>.
 
 =item B<-T> I<tag>, B<--tag> I<tag>
 
-Allows you to list blog posts or pages with matching I<tag>. 
+Allows you to list blog posts or pages with matching I<tag>.
 
 =item B<-d> I<day>, B<--day> I<day>
 
 Allows you to list blog posts or pages from the specified I<day> of a
-month. The value has to be in the C<DD> form. 
+month. The value has to be in the C<DD> form.
 
 =item B<-m> I<month>, B<--month> I<month>
 
 Allows you to list blog posts or pages from the specified I<month>. The
-value has to be in the C<MM> form. 
+value has to be in the C<MM> form.
 
 =item B<-y> I<year>, B<--year> I<year>
 
 Allows you to list blog posts or pages from the specified I<year>. The
-value has to be in the C<YYYY> form. 
+value has to be in the C<YYYY> form.
 
 =item B<-n> I<number>, B<--number> I<number>
 
-Allows you to specify a I<number> of blog posts or pages to be listed. 
+Allows you to specify a I<number> of blog posts or pages to be listed.
 
 =item B<-p>, B<--page>
 
-Tells B<blaze-list> to list pages. 
+Tells B<blaze-list> to list pages.
 
 =item B<-P>, B<--post>
 
-Tells B<blaze-list> to list blog posts. This is the default option. 
+Tells B<blaze-list> to list blog posts. This is the default option.
 
 =item B<-S>, B<--stats>
 
-Tells B<blaze-list> to display statistics. 
+Tells B<blaze-list> to display statistics.
 
 =item B<-s>, B<--short>
 
 Tells B<blaze-list> to display each blog post or page information on a
-single line. 
+single line.
 
 =item B<-r>, B<--reverse>
 
-Tells B<blaze-list> to display blog posts or pages in reverse order. 
+Tells B<blaze-list> to display blog posts or pages in reverse order.
 
 =item B<-c>, B<--color>
 
 Enables colored output. When supplied, this option overrides the relevant
-configuration option. 
+configuration option.
 
 =item B<-C>, B<--no-color>
 
 Disables colored output. When supplied, this option overrides the relevant
-configuration option. 
+configuration option.
 
 =item B<-q>, B<--quiet>
 
-Disables displaying of unnecessary messages. 
+Disables displaying of unnecessary messages.
 
 =item B<-V>, B<--verbose>
 
-Enables displaying of all messages. This is the default option. 
+Enables displaying of all messages. This is the default option.
 
 =item B<-h>, B<--help>
 
-Displays usage information and exits. 
+Displays usage information and exits.
 
 =item B<-v>, B<--version>
 
-Displays version information and exits. 
+Displays version information and exits.
 
 =back
 
