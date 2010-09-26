@@ -37,7 +37,7 @@ man7dir = $(mandir)/man7
 langdir = $(datadir)/lang
 
 # Additional information:
-VERSION = 1.0.0
+VERSION = 1.1.0
 
 # Make rules;  please do not edit these unless you really know what you are
 # doing:
