@@ -684,10 +684,10 @@ B<blaze-edit> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-edit> opens an existing blog post or a page with the specified id
-in an external text editor. Note that there are several special forms and
-placeholders that can be used in the text, and that will be replaced with
-a proper data when the blog is generated.
+B<blaze-edit> opens an existing blog post or a page with the specified
+I<id> in an external text editor. Note that there are several special forms
+and placeholders that can be used in the text, and that will be replaced
+with a proper data when the blog is generated.
 
 =head2 Special Forms
 

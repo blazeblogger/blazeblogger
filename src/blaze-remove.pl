@@ -1,8 +1,7 @@
 #!/usr/bin/env perl
 
-# blaze-remove - removes a blog post or a page  from the BlazeBlogger repo-
-# sitory
-# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+# blaze-remove - removes a post or page from the BlazeBlogger repository
+# Copyright (C) 2008-2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -96,7 +95,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -267,88 +266,102 @@ __END__
 
 =head1 NAME
 
-blaze-remove - remove a post/page from the BlazeBlogger repository
+blaze-remove  - removes a post or page from the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
 B<blaze-remove> [B<-fipqPV>] [B<-b> I<directory>] I<id>...
 
-B<blaze-remove> B<-h> | B<-v>
+B<blaze-remove> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-remove> deletes the blog posts or pages with given I<id>s from the
-BlazeBlogger repository.
+B<blaze-remove> removes a blog post or a page with the specified I<id> from
+the BlazeBlogger repository.
 
 =head1 OPTIONS
 
 =over
 
-=item B<-b>, B<--blogdir> I<directory>
+=item B<-b> I<directory>, B<--blogdir> I<directory>
 
-Specify the I<directory> where the BlazeBlogger repository is placed. The
-default option is the current working directory.
+Allows you to specify a I<directory> in which the BlazeBlogger repository
+is placed. The default option is a current working directory.
 
 =item B<-p>, B<--page>, B<--pages>
 
-Remove pages instead of blog posts.
+Tells B<blaze-remove> to remove a page or pages.
 
 =item B<-P>, B<--post>, B<--posts>
 
-Remove blog posts; this is the default option.
-
-=item B<-i>, B<--interactive>
-
-Prompt before post/page removal.
+Tells B<blaze-remove> to remove a blog post or blog posts. This is the
+default option.
 
 =item B<-f>, B<--force>
 
-Do not prompt before post/page removal; this is the default option.
+Disables requiring manual confirmation of each blog post or page removal.
+This is the default option.
+
+=item B<-i>, B<--interactive>
+
+Enables requiring manual confirmation of each blog post or page removal.
 
 =item B<-q>, B<--quiet>
 
-Avoid displaying messages that are not necessary.
+Disables displaying of unnecessary messages.
 
 =item B<-V>, B<--verbose>
 
-Display all messages. This is the default option.
+Enables displaying of all messages. This is the default option.
 
 =item B<-h>, B<--help>
 
-Display usage information and exit.
+Displays usage information and exits.
 
 =item B<-v>, B<--version>
 
-Display version information and exit.
+Displays version information and exits.
 
 =back
 
+=head1 EXAMPLE USAGE
+
+Remove a blog post:
+
+  ~]$ blaze-remove 10
+  Successfully removed the post with ID 10.
+
+Remove a page:
+
+  ~]$ blaze-remove -p 4
+  Successfully removed the page with ID 4.
+
+Remove multiple blog posts:
+
+  ~]$ blaze-remove 10 4 6
+  Successfully removed the post with ID 10, 4 and 6.
+
+Remove multiple blog posts safely:
+
+  ~]$ blaze-remove -i 10 4 6
+  Remove the post with ID 10 titled `Debian and Fedora Packages'? y
+  Remove the post with ID 4 titled `BlazeBlogger 0.8.0 RC2'? y
+  Remove the post with ID 6 titled `BlazeBlogger 0.8.1'? y
+  Successfully removed the post with ID 10, 4 and 6.
+
 =head1 SEE ALSO
 
-B<perl>(1).
+B<blaze-config>(1), B<blaze-add>(1), B<blaze-list>(1)
 
 =head1 BUGS
 
-To report bug or even send patch, either add new issue to the project
-bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
-the discussion group at <http://groups.google.com/group/blazeblogger/>. You
-can also contact the author directly via e-mail.
-
-=head1 AUTHOR
-
-Written by Jaromir Hradilek <jhradilek@gmail.com>.
-
-Permission is granted to copy, distribute and/or modify this document under
-the terms of the GNU Free Documentation License, Version 1.3 or any later
-version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-A copy of the license is included as a file called FDL in the main
-directory of the BlazeBlogger source package.
+To report a bug or to send a patch, please, add a new issue to the bug
+tracker at <http://code.google.com/p/blazeblogger/issues/>, or visit the
+discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008, 2009 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
