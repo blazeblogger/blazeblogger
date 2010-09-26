@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-list - lists blog posts or pages in the BlazeBlogger repository
-# Copyright (C) 2009, 2010 Jaromir Hradilek
+# Copyright (C) 2009-2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -123,7 +123,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2009, 2010 Jaromir Hradilek
+Copyright (C) 2009-2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -518,7 +518,7 @@ __END__
 
 =head1 NAME
 
-blaze-list - browse the content of the BlazeBlogger repository
+blaze-list - lists blog posts or pages in the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
@@ -526,131 +526,177 @@ B<blaze-list> [B<-cpqrsCPSV>] [B<-b> I<directory>] [B<-I> I<id>]
 [B<-a> I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>]
 [B<-m> I<month>] [B<-y> I<year>] [B<-n> I<number>]
 
-B<blaze-list> B<-h> | B<-v>
+B<blaze-list> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-list> displays the content of the BlazeBlogger repository. All
-items are listed by default, but desired subset can be easily selected via
-additional options.
+B<blaze-list> lists existing blog posts or pages in the BlazeBlogger
+repository. Additionally, it can also display basic repository statistics.
 
 =head1 OPTIONS
 
 =over
 
-=item B<-b>, B<--blogdir> I<directory>
+=item B<-b> I<directory>, B<--blogdir> I<directory>
 
-Specify the I<directory> where the BlazeBlogger repository is placed. The
-default option is the current working directory.
+Allows you to specify a I<directory> in which the BlazeBlogger repository
+is placed. The default option is a current working directory. 
 
-=item B<-I>, B<--id> I<id>
+=item B<-I> I<id>, B<--id> I<id>
 
-Display the record with specified I<id> only.
+Allows you to display a single blog post or a page with the specified
+I<id>. 
 
-=item B<-a>, B<--author> I<author>
+=item B<-a> I<author>, B<--author> I<author>
 
-List records by specified I<author> only.
+Allows you to list blog posts or pages by the selected I<author>. 
 
-=item B<-t>, B<--title> I<title>
+=item B<-t> I<title>, B<--title> I<title>
 
-List records with matching I<title>.
+Allows you to list blog posts or pages with matching I<title>. 
 
-=item B<-T>, B<--tag> I<tag>
+=item B<-T> I<tag>, B<--tag> I<tag>
 
-List records tagged as I<tag>.
+Allows you to list blog posts or pages with matching I<tag>. 
 
-=item B<-d>, B<--day> I<day>
+=item B<-d> I<day>, B<--day> I<day>
 
-List records from the specified day where I<day> is in the DD format. Do
-not forget to specify the month and year as well, unless you, for example,
-want to list all records from the first day of every month.
+Allows you to list blog posts or pages from the specified I<day> of a
+month. The value has to be in the C<DD> form. 
 
-=item B<-m>, B<--month> I<month>
+=item B<-m> I<month>, B<--month> I<month>
 
-List records from the specified month where I<month> is in the MM format.
-Do not forget to specify the year as well, unless you, for example, want to
-list all july records.
+Allows you to list blog posts or pages from the specified I<month>. The
+value has to be in the C<MM> form. 
 
-=item B<-y>, B<--year> I<year>
+=item B<-y> I<year>, B<--year> I<year>
 
-List records from the specified year where I<year> is in the YYYY format.
+Allows you to list blog posts or pages from the specified I<year>. The
+value has to be in the C<YYYY> form. 
 
-=item B<-n>, B<--number> I<number>
+=item B<-n> I<number>, B<--number> I<number>
 
-List selected I<number> of records only.
+Allows you to specify a I<number> of blog posts or pages to be listed. 
 
-=item B<-p>, B<--pages>
+=item B<-p>, B<--page>
 
-List pages instead of blog posts.
+Tells B<blaze-list> to list pages. 
 
-=item B<-P>, B<--posts>
+=item B<-P>, B<--post>
 
-List blog posts; this is the default option.
+Tells B<blaze-list> to list blog posts. This is the default option. 
 
 =item B<-S>, B<--stats>
 
-Show repository statistics instead of blog posts.
+Tells B<blaze-list> to display statistics. 
 
 =item B<-s>, B<--short>
 
-Display each record on a single line.
+Tells B<blaze-list> to display each blog post or page information on a
+single line. 
 
 =item B<-r>, B<--reverse>
 
-Display records in reverse order.
+Tells B<blaze-list> to display blog posts or pages in reverse order. 
 
-=item B<-c>, B<--color>, B<--colour>
+=item B<-c>, B<--color>
 
-Enable coloured output, no matter what is set in the configuration.
+Enables colored output. When supplied, this option overrides the relevant
+configuration option. 
 
-=item B<-C>, B<--no-color>, B<--no-colour>
+=item B<-C>, B<--no-color>
 
-Disable coloured output, no matter what is set in the configuration.
+Disables colored output. When supplied, this option overrides the relevant
+configuration option. 
 
 =item B<-q>, B<--quiet>
 
-Avoid displaying messages that are not necessary.
+Disables displaying of unnecessary messages. 
 
 =item B<-V>, B<--verbose>
 
-Display all messages. This is the default option.
+Enables displaying of all messages. This is the default option. 
 
 =item B<-h>, B<--help>
 
-Display usage information and exit.
+Displays usage information and exits. 
 
 =item B<-v>, B<--version>
 
-Display version information and exit.
+Displays version information and exits. 
 
 =back
 
+=head1 EXAMPLE USAGE
+
+List all blog post:
+
+  ~]$ blaze-list
+  ID: 11 | 2010-07-05 | Jaromir Hradilek
+
+      Title: Join #blazeblogger on IRC
+      Tags:  announcement
+
+  ID: 10 | 2009-12-16 | Jaromir Hradilek
+
+      Title: Debian and Fedora Packages
+      Tags:  announcement
+
+  etc.
+
+List all blog post in reverse order:
+
+  ~]$ blaze-list -r
+  ID: 1 | 2009-02-10 | Jaromir Hradilek
+
+      Title: BlazeBlogger 0.7.0
+      Tags:  release
+
+  ID: 2 | 2009-02-11 | Jaromir Hradilek
+
+      Title: BlazeBlogger 0.7.1
+      Tags:  release
+
+  etc.
+
+List all pages:
+
+  ~]$ blaze-list -p
+  ID: 5 | 2009-02-10 | Jaromir Hradilek
+
+      Title: Downloads
+
+  ID: 4 | 2009-02-10 | Jaromir Hradilek
+
+      Title: Themes
+
+  etc.
+
+List each blog post on a single line:
+
+  ~]$ blaze-list -s
+  ID: 11 | 2010-07-05 | Join #blazeblogger on IRC
+  ID: 10 | 2009-12-16 | Debian and Fedora Packages
+  etc.
+
+Display a short version of blog statistics:
+
+  ~]$ blaze-list -Ss
+  There is a total number of 11 blog posts and 5 pages in the repository.
+
 =head1 SEE ALSO
 
-B<perl>(1).
+B<blaze-config>(1), B<blaze-add>(1)
 
 =head1 BUGS
 
-To report bug or even send patch, either add new issue to the project
-bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
-the discussion group at <http://groups.google.com/group/blazeblogger/>. You
-can also contact the author directly via e-mail.
-
-=head1 AUTHOR
-
-Written by Jaromir Hradilek <jhradilek@gmail.com>.
-
-Permission is granted to copy, distribute and/or modify this document under
-the terms of the GNU Free Documentation License, Version 1.3 or any later
-version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-A copy of the license is included as a file called FDL in the main
-directory of the BlazeBlogger source package.
+To report a bug or to send a patch, please, add a new issue to the bug
+tracker at <http://code.google.com/p/blazeblogger/issues/>, or visit the
+discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009 Jaromir Hradilek
+Copyright (C) 2009-2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;

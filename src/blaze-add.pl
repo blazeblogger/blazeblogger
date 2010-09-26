@@ -702,7 +702,9 @@ blaze-add - adds a blog post or a page to the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
-B<blaze-add> [B<-pqCPV>] [B<-b> I<directory>] [B<-E> I<editor>] [B<-a> I<author>] [B<-d> I<date>] [B<-t> I<title>] [B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
+B<blaze-add> [B<-pqCPV>] [B<-b> I<directory>] [B<-E> I<editor>]
+[B<-a> I<author>] [B<-d> I<date>] [B<-t> I<title>] [B<-T> I<tags>]
+[B<-u> I<url>] [I<file>...]
 
 B<blaze-add> B<-h>|B<-v>
 
