@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-log - displays the BlazeBlogger repository log
-# Copyright (C) 2009, 2010 Jaromir Hradilek
+# Copyright (C) 2009-2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -97,7 +97,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2009, 2010 Jaromir Hradilek
+Copyright (C) 2009-2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -300,13 +300,13 @@ __END__
 
 =head1 NAME
 
-blaze-log - display the BlazeBlogger repository log
+blaze-log - displays the BlazeBlogger repository log
 
 =head1 SYNOPSIS
 
 B<blaze-log> [B<-cqrsCV>] [B<-b> I<directory>] [B<-n> I<number>]
 
-B<blaze-log> B<-h> | B<-v>
+B<blaze-log> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
@@ -316,46 +316,48 @@ B<blaze-log> displays the content of the BlazeBlogger repository log.
 
 =over
 
-=item B<-b>, B<--blogdir> I<directory>
+=item B<-b> I<directory>, B<--blogdir> I<directory>
 
-Specify the I<directory> where the BlazeBlogger repository is placed. The
-default option is the current working directory.
+Allows you to specify a I<directory> in which the BlazeBlogger repository
+is placed. The default option is a current working directory.
 
-=item B<-n>, B<--number> I<number>
+=item B<-n> I<number>, B<--number> I<number>
 
-List selected number of log records only.
+Allows you to specify a I<number> of log entries to be listed.
 
 =item B<-s>, B<--short>
 
-Display each log record on a single line.
+Tells B<blaze-log> to display each log entry on a single line.
 
 =item B<-r>, B<--reverse>
 
-Display log records in reverse order.
+Tells B<blaze-log> to display log entries in reverse order.
 
-=item B<-c>, B<--color>, B<--colour>
+=item B<-c>, B<--color>
 
-Enable coloured output, no matter what is set in the configuration.
+Enables colored output. When supplied, this option overrides the relevant
+configuration option.
 
-=item B<-C>, B<--no-color>, B<--no-colour>
+=item B<-C>, B<--no-color>
 
-Disable coloured output, no matter what is set in the configuration.
+Disables colored output. When supplied, this option overrides the relevant
+configuration option.
 
 =item B<-q>, B<--quiet>
 
-Avoid displaying messages that are not necessary.
+Disables displaying of unnecessary messages.
 
 =item B<-V>, B<--verbose>
 
-Display all messages. This is the default option.
+Enables displaying of all messages. This is the default option.
 
 =item B<-h>, B<--help>
 
-Display usage information and exit.
+Displays usage information and exits.
 
 =item B<-v>, B<--version>
 
-Display version information and exit.
+Displays version information and exits.
 
 =back
 
@@ -365,36 +367,56 @@ Display version information and exit.
 
 =item I<.blaze/log>
 
-BlazeBlogger repository log file.
+A file containing the repository log.
 
 =back
 
+=head1 EXAMPLE USAGE
+
+List the whole repository history:
+
+  ~]$ blaze-log
+  Date: Sun Jul 25 16:48:22 2010
+
+      Edited the page with ID 5.
+
+  Date: Tue Jul  6 18:54:59 2010
+
+      Edited the page with ID 5.
+
+  etc.
+
+List the whole repository history in reverse order:
+
+  ~]$ blaze-log -r
+  Date: Tue Feb 10 00:40:16 2009
+
+      Created/recovered a BlazeBlogger repository.
+
+  Date: Tue Feb 10 01:06:44 2009
+
+      Added the page with ID 1.
+
+  etc.
+
+Display the very first log entry on a single line:
+
+  ~]$ blaze-log -rs -n 1
+  Tue Feb 10 00:40:16 2009 - Created/recovered a BlazeBlogger repository.
+
 =head1 SEE ALSO
 
-B<blaze-config>(1), B<perl>(1).
+B<blaze-init>(1), B<blaze-config>(1)
 
 =head1 BUGS
 
-To report bug or even send patch, either add new issue to the project
-bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
-the discussion group at <http://groups.google.com/group/blazeblogger/>. You
-can also contact the author directly via e-mail.
-
-=head1 AUTHOR
-
-Written by Jaromir Hradilek <jhradilek@gmail.com>.
-
-Permission is granted to copy, distribute and/or modify this document under
-the terms of the GNU Free Documentation License, Version 1.3 or any later
-version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-A copy of the license is included as a file called FDL in the main
-directory of the BlazeBlogger source package.
+To report a bug or to send a patch, please, add a new issue to the bug
+tracker at <http://code.google.com/p/blazeblogger/issues/>, or visit the
+discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009 Jaromir Hradilek
+Copyright (C) 2009-2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
