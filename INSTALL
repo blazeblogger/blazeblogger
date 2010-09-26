@@ -3,7 +3,7 @@
                          installation instructions
 
 
-   Copyright (C) 2009 Jaromir Hradilek
+   Copyright (C) 2009-2010 Jaromir Hradilek
 
    Permission is granted to copy, distribute and/or modify this document
    under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -14,68 +14,99 @@
    directory of the BlazeBlogger source package.
 
 
-1. GENERAL SYSTEM REQUIREMENTS
+ABSTRACT
 
-All parts of BlazeBlogger package are standalone scripts  written  in  Perl
-and as such, it should be runnable on almost any operating system, provided
-that following dependencies are met:
-
-  * Working installation of Perl (tested on version 5.10.1, but 5.8.8 ought
-    to work perfectly).
+This document covers  the installation of BlazeBlogger on various operating
+systems, including GNU/Linux, and Microsoft Windows.
 
 
-2. INSTALLING ON UNIX SYSTEMS
+TABLE OF CONTENTS
 
-The easiest way to install BlazeBlogger on Unix operating systems,  such as
-Linux or various *BSDs,  is to use the existing Makefile. As a root, simply
-get into the main directory of the BlazeBlogger source package and type:
+  1. System Requirements
+  2. Installing on GNU/Linux
+     2.1 Installing on Debian
+     2.2 Installing on Fedora
+     2.3 Installing on Ubuntu
+  3. Installing on Windows
+  4. Installing from the Source Code
 
-  make install
 
-This will install the runnable scripts and their corresponding man pages to
-the predefined /usr/local/bin and /usr/local/share/man respectively. Never-
-theless,  if these locations do not satisfy your needs, you can either edit
-the relevant part of the Makefile, or you can change the prefix directly on
-the command line like this:
+1. SYSTEM REQUIREMENTS
 
-  make prefix=/some/location install
+A working installation of Perl is required, version 5.8.8 or higher.
 
-Similarly, typing
 
-  make uninstall
+2. INSTALLING ON GNU/LINUX
 
-or, if you have previously changed the destination directory,
+Note that with the exception of Ubuntu,  you have to be logged in as super-
+user in order to run commands described in this section. To do so, type the
+following at a shell prompt:
 
-  make prefix=/some/location uninstall
+  ~]$ su -
+  Password:
 
-will completely remove all installed files.
+2.1. Installing on Debian
 
-On the other hand, you can also run the scripts directly from their present
-location or copy the content of src/ (and unix/ in  case you  intend to use
-the command wrapper) directory somewhere in the $PATH yourself.
+BlazeBlogger is currently available in  both testing (Squeeze) and unstable
+(Sid) version of Debian. To install it, open a terminal, and run the follo-
+wing command:
+
+  ~]# apt-get install blazeblogger
+
+2.2. Installing on Fedora
+
+BlazeBlogger is currently available in both Fedora 12 (Constantine)  and 13
+(Goddard).  To install it,  open a terminal, and run the following command:
+
+  ~]# yum install blazeblogger
+
+2.3. Installing on Ubuntu
+
+BlazeBlogger  is currently available in  Ubuntu 10.04 LTS  (Lucid Lynx). To
+install it, open a terminal, and run the following command:
+
+  ~]# sudo apt-get install blazeblogger
 
 
 3. INSTALLING ON WINDOWS
 
-Currently, there is no  installer for Microsoft Windows  and the  preferred
-way to use BlazeBlogger is to run the batch files  from their present loca-
-tion. To do so, run your favourite command line interpreter (e.g. cmd.exe),
-get into the  windows/  directory of the BlazeBlogger  source  package  and
-type commands in the following form:
+Currently, there is no installer for Microsoft Windows. To use BlazeBlogger
+there,  download the latest version from the official homepage,  unpack it,
+and use the batch  files that are  located in  blazeblogger-1.1.0/windows/.
+For example:
 
-  blaze.bat init [options]
+  C:\blazeblogger-1.1.0\windows> blaze init
 
-or:
+Alternatively, you can use BlazeBlogger with Cygwin. In that case, see Sec-
+tion 4, "Installing from the Source Code" for detailed installation instru-
+ctions.
 
-  blaze-init.bat [options]
 
-Alternatively,  you can run the Perl scripts directly  from the src/ direc-
-tory like this:
+4. INSTALLING FROM THE SOURCE CODE
 
-  perl blaze-init.pl [options]
+To install  BlazeBlogger  from the source code,  download the latest source
+package from the official homepage, and unpack it:
 
-Note that you might want to change the default editor first:
+  ~]# tar xfz blazeblogger-1.1.0.tar.gz
 
-  blaze.bat config core.editor C:\Location\Of\Your\editor.exe
+A directory called  blazeblogger-1.1.0 will  appear  in the current working
+directory. Get into it, and type "make install" at a shell prompt:
 
-You can also run BlazeBlogger in Cygwin.
+  ~]# cd blazeblogger-1.1.0
+  blazeblogger-1.1.0]# make install
+
+This will install runnable scripts and their corresponding  manual pages to
+the predefined /usr/local/bin/ and /usr/local/share/man/ directories respe-
+ctively. Note that you can change the destination directory by changing the
+value of "prefix". For example, to install scripts to ~/local/bin/, and ma-
+nual pages to ~/local/share/man/, type the following command:
+
+  blazeblogger-1.1.0]# make prefix=$HOME/local install
+
+Additionally, on UNIX operating systems, you can also install the Bash com-
+pletion support. To do so,  get into the  unix/bash_completion/  directory,
+and run "make install".
+
+  blazeblogger-1.1.0]# cd unix/bash_completion
+  bash_completion]# make install
+
