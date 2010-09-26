@@ -846,7 +846,7 @@ Write a new page in an external text editor:
 
   ~]$ blaze-add -p
 
-Write a new page in nano:
+Write a new page in B<nano>:
 
   ~]$ blaze-add -p -E nano
 

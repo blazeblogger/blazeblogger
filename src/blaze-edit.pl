@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-edit - edits a blog post or a page in the BlazeBlogger repository
-# Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+# Copyright (C) 2008-2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -105,7 +105,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -674,105 +674,105 @@ __END__
 
 =head1 NAME
 
-blaze-edit - edit a blog post or a page in the BlazeBlogger repository
+blaze-edit - edits a blog post or a page in the BlazeBlogger repository
 
 =head1 SYNOPSIS
 
 B<blaze-edit> [B<-fpqCPV>] [B<-b> I<directory>] [B<-E> I<editor>] I<id>
 
-B<blaze-edit> B<-h> | B<-v>
+B<blaze-edit> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-edit> enables you to edit a blog post or a page in your favourite
-text editor.
+B<blaze-edit> opens an existing blog post or a page with the specified id
+in an external text editor. Note that there are several special forms and
+placeholders that can be used in the text, and that will be replaced with
+a proper data when the blog is generated.
 
-Note that inside your posts and pages, you can use several special
-placeholders to be replaced by appropriate data later, when the static
-content is being generated; the case is not significant, and supported
-placeholders are as follows:
+=head2 Special Forms
+
+=over
+
+=item B<< <!-- break --> >>
+
+A mark to delimit a blog post synopsis.
+
+=back
+
+=head2 Placeholders
 
 =over
 
 =item B<%root%>
 
-Relative path to the root directory of the blog; to be used inside links.
+A relative path to the root directory of the blog.
 
 =item B<%home%>
 
-Relative path to the website home (index) page; to be used inside links.
+A relative path to the index page of the blog.
 
 =item B<%page[>I<id>B<]%>
 
-Relative path to the page with given I<id>; to be used inside links.
+A relative path to a page with the supplied I<id>.
 
-=item B<%post[>I<id>B<]%>
+=item B<%post[>I<id>I<]%>
 
-Relative path to the post with given I<id>; to be used inside links.
+A relative path to a blog post with the supplied I<id>.
 
 =item B<%tag[>I<name>B<]%>
 
-Relative path to the tag with given I<name>; to be used inside links.
+A relative path to a tag with the supplied I<name>.
 
 =back
-
-You can also use a special form, B<< <!-- break --> >>, to mark the end of
-a part to be displayed on index page.
 
 =head1 OPTIONS
 
 =over
 
-=item B<-b>, B<--blogdir> I<directory>
+=item B<-b> I<directory>, B<--blogdir> I<directory>
 
-Specify the I<directory> where the BlazeBlogger repository is placed. The
-default option is the current working directory.
+Allows you to specify a I<directory> in which the BlazeBlogger repository
+is placed. The default option is a current working directory.
 
-=item B<-E>, B<--editor> I<editor>
+=item B<-E> I<editor>, B<--editor> I<editor>
 
-Specify the external text I<editor> to be used for editing purposes. By
-default, the C<core.editor> configuration option is used, and unless it is
-set, BlazeBlogger tries to use the system wide settings by looking for the
-C<EDITOR> environment variable. If neither of these options is supplied,
-then C<vi> is used as a considerably reasonable option.
+Allows you to specify an external text I<editor>. When supplied, this
+option overrides the relevant configuration option.
 
 =item B<-p>, B<--page>
 
-Edit page instead of blog post.
+Tells B<blaze-edit> to edit a page or pages.
 
 =item B<-P>, B<--post>
 
-Edit blog post; this is the default option.
+Tells B<blaze-edit> to edit a blog post or blog posts. This is the default
+option.
 
 =item B<-f>, B<--force>
 
-Force creating a new, empty raw file when it does not already exist,
-although the C<core.processor> is enabled in the configuration; just be
-warned that this will rewrite whatever content is in the existing target
-file.
+Tells B<blaze-edit> to create an empty source file in case it does not
+already exist. If the B<core.processor> option is enabled, this file is
+used as the input to be processed by the selected application.
 
 =item B<-C>, B<--no-processor>
 
-Disable the use of external processor; just be warned that you will be
-editing the target (i.e. potentially previously processed) file instead of
-the raw source. Unless the C<core.processor> is enabled in the
-configuration, this is the default behaviour.
+Disables processing a blog post or page with an external application.
 
 =item B<-q>, B<--quiet>
 
-Avoid displaying messages that are not necessary.
+Disables displaying of unnecessary messages.
 
 =item B<-V>, B<--verbose>
 
-Display all messages. This is the default option.
+Enables displaying of all messages. This is the default option.
 
 =item B<-h>, B<--help>
 
-Display usage information and exit.
+Displays usage information and exits.
 
 =item B<-v>, B<--version>
 
-Display version information and exit.
+Displays version information and exits.
 
 =back
 
@@ -782,49 +782,38 @@ Display version information and exit.
 
 =item B<EDITOR>
 
-Unless the BlazeBlogger specific option I<core.editor> is set, blaze-edit
-tries to use system wide settings to decide which editor to run. If neither
-of these options are supplied, the B<vi> is used instead as a considerably
-reasonable choice.
+Unless the B<core.editor> option is set, BlazeBlogger tries to use
+system-wide settings to decide which editor to use.
 
 =back
 
-=head1 FILES
+=head1 EXAMPLE USAGE
 
-=over
+Edit a blog post in an external text editor:
 
-=item I<.blaze/config>
+  ~]$ blaze-edit 10
 
-BlazeBlogger configuration file.
+Edit a page in an external text editor:
 
-=back
+  ~]$ blaze-edit -p 4
+
+Edit a page in B<nano>:
+
+  ~]$ blaze-edit -p 2 -E nano
 
 =head1 SEE ALSO
 
-B<blaze-config>(1), B<perl>(1).
+B<blaze-config>(1), B<blaze-add>(1), B<blaze-list>(1)
 
 =head1 BUGS
 
-To report bug or even send patch, either add new issue to the project
-bugtracker at <http://code.google.com/p/blazeblogger/issues/>, or visit
-the discussion group at <http://groups.google.com/group/blazeblogger/>. You
-can also contact the author directly via e-mail.
-
-=head1 AUTHOR
-
-Written by Jaromir Hradilek <jhradilek@gmail.com>.
-
-Permission is granted to copy, distribute and/or modify this document under
-the terms of the GNU Free Documentation License, Version 1.3 or any later
-version published by the Free Software Foundation; with no Invariant
-Sections, no Front-Cover Texts, and no Back-Cover Texts.
-
-A copy of the license is included as a file called FDL in the main
-directory of the BlazeBlogger source package.
+To report a bug or to send a patch, please, add a new issue to the bug
+tracker at <http://code.google.com/p/blazeblogger/issues/>, or visit the
+discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008, 2009, 2010 Jaromir Hradilek
+Copyright (C) 2008-2010 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
