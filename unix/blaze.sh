@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # blaze, a command wrapper for BlazeBlogger
-# Copyright (C) 2009, 2010 Jaromir Hradilek
+# Copyright (C) 2009-2010 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -87,7 +87,7 @@ case "$COMMAND" in
     # Display version information:
     echo "BlazeBlogger $VERSION"
     echo
-    echo "Copyright (C) 2008, 2009, 2010 Jaromir Hradilek"
+    echo "Copyright (C) 2008-2010 Jaromir Hradilek"
     echo "This program is free software; see the source for copying conditions. It is"
     echo "distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;"
     echo "without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-"
