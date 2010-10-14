@@ -80,6 +80,7 @@ install_docs:
 	$(INSTALL) -m 644 AUTHORS $(docsdir)
 	$(INSTALL) -m 644 COPYING $(docsdir)
 	$(INSTALL) -m 644 INSTALL $(docsdir)
+	-$(INSTALL) -m 644 ChangeLog $(docsdir)
 
 install_man: $(MAN1)
 	@echo "Copying manual pages..."
@@ -126,6 +127,7 @@ uninstall:
 	-rm -f $(docsdir)/AUTHORS
 	-rm -f $(docsdir)/COPYING
 	-rm -f $(docsdir)/INSTALL
+	-rm -f $(docsdir)/ChangeLog
 	@echo "Removing manual pages..."
 	-rm -f $(man1dir)/blaze-add.1
 	-rm -f $(man1dir)/blaze-log.1
