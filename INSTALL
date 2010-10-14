@@ -103,10 +103,8 @@ nual pages to ~/local/share/man/, type the following command:
 
   blazeblogger-1.1.0]# make prefix=$HOME/local install
 
-Additionally, on UNIX operating systems, you can also install the Bash com-
-pletion support. To do so,  get into the  unix/bash_completion/  directory,
-and run "make install".
+Additionally, you can also install the runnable scripts only. To do so, run
+the make command as follows:
 
-  blazeblogger-1.1.0]# cd unix/bash_completion
-  bash_completion]# make install
+  blazeblogger-1.1.0]# make prefix=$HOME/local install_bin
 
