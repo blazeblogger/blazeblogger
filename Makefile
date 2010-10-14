@@ -34,7 +34,6 @@ bindir  = $(prefix)/bin
 datadir = $(prefix)/share/$(NAME)
 docsdir = $(prefix)/share/doc/$(NAME)-$(VERSION)
 man1dir = $(prefix)/share/man/man1
-langdir = $(datadir)/lang
 
 # Make rules;  please do not edit these unless you really know what you are
 # doing:
@@ -58,18 +57,18 @@ install_bin:
 
 install_data:
 	@echo "Copying translations..."
-	$(INSTALL) -d $(langdir)
-	$(INSTALL) -m 644 lang/cs_CZ $(langdir)
-	$(INSTALL) -m 644 lang/de_DE $(langdir)
-	$(INSTALL) -m 644 lang/en_GB $(langdir)
-	$(INSTALL) -m 644 lang/en_US $(langdir)
-	$(INSTALL) -m 644 lang/es_ES $(langdir)
-	$(INSTALL) -m 644 lang/eu_ES $(langdir)
-	$(INSTALL) -m 644 lang/fr_FR $(langdir)
-	$(INSTALL) -m 644 lang/ja_JP $(langdir)
-	$(INSTALL) -m 644 lang/pt_BR $(langdir)
-	$(INSTALL) -m 644 lang/ru_RU $(langdir)
-	$(INSTALL) -m 644 lang/uk_UK $(langdir)
+	$(INSTALL) -d $(datadir)/lang
+	$(INSTALL) -m 644 lang/cs_CZ $(datadir)/lang
+	$(INSTALL) -m 644 lang/de_DE $(datadir)/lang
+	$(INSTALL) -m 644 lang/en_GB $(datadir)/lang
+	$(INSTALL) -m 644 lang/en_US $(datadir)/lang
+	$(INSTALL) -m 644 lang/es_ES $(datadir)/lang
+	$(INSTALL) -m 644 lang/eu_ES $(datadir)/lang
+	$(INSTALL) -m 644 lang/fr_FR $(datadir)/lang
+	$(INSTALL) -m 644 lang/ja_JP $(datadir)/lang
+	$(INSTALL) -m 644 lang/pt_BR $(datadir)/lang
+	$(INSTALL) -m 644 lang/ru_RU $(datadir)/lang
+	$(INSTALL) -m 644 lang/uk_UK $(datadir)/lang
 
 install_docs:
 	@echo "Copying documentation..."
@@ -108,18 +107,20 @@ uninstall:
 	-rm -f $(bindir)/blaze-config
 	-rm -f $(bindir)/blaze-remove
 	-rm -f $(bindir)/blaze
+	-rmdir $(bindir)
 	@echo "Removing translations..."
-	-rm -f $(langdir)/cs_CZ
-	-rm -f $(langdir)/de_DE
-	-rm -f $(langdir)/en_GB
-	-rm -f $(langdir)/en_US
-	-rm -f $(langdir)/es_ES
-	-rm -f $(langdir)/eu_ES
-	-rm -f $(langdir)/fr_FR
-	-rm -f $(langdir)/ja_JP
-	-rm -f $(langdir)/pt_BR
-	-rm -f $(langdir)/ru_RU
-	-rm -f $(langdir)/uk_UK
+	-rm -f $(datadir)/lang/cs_CZ
+	-rm -f $(datadir)/lang/de_DE
+	-rm -f $(datadir)/lang/en_GB
+	-rm -f $(datadir)/lang/en_US
+	-rm -f $(datadir)/lang/es_ES
+	-rm -f $(datadir)/lang/eu_ES
+	-rm -f $(datadir)/lang/fr_FR
+	-rm -f $(datadir)/lang/ja_JP
+	-rm -f $(datadir)/lang/pt_BR
+	-rm -f $(datadir)/lang/ru_RU
+	-rm -f $(datadir)/lang/uk_UK
+	-rmdir $(datadir)/lang $(datadir)
 	@echo "Removing documentation..."
 	-rm -f $(docsdir)/FDL
 	-rm -f $(docsdir)/TODO
@@ -128,6 +129,7 @@ uninstall:
 	-rm -f $(docsdir)/COPYING
 	-rm -f $(docsdir)/INSTALL
 	-rm -f $(docsdir)/ChangeLog
+	-rmdir $(docsdir)
 	@echo "Removing manual pages..."
 	-rm -f $(man1dir)/blaze-add.1
 	-rm -f $(man1dir)/blaze-log.1
@@ -138,8 +140,7 @@ uninstall:
 	-rm -f $(man1dir)/blaze-config.1
 	-rm -f $(man1dir)/blaze-remove.1
 	-rm -f $(man1dir)/blaze.1
-	@echo "Removing empty directories..."
-	-rmdir $(bindir) $(datadir) $(docsdir) $(man1dir) $(langdir)
+	-rmdir $(man1dir)
 
 clean:
 	-rm -f $(MAN1)
