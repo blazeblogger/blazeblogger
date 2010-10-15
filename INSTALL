@@ -95,16 +95,19 @@ directory. Get into it, and type "make install" at a shell prompt:
   ~]# cd blazeblogger-1.1.0
   blazeblogger-1.1.0]# make install
 
-This will install runnable scripts and their corresponding  manual pages to
-the predefined /usr/local/bin/ and /usr/local/share/man/ directories respe-
-ctively. Note that you can change the destination directory by changing the
-value of "prefix". For example, to install scripts to ~/local/bin/, and ma-
-nual pages to ~/local/share/man/, type the following command:
+This will install executables, manual pages, documentation, and application
+data to the /usr/local/ directory,  and place  the Bash completion  file to
+/etc/bash_completion.d/.
 
-  blazeblogger-1.1.0]# make prefix=$HOME/local install
+To use a different installation directory,  change the value of "prefix" on
+the command line.  For example, to install BlazeBlogger to /usr/,  type the
+following command:
 
-Additionally, you can also install the runnable scripts only. To do so, run
-the make command as follows:
+  blazeblogger-1.1.0]# make prefix=/usr install
 
-  blazeblogger-1.1.0]# make prefix=$HOME/local install_bin
+Note that you can also choose to install executables only. For instance, to
+install BlazeBlogger into your home directory, run the make command as fol-
+lows:
+
+  blazeblogger-1.1.0]$ make prefix=$HOME install_bin
 
