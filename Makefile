@@ -29,16 +29,18 @@ SRCS    = src/blaze-add.pl src/blaze-config.pl src/blaze-edit.pl \
           src/blaze-make.pl src/blaze-remove.pl
 
 # Installation directories:
+config  = /etc
 prefix  = /usr/local
 bindir  = $(prefix)/bin
 datadir = $(prefix)/share/$(NAME)
 docsdir = $(prefix)/share/doc/$(NAME)-$(VERSION)
 man1dir = $(prefix)/share/man/man1
+compdir = $(config)/bash_completion.d
 
 # Make rules;  please do not edit these unless you really know what you are
 # doing:
-.PHONY: all install_bin install_data install_docs install_man install \
-        uninstall clean
+.PHONY: all install_bin install_conf install_data install_docs \
+        install_man install uninstall clean
 
 all: $(MAN1)
 
@@ -54,6 +56,11 @@ install_bin:
 	$(INSTALL) -m 755 src/blaze-config.pl $(bindir)/blaze-config
 	$(INSTALL) -m 755 src/blaze-remove.pl $(bindir)/blaze-remove
 	$(INSTALL) -m 755 unix/blaze.sh $(bindir)/blaze
+
+install_conf:
+	@echo "Copying bash completion..."
+	$(INSTALL) -d $(compdir)
+	$(INSTALL) -m 644 unix/bash_completion $(compdir)/blazeblogger
 
 install_data:
 	@echo "Copying translations..."
@@ -94,7 +101,7 @@ install_man: $(MAN1)
 	$(INSTALL) -m 644 src/blaze-remove.1 $(man1dir)
 	$(INSTALL) -m 644 unix/man/man1/blaze.1 $(man1dir)
 
-install: install_bin install_data install_docs install_man
+install: install_bin install_conf install_data install_docs install_man
 
 uninstall:
 	@echo "Removing executables..."
@@ -108,6 +115,9 @@ uninstall:
 	-rm -f $(bindir)/blaze-remove
 	-rm -f $(bindir)/blaze
 	-rmdir $(bindir)
+	@echo "Removing bash completion..."
+	-rm -f $(compdir)/blazeblogger
+	-rmdir $(compdir)
 	@echo "Removing translations..."
 	-rm -f $(datadir)/lang/cs_CZ
 	-rm -f $(datadir)/lang/de_DE
