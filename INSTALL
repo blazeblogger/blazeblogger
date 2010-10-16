@@ -97,17 +97,14 @@ directory. Get into it, and type "make install" at a shell prompt:
 
 This will install executables, manual pages, documentation, and application
 data to the /usr/local/ directory,  and place  the Bash completion  file to
-/etc/bash_completion.d/.
-
-To use a different installation directory,  change the value of "prefix" on
-the command line.  For example, to install BlazeBlogger to /usr/,  type the
-following command:
+/etc/bash_completion.d/. To use a different installation directory,  change
+the value of "prefix" on the command line. For example, if you want to ins-
+tall BlazeBlogger to /usr/,  type the following command:
 
   blazeblogger-1.1.0]# make prefix=/usr install
 
-Note that you can also choose to install executables only. For instance, to
-install BlazeBlogger into your home directory, run the make command as fol-
-lows:
+Alternatively, you can choose to install executables only. For instance, to
+install BlazeBlogger into your home directory, type:
 
   blazeblogger-1.1.0]$ make prefix=$HOME install_bin
 
