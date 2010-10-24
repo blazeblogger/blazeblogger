@@ -1071,7 +1071,7 @@ sub generate_rss {
   }
 
   # Set up the blog post item type:
-  my $fullposts  = ($feed_fullposts =~ /^(true|auto)\s*$/i) ? 1 : 0;
+  my $excerpt = ($feed_fullposts =~ /^(true|auto)\s*$/i) ? 0 : 1;
 
   # Initialize necessary variables:
   my $count      = 0;
@@ -1120,30 +1120,17 @@ sub generate_rss {
               "  <guid>$feed_baseurl/$year/$month/$url/</guid>\n  " .
               "  <pubDate>$date_time</pubDate>\n  ";
 
-    # Check whether to list full blog posts:
-    unless ($fullposts) {
-      # Read the blog post synopsis:
-      my $post_body = read_entry($record->{id}, 'post', '', 1);
+    # Read the blog post body:
+    my $post_desc = read_entry($record->{id}, 'post', '', $excerpt);
 
-      # Strip HTML elements:
-      my $post_desc = substr(strip_html($post_body), 0, 500);
+    # Substitute the root directory placeholder:
+    $post_desc =~ s/%root%/$feed_baseurl\//ig;
 
-      # Add the blog post synopsis:
-      print RSS "  <description>$post_desc    </description>\n";
-    }
-    else {
-      # Read the blog post body:
-      my $post_desc = read_entry($record->{id}, 'post', '', 0);
+    # Substitute the home page placeholder:
+    $post_desc =~ s/%home%/$feed_baseurl\//ig;
 
-      # Substitute the root directory placeholder:
-      $post_desc =~ s/%root%/$feed_baseurl\//ig;
-
-      # Substitute the home page placeholder:
-      $post_desc =~ s/%home%/$feed_baseurl\//ig;
-
-      # Add the blog post body:
-      print RSS "  <description><![CDATA[$post_desc    ]]></description>\n";
-    }
+    # Add the blog post body:
+    print RSS "  <description><![CDATA[$post_desc    ]]></description>\n";
 
     # Close the blog post item:
     print RSS "  </item>\n";

@@ -754,7 +754,8 @@ C<10>.
 =item B<feed.fullposts>=I<boolean>
 
 A boolean to enable (C<true>) or disable (C<false>) inclusion of the whole
-content of a blog post in the feed. The default option is C<false>.
+content of a blog post in the feed, even though the B<< <!-- break --> >>
+form is used. The default option is C<false>.
 
 =item B<post.author>=I<string>
 
