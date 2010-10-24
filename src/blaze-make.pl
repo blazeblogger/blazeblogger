@@ -429,10 +429,16 @@ sub collect_headers {
 
   # Return the result:
   if ($type eq 'post') {
-    return sort {"$b->{date}:$b->{id}" cmp "$a->{date}:$a->{id}"} @records;
+    return sort {
+      sprintf("%s:%08d", $b->{date}, $b->{id}) cmp
+      sprintf("%s:%08d", $a->{date}, $a->{id})
+    } @records;
   }
   else {
-    return sort {"$a->{date}:$a->{id}" cmp "$b->{date}:$b->{id}"} @records;
+    return sort {
+      sprintf("%s:%08d", $a->{date}, $a->{id}) cmp
+      sprintf("%s:%08d", $b->{date}, $b->{id})
+    } @records;
   }
 }
 
