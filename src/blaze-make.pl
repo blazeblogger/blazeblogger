@@ -975,11 +975,14 @@ sub write_page {
     }
   }
 
-  # Create the target directory tree:
-  eval { mkpath($target, 0) };
+  # Check whether to create a directory tree:
+  if ($target) {
+    # Create the target directory tree:
+    eval { mkpath($target, 0) };
 
-  # Make sure the directory creation was successful:
-  exit_with_error("Creating `$target': $@", 13) if $@;
+    # Make sure the directory creation was successful:
+    exit_with_error("Creating `$target': $@", 13) if $@;
+  }
 
   # Prepare the file name:
   my $file = $target
