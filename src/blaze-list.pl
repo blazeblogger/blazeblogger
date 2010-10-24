@@ -277,10 +277,12 @@ sub make_record {
 sub compare_records {
   # Check whether to use reverse order:
   unless ($reverse) {
-    return "$b->{date}:$b->{id}" cmp "$a->{date}:$a->{id}";
+    return sprintf("%s:%08d", $b->{date}, $b->{id}) cmp
+           sprintf("%s:%08d", $a->{date}, $a->{id});
   }
   else {
-    return "$a->{date}:$a->{id}" cmp "$b->{date}:$b->{id}";
+    return sprintf("%s:%08d", $a->{date}, $a->{id}) cmp
+           sprintf("%s:%08d", $b->{date}, $b->{id});
   }
 }
 
