@@ -158,6 +158,10 @@ sub fix_link {
     # Append the index file name:
     $link .= 'index.' . ($conf->{core}->{extension} || 'html');
   }
+  else {
+    # Make sure the link is not empty:
+    $link = '.' unless $link;
+  }
 
   # Return the correct link:
   return $link;
