@@ -72,10 +72,10 @@ install it, open a terminal, and run the following command:
 
 Currently, there is no installer for Microsoft Windows. To use BlazeBlogger
 there,  download the latest version from the official homepage,  unpack it,
-and use the batch  files that are  located in  blazeblogger-1.1.1/windows/.
+and use the batch  files that are  located in  blazeblogger-1.1.2/windows/.
 For example:
 
-  C:\blazeblogger-1.1.1\windows> blaze init
+  C:\blazeblogger-1.1.2\windows> blaze init
 
 Alternatively, you can use BlazeBlogger with Cygwin. In that case, see Sec-
 tion 4, "Installing from the Source Code" for detailed installation instru-
@@ -87,13 +87,13 @@ ctions.
 To install  BlazeBlogger  from the source code,  download the latest source
 package from the official homepage, and unpack it:
 
-  ~]# tar xfz blazeblogger-1.1.1.tar.gz
+  ~]# tar xfz blazeblogger-1.1.2.tar.gz
 
-A directory called  blazeblogger-1.1.1 will  appear  in the current working
+A directory called  blazeblogger-1.1.2 will  appear  in the current working
 directory. Get into it, and type "make install" at a shell prompt:
 
-  ~]# cd blazeblogger-1.1.1
-  blazeblogger-1.1.1]# make install
+  ~]# cd blazeblogger-1.1.2
+  blazeblogger-1.1.2]# make install
 
 This will install executables, manual pages, documentation, and application
 data to the /usr/local/ directory,  and place  the Bash completion  file to
@@ -101,10 +101,10 @@ data to the /usr/local/ directory,  and place  the Bash completion  file to
 the value of "prefix" on the command line. For example, if you want to ins-
 tall BlazeBlogger to /usr/,  type the following command:
 
-  blazeblogger-1.1.1]# make prefix=/usr install
+  blazeblogger-1.1.2]# make prefix=/usr install
 
 Alternatively, you can choose to install executables only. For instance, to
 install BlazeBlogger into your home directory, type:
 
-  blazeblogger-1.1.1]$ make prefix=$HOME install_bin
+  blazeblogger-1.1.2]$ make prefix=$HOME install_bin
 
