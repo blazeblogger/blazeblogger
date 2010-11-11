@@ -103,6 +103,10 @@ tall BlazeBlogger to /usr/,  type the following command:
 
   blazeblogger-1.1.2]# make prefix=/usr install
 
+To install all files without root privileges, type the following command:
+
+  blazeblogger-1.1.2]# make prefix=$HOME compdir='$(prefix)/etc' install
+
 Alternatively, you can choose to install executables only. For instance, to
 install BlazeBlogger into your home directory, type:
 
