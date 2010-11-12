@@ -79,7 +79,7 @@ case "$COMMAND" in
         ;;
       *)
         # Display general manual page:
-        exec man blazeblogger
+        exec man blaze
         ;;
     esac
     ;;
