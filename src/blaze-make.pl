@@ -544,16 +544,15 @@ sub collect_metadata {
 # Return a list of tags:
 sub list_of_tags {
   my $tags = shift || die 'Missing argument';
-  my $root = shift || '';
 
-  # Check whether the tag creation is eneabled:
+  # Check whether the tag creation is enabled:
   return '' unless $with_tags;
 
   # Check whether the list is not empty:
   if (my %tags = %$tags) {
     # Return the list of tags:
     return join("\n", map {
-      "<li><a href=\"" . fix_link("${root}tags/$tags{$_}->{url}") .
+      "<li><a href=\"" . fix_link("%root%tags/$tags{$_}->{url}") .
       "\">$_ (" . $tags{$_}->{count} . ")</a></li>"
     } sort(keys(%tags)));
   }
@@ -566,7 +565,6 @@ sub list_of_tags {
 # Return a list of months:
 sub list_of_months {
   my $months = shift || die 'Missing argument';
-  my $root   = shift || '';
   my $year   = shift || '';
 
   # Check whether the post creation is enabled:
@@ -576,7 +574,7 @@ sub list_of_months {
   if (my %months = %$months) {
     # Return the list of months:
     return join("\n", sort { $b cmp $a } (map {
-      "<li><a href=\"" . fix_link($root . $months{$_}->{url}) .
+      "<li><a href=\"" . fix_link("%root%$months{$_}->{url}") .
       "\">$_ (" . $months{$_}->{count} . ")</a></li>"
     } grep(/$year$/, keys(%months))));
   }
@@ -589,7 +587,6 @@ sub list_of_months {
 # Return a list of pages:
 sub list_of_pages {
   my $pages = shift || die 'Missing argument';
-  my $root  = shift || '';
 
   # Initialize required variables:
   my $list  = '';
@@ -604,7 +601,7 @@ sub list_of_pages {
     my $url   = $record->{url};
 
     # Add the page link to the list:
-    $list .= "<li><a href=\"".fix_link("$root$url")."\">$title</a></li>\n";
+    $list .= "<li><a href=\"".fix_link("%root%$url")."\">$title</a></li>\n";
   }
 
   # Strip trailing line break:
@@ -617,7 +614,6 @@ sub list_of_pages {
 # Return a list of blog posts:
 sub list_of_posts {
   my $posts = shift || die 'Missing argument';
-  my $root  = shift || '';
   my $max   = shift || 5;
 
   # Initialize required variables:
@@ -641,7 +637,7 @@ sub list_of_posts {
     my ($year, $month) = split(/-/, $record->{date});
 
     # Add the post link to the list:
-    $list .= "<li><a href=\"" . fix_link("$root$year/$month/$url") .
+    $list .= "<li><a href=\"" . fix_link("%root%$year/$month/$url") .
              "\">$title</a></li>\n";
 
     # Increase the counter:
@@ -871,10 +867,10 @@ sub write_page {
     my $title    = $conf->{blog}->{title}     || 'My Blog';
 
     # Prepare the post, page, tag, and month lists:
-    my $tags     = list_of_tags($data->{links}->{tags}, $root);
-    my $archive  = list_of_months($data->{links}->{months}, $root);
-    my $pages    = list_of_pages($data->{headers}->{pages}, $root);
-    my $posts    = list_of_posts($data->{headers}->{posts}, $root);
+    my $tags     = list_of_tags($data->{links}->{tags});
+    my $archive  = list_of_months($data->{links}->{months});
+    my $pages    = list_of_pages($data->{headers}->{pages});
+    my $posts    = list_of_posts($data->{headers}->{posts});
 
     # Get current year:
     my $year     = substr(date_to_string(time), 0, 4);
@@ -1317,7 +1313,7 @@ sub generate_posts {
 
       # Add the yearly archive list of months:
       $year_body .= "<ul>\n" . list_of_months($data->{links}->{months},
-                                              '../', $year) . "\n</ul>";
+                                              $year) . "\n</ul>";
 
       # Prepare the yearly archive target directory name:
       $target = ($destdir eq '.') ? $year : catdir($destdir, $year);
