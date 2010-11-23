@@ -709,7 +709,6 @@ sub format_heading {
 sub format_information {
   my $record = shift || die 'Missing argument';
   my $tags   = shift || die 'Missing argument';
-  my $root   = shift || '';
   my $type   = shift || 'top';
 
   # Initialize required variables:
@@ -745,7 +744,7 @@ sub format_information {
   if ($tags_location eq $type && $with_tags && $record->{tags}) {
     # Convert tags to proper links:
     $taglist = join(', ', map {
-      "<a href=\"". fix_link("${root}tags/$tags->{$_}->{url}") ."\">$_</a>"
+      "<a href=\"". fix_link("%root%tags/$tags->{$_}->{url}") ."\">$_</a>"
       } split(/,\s*/, $record->{tags}));
 
     # Format the tags:
@@ -770,7 +769,6 @@ sub format_information {
 sub format_entry {
   my $data    = shift || die 'Missing argument';
   my $record  = shift || die 'Missing argument';
-  my $root    = shift || '';
   my $type    = shift || 'post';
   my $excerpt = shift || 0;
 
@@ -788,11 +786,11 @@ sub format_entry {
       my ($year, $month) = split(/-/, $record->{date});
 
       # Compose the link:
-      $link = fix_link("$root$year/$month/$record->{url}")
+      $link = fix_link("%root%$year/$month/$record->{url}")
     }
     else {
       # Compose the link:
-      $link = fix_link("$root$record->{url}");
+      $link = fix_link("%root%$record->{url}");
     }
   }
 
@@ -802,8 +800,8 @@ sub format_entry {
 
   # For blog posts, prepare its additional information:
   if ($type eq 'post') {
-    $information = format_information($record, $tags, $root, 'top');
-    $post_footer = format_information($record, $tags, $root, 'bottom');
+    $information = format_information($record, $tags, 'top');
+    $post_footer = format_information($record, $tags, 'bottom');
   }
 
   # Return the result:
@@ -1213,7 +1211,7 @@ sub generate_index {
       }
 
       # Add the blog post synopsis to the page body:
-      $body .= format_entry($data, $record, '', 'post', 1);
+      $body .= format_entry($data, $record, 'post', 1);
 
       # Increase the number of listed blog posts:
       $count++;
@@ -1289,7 +1287,7 @@ sub generate_posts {
     ($year, $month) = split(/-/, $record->{date});
 
     # Prepare the blog post body:
-    $post_body = format_entry($data, $record, '../../../', 'post', 0);
+    $post_body = format_entry($data, $record, 'post', 0);
 
     # Prepare the target directory name:
     $target    = ($destdir eq '.')
@@ -1386,7 +1384,7 @@ sub generate_posts {
     }
 
     # Add the blog post synopsis:
-    $month_body .= format_entry($data, $record, '../../', 'post', 1);
+    $month_body .= format_entry($data, $record, 'post', 1);
 
     # Increase the number of listed blog posts:
     $month_count++;
@@ -1499,7 +1497,7 @@ sub generate_tags {
       }
 
       # Add the blog post synopsis:
-      $tag_body .= format_entry($data, $record, '../../', 'post', 1);
+      $tag_body .= format_entry($data, $record, 'post', 1);
 
       # Increase the number of listed blog posts:
       $tag_count++;
@@ -1560,7 +1558,7 @@ sub generate_pages {
   # Process each record:
   foreach my $record (@{$data->{headers}->{pages}}) {
     # Prepare the page body:
-    my $body   = format_entry($data, $record, '../', 'page', 0);
+    my $body   = format_entry($data, $record, 'page', 0);
 
     # Prepare the target directory name:
     my $target = ($destdir eq '.')
