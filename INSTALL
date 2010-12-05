@@ -87,10 +87,11 @@ ctions.
 To install  BlazeBlogger  from the source code,  download the latest source
 package from the official homepage, and unpack it:
 
-  ~]# tar xfz blazeblogger-1.1.2.tar.gz
+  ~]$ tar xfz blazeblogger-1.1.2.tar.gz
 
 A directory called  blazeblogger-1.1.2 will  appear  in the current working
-directory. Get into it, and type "make install" at a shell prompt:
+directory.  Switch to superuser, get into the newly created directory,  and
+type "make install" at a shell prompt:
 
   ~]# cd blazeblogger-1.1.2
   blazeblogger-1.1.2]# make install
@@ -103,12 +104,14 @@ tall BlazeBlogger to /usr/,  type the following command:
 
   blazeblogger-1.1.2]# make prefix=/usr install
 
-To install all files without root privileges, type the following command:
-
-  blazeblogger-1.1.2]# make prefix=$HOME compdir='$(prefix)/etc' install
-
 Alternatively, you can choose to install executables only. For instance, to
 install BlazeBlogger into your home directory, type:
 
   blazeblogger-1.1.2]$ make prefix=$HOME install_bin
+
+Finally,  if you prefer to install all available files, but you do not have
+superuser privileges, change the value of "compdir" to a directory you have
+access to. For example:
+
+  blazeblogger-1.1.2]$ make prefix=$HOME compdir='$(prefix)/etc' install
 
