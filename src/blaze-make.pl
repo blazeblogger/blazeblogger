@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-make - generates a blog from the BlazeBlogger repository
-# Copyright (C) 2009-2010 Jaromir Hradilek
+# Copyright (C) 2009-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -115,7 +115,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2009-2010 Jaromir Hradilek
+Copyright (C) 2009-2011 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -846,13 +846,15 @@ sub format_template {
   return $cache_theme if $cache_theme;
 
   # Read required data from the documentation:
-  my $conf_doctype  = $conf->{core}->{doctype}  || 'html';
-  my $conf_encoding = $conf->{core}->{encoding} || 'UTF-8';
-  my $conf_title    = $conf->{blog}->{title}    || 'My Blog';
-  my $conf_subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
-  my $conf_name     = $conf->{user}->{name}     || 'admin';
-  my $conf_email    = $conf->{user}->{email}    || 'admin@localhost';
-  my $conf_nickname = $conf->{user}->{nickname} || $conf_name;
+  my $conf_doctype  = $conf->{core}->{doctype}     || 'html';
+  my $conf_encoding = $conf->{core}->{encoding}    || 'UTF-8';
+  my $conf_title    = $conf->{blog}->{title}       || 'Blog Title';
+  my $conf_subtitle = $conf->{blog}->{subtitle}    || 'blog subtitle';
+  my $conf_desc     = $conf->{blog}->{description} || 'blog description';
+  my $conf_keywords = $conf->{blog}->{keywords}    || 'blog keywords';
+  my $conf_name     = $conf->{user}->{name}        || 'admin';
+  my $conf_email    = $conf->{user}->{email}       || 'admin@localhost';
+  my $conf_nickname = $conf->{user}->{nickname}    || $conf_name;
 
   # Prepare a list of blog posts, pages, tags, and months:
   my $list_pages    = list_of_pages($data->{headers}->{pages});
@@ -868,7 +870,13 @@ sub format_template {
                           'txt/html; charset=' . $conf_encoding . '">';
   my $meta_generator    = '<meta name="Generator" content="BlazeBlogger ' .
                           VERSION . '">';
+  my $meta_copyright    = '<meta name="Copyright" content="&copy; ' .
+                          $current_year . ' ' . $conf_name . '">';
   my $meta_date         = '<meta name="Date" content="'. localtime() .'">';
+  my $meta_description  = '<meta name="Description" content="' .
+                          $conf_desc . '">';
+  my $meta_keywords     = '<meta name="Keywords" content="' .
+                          $conf_keywords . '">';
 
   # Prepare the LINK tags:
   my $link_stylesheet   = '<link rel="stylesheet" href="%root%' .
@@ -897,6 +905,7 @@ sub format_template {
     # Fix the tags:
     $meta_content_type =~ s/>$/ \/>/;
     $meta_generator    =~ s/>$/ \/>/;
+    $meta_copyright    =~ s/>$/ \/>/;
     $meta_date         =~ s/>$/ \/>/;
     $meta_description  =~ s/>$/ \/>/;
     $meta_keywords     =~ s/>$/ \/>/;
@@ -919,7 +928,10 @@ sub format_template {
   $template =~ s/<!--\s*end-document\s*-->/$document_end/ig;
   $template =~ s/<!--\s*content-type\s*-->/$meta_content_type/ig;
   $template =~ s/<!--\s*generator\s*-->/$meta_generator/ig;
+  $template =~ s/<!--\s*copyright\s*-->/$meta_copyright/ig;
   $template =~ s/<!--\s*date\s*-->/$meta_date/ig;
+  $template =~ s/<!--\s*description\s*-->/$meta_description/ig;
+  $template =~ s/<!--\s*keywords\s*-->/$meta_keywords/ig;
   $template =~ s/<!--\s*stylesheet\s*-->/$link_stylesheet/ig;
   $template =~ s/<!--\s*feed\s*-->/$link_feed/ig if $with_rss;
   $template =~ s/<!--\s*rss\s*-->/$link_feed/ig if $with_rss; # Deprecated.
@@ -1820,7 +1832,7 @@ discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009-2010 Jaromir Hradilek
+Copyright (C) 2009-2011 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;

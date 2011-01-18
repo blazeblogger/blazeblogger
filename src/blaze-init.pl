@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-init - creates or recovers a BlazeBlogger repository
-# Copyright (C) 2008-2010 Jaromir Hradilek
+# Copyright (C) 2008-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -91,7 +91,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -125,6 +125,8 @@ sub create_conf {
 ##
 ##   title         A title of your blog.
 ##   subtitle      A subtitle of your blog.
+##   description   A brief description of your blog.
+##   keywords      A comma-separated list of keywords.
 ##   theme         A theme for your blog. It must point to an existing file
 ##                 in the .blaze/theme/ directory.
 ##   style         A style sheet for your blog.  It must point to  an exis-
@@ -136,6 +138,8 @@ sub create_conf {
 [blog]
 title=Blog Title
 subtitle=blog subtitle
+description=blog description
+keywords=blog keywords
 theme=default.html
 style=default.css
 lang=en_US
@@ -244,7 +248,10 @@ sub create_theme {
 <head>
   <!-- content-type -->
   <!-- generator -->
+  <!-- copyright -->
   <!-- date -->
+  <!-- description -->
+  <!-- keywords -->
   <!-- stylesheet -->
   <!-- feed -->
   <title><!-- page-title --></title>
@@ -772,7 +779,7 @@ discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;

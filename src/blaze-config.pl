@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-config - displays or sets BlazeBlogger configuration options
-# Copyright (C) 2008-2010 Jaromir Hradilek
+# Copyright (C) 2008-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -34,8 +34,10 @@ our $verbose = 1;                                   # Verbosity level.
 # A list of valid options, and their default values:
 our %opt = (
   # Blog related settings:
-  'blog.title'       => 'My Blog',                  # Blog title.
-  'blog.subtitle'    => 'yet another blog',         # Blog subtitle.
+  'blog.title'       => 'Blog Title',               # Blog title.
+  'blog.subtitle'    => 'blog subtitle',            # Blog subtitle.
+  'blog.description' => 'blog description',         # Blog description.
+  'blog.keywords'    => 'blog keywords',            # Blog keywords.
   'blog.theme'       => 'default.html',             # Blog theme.
   'blog.style'       => 'default.css',              # Blog style sheet.
   'blog.lang'        => 'en_US',                    # Blog localization.
@@ -131,7 +133,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -247,6 +249,8 @@ sub create_temp {
   # Prepare the general blog settings:
   my $blog_title     = $conf->{blog}->{title}     || $opt{'blog.title'};
   my $blog_subtitle  = $conf->{blog}->{subtitle}  || $opt{'blog.subtitle'};
+  my $blog_desc      = $conf->{blog}->{description}||$opt{'blog.description'};
+  my $blog_keywords  = $conf->{blog}->{keywords}  || $opt{'blog.keywords'};
   my $blog_theme     = $conf->{blog}->{theme}     || $opt{'blog.theme'};
   my $blog_style     = $conf->{blog}->{style}     || $opt{'blog.style'};
   my $blog_lang      = $conf->{blog}->{lang}      || $opt{'blog.lang'};
@@ -293,6 +297,8 @@ sub create_temp {
 ##
 ##   title         A title of your blog.
 ##   subtitle      A subtitle of your blog.
+##   description   A brief description of your blog.
+##   keywords      A comma-separated list of keywords.
 ##   theme         A theme for your blog. It must point to an existing file
 ##                 in the .blaze/theme/ directory.
 ##   style         A style sheet for your blog.  It must point to  an exis-
@@ -304,6 +310,8 @@ sub create_temp {
 [blog]
 title=$blog_title
 subtitle=$blog_subtitle
+description=$blog_desc
+keywords=$blog_keywords
 theme=$blog_theme
 style=$blog_style
 lang=$blog_lang
@@ -874,7 +882,7 @@ discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
