@@ -31,21 +31,21 @@ use constant NAME    => basename($0, '.pl');        # Script name.
 use constant VERSION => '1.1.2';                    # Script version.
 
 # General script settings:
-our $blogdir    = '.';                              # Repository location.
-our $destdir    = '.';                              # HTML pages location.
-our $verbose    = 1;                                # Verbosity level.
-our $with_index = 1;                                # Generate index page?
-our $with_posts = 1;                                # Generate posts?
-our $with_pages = 1;                                # Generate pages?
-our $with_tags  = 1;                                # Generate tags?
-our $with_rss   = 1;                                # Generate RSS feed?
-our $with_css   = 1;                                # Generate stylesheet?
-our $full_paths = 0;                                # Generate full paths?
+our $blogdir     = '.';                             # Repository location.
+our $destdir     = '.';                             # HTML pages location.
+our $verbose     = 1;                               # Verbosity level.
+our $with_index  = 1;                               # Generate index page?
+our $with_posts  = 1;                               # Generate posts?
+our $with_pages  = 1;                               # Generate pages?
+our $with_tags   = 1;                               # Generate tags?
+our $with_rss    = 1;                               # Generate RSS feed?
+our $with_css    = 1;                               # Generate stylesheet?
+our $full_paths  = 0;                               # Generate full paths?
 
 # Global variables:
-our $conf       = {};                               # Configuration.
-our $locale     = {};                               # Localization.
-our $cache      = {};                               # Cache.
+our $conf        = {};                              # Configuration.
+our $locale      = {};                              # Localization.
+our $cache_theme = '';                              # Cached template.
 
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
@@ -836,6 +836,115 @@ sub format_navigation {
          "</div>\n";
 }
 
+# Prepare a template:
+sub format_template {
+  my $data          = shift || die 'Missing argument';
+  my $theme_file    = shift || $conf->{blog}->{theme} || 'default.html';
+  my $style_file    = shift || $conf->{blog}->{style} || 'default.css';
+
+  # Restore the template from the cache if available:
+  return $cache_theme if $cache_theme;
+
+  # Read required data from the documentation:
+  my $conf_doctype  = $conf->{core}->{doctype}  || 'html';
+  my $conf_encoding = $conf->{core}->{encoding} || 'UTF-8';
+  my $conf_title    = $conf->{blog}->{title}    || 'My Blog';
+  my $conf_subtitle = $conf->{blog}->{subtitle} || 'yet another blog';
+  my $conf_name     = $conf->{user}->{name}     || 'admin';
+  my $conf_email    = $conf->{user}->{email}    || 'admin@localhost';
+  my $conf_nickname = $conf->{user}->{nickname} || $conf_name;
+
+  # Prepare a list of blog posts, pages, tags, and months:
+  my $list_pages    = list_of_pages($data->{headers}->{pages});
+  my $list_posts    = list_of_posts($data->{headers}->{posts});
+  my $list_months   = list_of_months($data->{links}->{months});
+  my $list_tags     = list_of_tags($data->{links}->{tags});
+
+  # Determine the current year:
+  my $current_year  = substr(date_to_string(time), 0, 4);
+
+  # Prepare the META tags:
+  my $meta_content_type = '<meta http-equiv="Content-Type" content="' .
+                          'txt/html; charset=' . $conf_encoding . '">';
+  my $meta_generator    = '<meta name="Generator" content="BlazeBlogger ' .
+                          VERSION . '">';
+  my $meta_date         = '<meta name="Date" content="'. localtime() .'">';
+
+  # Prepare the LINK tags:
+  my $link_stylesheet   = '<link rel="stylesheet" href="%root%' .
+                          $style_file . '" type="text/css">';
+  my $link_feed         = '<link rel="alternate" href="%root%index.rss" ' .
+                          'title="RSS Feed" type="application/rss+xml">';
+
+  # Prepare the document header and footer:
+  my $document_start;
+  my $document_end      = '</html>';
+
+  # Decide which document type to use:
+  if ($conf_doctype ne 'xhtml') {
+    # Fix the document header:
+    $document_start = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+                      "http://www.w3.org/TR/html4/strict.dtd">
+<html>';
+  }
+  else {
+    # Fix the document header:
+    $document_start = '<?xml version="1.0" encoding="$conf_encoding"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">';
+
+    # Fix the tags:
+    $meta_content_type =~ s/>$/ \/>/;
+    $meta_generator    =~ s/>$/ \/>/;
+    $meta_date         =~ s/>$/ \/>/;
+    $meta_description  =~ s/>$/ \/>/;
+    $meta_keywords     =~ s/>$/ \/>/;
+    $link_stylesheet   =~ s/>$/ \/>/;
+    $link_feed         =~ s/>$/ \/>/;
+  }
+
+  # Open the theme file for reading:
+  open(THEME, catfile($blogdir, '.blaze', 'theme', $theme_file))
+    or return 0;
+
+  # Read the theme file:
+  my $template = do { local $/; <THEME> };
+
+  # Close the theme file:
+  close(THEME);
+
+  # Substitute the header placeholders:
+  $template =~ s/<!--\s*start-document\s*-->/$document_start/ig;
+  $template =~ s/<!--\s*end-document\s*-->/$document_end/ig;
+  $template =~ s/<!--\s*content-type\s*-->/$meta_content_type/ig;
+  $template =~ s/<!--\s*generator\s*-->/$meta_generator/ig;
+  $template =~ s/<!--\s*date\s*-->/$meta_date/ig;
+  $template =~ s/<!--\s*stylesheet\s*-->/$link_stylesheet/ig;
+  $template =~ s/<!--\s*feed\s*-->/$link_feed/ig if $with_rss;
+  $template =~ s/<!--\s*rss\s*-->/$link_feed/ig if $with_rss; # Deprecated.
+
+  # Substitute the list placeholders:
+  $template =~ s/<!--\s*pages\s*-->/$list_pages/ig;
+  $template =~ s/<!--\s*posts\s*-->/$list_posts/ig;
+  $template =~ s/<!--\s*archive\s*-->/$list_months/ig;
+  $template =~ s/<!--\s*tags\s*-->/$list_tags/ig;
+
+  # Substitute body placeholders:
+  $template =~ s/<!--\s*title\s*-->/$conf_title/ig;
+  $template =~ s/<!--\s*subtitle\s*-->/$conf_subtitle/ig;
+  $template =~ s/<!--\s*name\s*-->/$conf_name/ig;
+  $template =~ s/<!--\s*nickname\s*-->/$conf_nickname/ig;
+  $template =~ s/<!--\s*e-mail\s*-->/$conf_email/ig;
+  $template =~ s/<!--\s*year\s*-->/$current_year/ig;
+
+  # Store the template to the cache:
+  $cache_theme = $template;
+
+  # Return the result:
+  return $template;
+}
+
 # Write a single page:
 sub write_page {
   my $data    = shift || die 'Missing argument';
@@ -852,103 +961,20 @@ sub write_page {
   # Read required data from the configuration:
   my $ext     = $conf->{core}->{extension}    || 'html';
 
-  # Check whether the template is not already cached:
-  unless ($cache->{theme}->{$temp}) {
-    # Read required data from the configuration:
-    my $doctype  = $conf->{core}->{doctype}   || 'html';
-    my $encoding = $conf->{core}->{encoding}  || 'UTF-8';
-    my $name     = $conf->{user}->{name}      || 'admin';
-    my $email    = $conf->{user}->{email}     || 'admin@localhost';
-    my $style    = $conf->{blog}->{style}     || 'default.css';
-    my $subtitle = $conf->{blog}->{subtitle}  || 'yet another blog';
-    my $theme    = $conf->{blog}->{theme}     || 'default.html';
-    my $title    = $conf->{blog}->{title}     || 'My Blog';
-
-    # Prepare the post, page, tag, and month lists:
-    my $tags     = list_of_tags($data->{links}->{tags});
-    my $archive  = list_of_months($data->{links}->{months});
-    my $pages    = list_of_pages($data->{headers}->{pages});
-    my $posts    = list_of_posts($data->{headers}->{posts});
-
-    # Get current year:
-    my $year     = substr(date_to_string(time), 0, 4);
-
-    # Declare required variables:
-    my ($date, $content_type, $generator, $stylesheet, $rss);
-
-    # Check which doctype to use:
-    if ($doctype ne 'xhtml') {
-      # Prepare the meta and link elements for the page header:
-      $date         = "<meta name=\"Date\" content=\"".localtime()."\">";
-      $content_type = "<meta http-equiv=\"Content-Type\" content=\"" .
-                      "text/html; charset=$encoding\">";
-      $generator    = "<meta name=\"Generator\" content=\"BlazeBlogger " .
-                      VERSION . "\">";
-      $stylesheet   = "<link rel=\"stylesheet\" href=\"$root$style\" " .
-                      "type=\"text/css\">";
-      $rss          = "<link rel=\"alternate\" href=\"${root}index.rss\" ".
-                      "title=\"RSS Feed\" type=\"application/rss+xml\">";
-    }
-    else {
-      # Prepare the meta and link elements for the page header:
-      $date         = "<meta name=\"Date\" content=\"".localtime()."\" />";
-      $content_type = "<meta http-equiv=\"Content-Type\" content=\"" .
-                      "text/html; charset=$encoding\" />";
-      $generator    = "<meta name=\"Generator\" content=\"BlazeBlogger " .
-                      VERSION . "\" />";
-      $stylesheet   = "<link rel=\"stylesheet\" href=\"$root$style\" " .
-                      "type=\"text/css\" />";
-      $rss          = "<link rel=\"alternate\" href=\"${root}index.rss\" ".
-                      "title=\"RSS Feed\" type=\"application/rss+xml\" />";
-    }
-
-    # Open the theme file for reading:
-    open(THEME, catfile($blogdir, '.blaze', 'theme', $theme)) or return 0;
-
-    # Read the theme file:
-    my $template = do { local $/; <THEME> };
-
-    # Close the theme file:
-    close(THEME);
-
-    # Substitute header placeholders:
-    $template =~ s/<!--\s*rss\s*-->/$rss/ig if $with_rss;
-    $template =~ s/<!--\s*content-type\s*-->/$content_type/ig;
-    $template =~ s/<!--\s*stylesheet\s*-->/$stylesheet/ig;
-    $template =~ s/<!--\s*generator\s*-->/$generator/ig;
-    $template =~ s/<!--\s*date\s*-->/$date/ig;
-
-    # Substitute list placeholders:
-    $template =~ s/<!--\s*tags\s*-->/$tags/ig;
-    $template =~ s/<!--\s*archive\s*-->/$archive/ig;
-    $template =~ s/<!--\s*pages\s*-->/$pages/ig;
-    $template =~ s/<!--\s*posts\s*-->/$posts/ig;
-
-    # Substitute body placeholders:
-    $template =~ s/<!--\s*subtitle\s*-->/$subtitle/ig;
-    $template =~ s/<!--\s*e-mail\s*-->/$email/ig;
-    $template =~ s/<!--\s*title\s*-->/$title/ig;
-    $template =~ s/<!--\s*name\s*-->/$name/ig;
-    $template =~ s/<!--\s*year\s*-->/$year/ig;
-
-    # Store the template to the cache:
-    $cache->{theme}->{$temp} = $template;
-  }
-
-  # Load the template from the cache:
-  my $template = $cache->{theme}->{$temp};
+  # Load the template:
+  my $template = format_template($data);
 
   # Substitute the page title:
-  $template   =~ s/<!--\s*page-title\s*-->/$heading/ig;
+  $template    =~ s/<!--\s*page-title\s*-->/$heading/ig;
 
   # Add the page content:
-  $template   =~ s/<!--\s*content\s*-->/$content/ig;
+  $template    =~ s/<!--\s*content\s*-->/$content/ig;
 
   # Substitute the root directory:
-  $template   =~ s/%root%/$root/ig;
+  $template    =~ s/%root%/$root/ig;
 
   # Substitute the home page:
-  $template   =~ s/%home%/$home/ig;
+  $template    =~ s/%home%/$home/ig;
 
   # Substitute the `blog post / page / tag with the selected ID'
   # placeholder:
