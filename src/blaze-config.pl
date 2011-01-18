@@ -694,6 +694,14 @@ A title of your blog.
 
 A subtitle of your blog.
 
+=item B<blog.description>=I<string>
+
+A brief description of your blog.
+
+=item B<blog.keywords>=I<list>
+
+A comma-separated list of keywords.
+
 =item B<blog.theme>=I<string>
 
 A theme for your blog. Note that it must point to an existing file in the
