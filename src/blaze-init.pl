@@ -240,15 +240,13 @@ sub create_theme {
 
   # Write the default theme to the file:
   print FILE << 'END_THEME';
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-                      "http://www.w3.org/TR/html4/strict.dtd">
-<html>
+<!-- START-DOCUMENT -->
 <head>
   <!-- content-type -->
   <!-- generator -->
   <!-- date -->
   <!-- stylesheet -->
-  <!-- rss -->
+  <!-- feed -->
   <title><!-- page-title --></title>
 </head>
 
@@ -297,7 +295,7 @@ sub create_theme {
 </div>
 
 </body>
-</html>
+<!-- END-DOCUMENT -->
 END_THEME
 
   # Close the file:
