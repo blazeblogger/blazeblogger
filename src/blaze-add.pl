@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-add - adds a blog post or a page to the BlazeBlogger repository
-# Copyright (C) 2008-2010 Jaromir Hradilek
+# Copyright (C) 2008-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -79,7 +79,7 @@ sub display_help {
   # Display the usage:
   print << "END_HELP";
 Usage: $NAME [-pqCPV] [-b DIRECTORY] [-E EDITOR] [-a AUTHOR] [-d DATE]
-                 [-t TITLE] [-T TAGS] [-u URL] [FILE...]
+                 [-t TITLE] [-k KEYWORDS] [-T TAGS] [-u URL] [FILE...]
        $NAME -h|-v
 
   -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
@@ -88,6 +88,7 @@ Usage: $NAME [-pqCPV] [-b DIRECTORY] [-E EDITOR] [-a AUTHOR] [-d DATE]
   -t, --title TITLE           specify a title
   -a, --author AUTHOR         specify an author
   -d, --date DATE             specify a date of publishing
+  -k, --keywords KEYWORDS     specify a comma-separated list of keywords
   -T, --tags TAGS             specify a comma-separated list of tags
   -u, --url URL               specify a URL
   -p, --page                  add a page or pages
@@ -112,7 +113,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -275,6 +276,12 @@ sub fix_header {
                     "Using `$date' instead.");
   }
 
+  # Check whether the keywords are specified:
+  if ($data->{header}->{keywords}) {
+    # Strip quotation marks:
+    $data->{header}->{keywords} =~ s/"//g;
+  }
+
   # Check whether the tags are specified:
   if (my $tags = $data->{header}->{tags}) {
     # Make all tags lower case:
@@ -380,7 +387,7 @@ sub save_record {
     last unless $line =~ /^#/;
 
     # Collect data for the record header:
-    if ($line =~ /(title|author|date|tags|url):\s*(\S.*)$/) {
+    if ($line =~ /(title|author|date|keywords|tags|url):\s*(\S.*)$/) {
       $data->{header}->{$1} = $2;
     }
   }
@@ -524,12 +531,14 @@ sub add_new {
   my $edit = $editor || $conf->{core}->{editor} || $ENV{EDITOR} || 'vi';
 
   # Prepare the data for the temporary file header:
-  my $title  = $data->{header}->{title} || '';
-  my $author = $data->{header}->{author}|| $conf->{user}->{nickname}
-                                        || $conf->{user}->{name} || 'admin';
-  my $date   = $data->{header}->{date}  || date_to_string(time);
-  my $tags   = $data->{header}->{tags}  || '';
-  my $url    = $data->{header}->{url}   || '';
+  my $title    = $data->{header}->{title}    || '';
+  my $author   = $data->{header}->{author}   || $conf->{user}->{nickname}
+                                             || $conf->{user}->{name}
+                                             || 'admin';
+  my $date     = $data->{header}->{date}     || date_to_string(time);
+  my $keywords = $data->{header}->{keywords} || '';
+  my $tags     = $data->{header}->{tags}     || '';
+  my $url      = $data->{header}->{url}      || '';
 
   # Prepare the temporary file header:
   my $head = << "END_HEAD";
@@ -541,11 +550,12 @@ sub add_new {
 # underscores only. Specifying your own url  is especially recommended when
 # you use non-ASCII characters in your $type title.
 #
-#   title:  $title
-#   author: $author
-#   date:   $date
-#   tags:   $tags
-#   url:    $url
+#   title:    $title
+#   author:   $author
+#   date:     $date
+#   keywords: $keywords
+#   tags:     $tags
+#   url:      $url
 #
 # The header ends here. The rest is the content of your $type.
 
@@ -642,11 +652,12 @@ GetOptions(
   'verbose|V'      => sub { $verbose = 1;      },
   'blogdir|b=s'    => sub { $blogdir = $_[1];  },
   'editor|E=s'     => sub { $editor  = $_[1];  },
-  'title|t=s'      => sub { $data->{header}->{title}  = $_[1]; },
-  'author|a=s'     => sub { $data->{header}->{author} = $_[1]; },
-  'date|d=s'       => sub { $data->{header}->{date}   = $_[1]; },
-  'tags|tag|T=s'   => sub { $data->{header}->{tags}   = $_[1]; },
-  'url|u=s'        => sub { $data->{header}->{url}    = $_[1]; },
+  'title|t=s'      => sub { $data->{header}->{title}    = $_[1]; },
+  'author|a=s'     => sub { $data->{header}->{author}   = $_[1]; },
+  'date|d=s'       => sub { $data->{header}->{date}     = $_[1]; },
+  'keywords|k=s'   => sub { $data->{header}->{keywords} = $_[1]; },
+  'tags|tag|T=s'   => sub { $data->{header}->{tags}     = $_[1]; },
+  'url|u=s'        => sub { $data->{header}->{url}      = $_[1]; },
 );
 
 # Check whether the repository is present, no matter how naive this method
@@ -865,7 +876,7 @@ discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
