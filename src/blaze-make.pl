@@ -913,7 +913,7 @@ sub format_template {
   }
   else {
     # Fix the document header:
-    $document_start = '<?xml version="1.0" encoding="$conf_encoding"?>
+    $document_start = '<?xml version="1.0" encoding="'.$conf_encoding.'"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">';
