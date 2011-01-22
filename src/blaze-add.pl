@@ -714,8 +714,8 @@ blaze-add - adds a blog post or a page to the BlazeBlogger repository
 =head1 SYNOPSIS
 
 B<blaze-add> [B<-pqCPV>] [B<-b> I<directory>] [B<-E> I<editor>]
-[B<-a> I<author>] [B<-d> I<date>] [B<-t> I<title>] [B<-T> I<tags>]
-[B<-u> I<url>] [I<file>...]
+[B<-a> I<author>] [B<-d> I<date>] [B<-t> I<title>] [B<-k> I<keywords>]
+[B<-T> I<tags>] [B<-u> I<url>] [I<file>...]
 
 B<blaze-add> B<-h>|B<-v>
 
@@ -788,6 +788,11 @@ Allows you to specify the I<author> of a blog post or page.
 =item B<-d> I<date>, B<--date> I<date>
 
 Allows you to specify the I<date> of publishing of a blog post or page.
+
+=item B<-k> I<keywords>, B<--keywords> I<keywords>
+
+Allows you to specify a comma-separated list of I<keywords> attached to
+a blog post or page.
 
 =item B<-T> I<tags>, B<--tags> I<tags>
 
