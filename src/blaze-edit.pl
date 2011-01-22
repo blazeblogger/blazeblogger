@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-edit - edits a blog post or a page in the BlazeBlogger repository
-# Copyright (C) 2008-2010 Jaromir Hradilek
+# Copyright (C) 2008-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -105,7 +105,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -268,6 +268,12 @@ sub fix_header {
                     "Using `$date' instead.");
   }
 
+  # Check whether the keywords are specified:
+  if ($data->{header}->{keywords}) {
+    # Strip quotation marks:
+    $data->{header}->{keywords} =~ s/"//g;
+  }
+
   # Check whether the tags are specified:
   if (my $tags = $data->{header}->{tags}) {
     # Make all tags lower case:
@@ -352,11 +358,12 @@ sub read_record {
   my $data = read_ini($head) or return 0;
 
   # Collect the data for the file header:
-  my $author = $data->{header}->{author} || '';
-  my $title  = $data->{header}->{title}  || '';
-  my $date   = $data->{header}->{date}   || '';
-  my $tags   = $data->{header}->{tags}   || '';
-  my $url    = $data->{header}->{url}    || '';
+  my $author   = $data->{header}->{author}   || '';
+  my $title    = $data->{header}->{title}    || '';
+  my $date     = $data->{header}->{date}     || '';
+  my $keywords = $data->{header}->{keywords} || '';
+  my $tags     = $data->{header}->{tags}     || '';
+  my $url      = $data->{header}->{url}      || '';
 
   # Open the file for writing:
   if (open(FOUT, ">$file")) {
@@ -370,11 +377,12 @@ sub read_record {
 # underscores only. Specifying your own url  is especially recommended when
 # you use non-ASCII characters in your $type title.
 #
-#   title:  $title
-#   author: $author
-#   date:   $date
-#   tags:   $tags
-#   url:    $url
+#   title:    $title
+#   author:   $author
+#   date:     $date
+#   keywords: $keywords
+#   tags:     $tags
+#   url:      $url
 #
 # The header ends here. The rest is the content of your $type.
 END_HEADER
@@ -452,7 +460,7 @@ sub save_record {
     last unless $line =~ /^#/;
 
     # Collect data for the record header:
-    if ($line =~ /(title|author|date|tags|url):\s*(\S.*)$/) {
+    if ($line =~ /(title|author|date|keywords|tags|url):\s*(\S.*)$/) {
       $data->{header}->{$1} = $2;
     }
   }
@@ -813,7 +821,7 @@ discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
