@@ -280,7 +280,7 @@ sub make_url {
 sub make_record {
   my $type = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
-  my ($title, $author, $date, $tags, $url) = @_;
+  my ($title, $author, $date, $keywords, $tags, $url) = @_;
 
   # Check whether the title is specified:
   if ($title) {
@@ -327,6 +327,12 @@ sub make_record {
                     "Using `$date' instead.");
   }
 
+  # Check whether the keywords are specified:
+  if ($keywords) {
+    # Strip quotation marks:
+    $keywords =~ s/"//g;
+  }
+
   # Check whether the tags are specified:
   if ($tags) {
     # Make all tags lower case:
@@ -350,7 +356,7 @@ sub make_record {
 
   # Check whether the URL is specified:
   if ($url) {
-    # Check whether it contains forbidded characters:
+    # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
       # Strip forbidden characters:
       $url = make_url($url);
@@ -385,12 +391,13 @@ sub make_record {
 
   # Return the composed record:
   return {
-    'id'     => $id,
-    'title'  => $title,
-    'author' => $author,
-    'date'   => $date,
-    'tags'   => $tags,
-    'url'    => $url,
+    'id'       => $id,
+    'title'    => $title,
+    'author'   => $author,
+    'date'     => $date,
+    'keywords' => $keywords,
+    'tags'     => $tags,
+    'url'      => $url,
   };
 }
 
@@ -413,16 +420,17 @@ sub collect_headers {
     next if $id =~ /^\.\.?$/;
 
     # Parse header data:
-    my $data   = read_ini(catfile($head, $id)) or next;
-    my $date   = $data->{header}->{date};
-    my $tags   = $data->{header}->{tags};
-    my $author = $data->{header}->{author};
-    my $url    = $data->{header}->{url};
-    my $title  = $data->{header}->{title};
+    my $data     = read_ini(catfile($head, $id)) or next;
+    my $title    = $data->{header}->{title};
+    my $author   = $data->{header}->{author};
+    my $date     = $data->{header}->{date};
+    my $keywords = $data->{header}->{keywords};
+    my $tags     = $data->{header}->{tags};
+    my $url      = $data->{header}->{url};
 
     # Create the record:
     my $record = make_record($type, $id, $title, $author, $date,
-                             $tags, $url);
+                             $keywords, $tags, $url);
 
     # Add the record to the beginning of the list:
     push(@records, $record);
@@ -822,7 +830,7 @@ sub format_navigation {
   my $index = shift || '';
 
   # Read required data from the configuration:
-  my $ext   = $conf->{core}->{extension} || 'html';
+  my $conf_extension = $conf->{core}->{extension} || 'html';
 
   # Read required data from the localization:
   my $prev_string = $locale->{lang}->{previous} || '&laquo; Previous';
@@ -832,8 +840,8 @@ sub format_navigation {
   my $label = ($type eq 'previous') ? $prev_string : $next_string;
 
   # Return the result:
-  return "<div class=\"$type\"><a href=\"index$index.$ext\">$label</a>" .
-         "</div>\n";
+  return "<div class=\"$type\"><a href=\"index$index.$conf_extension\">" .
+         "$label</a></div>\n";
 }
 
 # Prepare a template:
@@ -851,7 +859,6 @@ sub format_template {
   my $conf_title    = $conf->{blog}->{title}       || 'Blog Title';
   my $conf_subtitle = $conf->{blog}->{subtitle}    || 'blog subtitle';
   my $conf_desc     = $conf->{blog}->{description} || 'blog description';
-  my $conf_keywords = $conf->{blog}->{keywords}    || 'blog keywords';
   my $conf_name     = $conf->{user}->{name}        || 'admin';
   my $conf_email    = $conf->{user}->{email}       || 'admin@localhost';
   my $conf_nickname = $conf->{user}->{nickname}    || $conf_name;
@@ -875,8 +882,7 @@ sub format_template {
   my $meta_date         = '<meta name="Date" content="'. localtime() .'">';
   my $meta_description  = '<meta name="Description" content="' .
                           $conf_desc . '">';
-  my $meta_keywords     = '<meta name="Keywords" content="' .
-                          $conf_keywords . '">';
+  my $meta_keywords     = '<meta name="Keywords" content="%keywords%">';
 
   # Prepare the LINK tags:
   my $link_stylesheet   = '<link rel="stylesheet" href="%root%' .
@@ -959,34 +965,44 @@ sub format_template {
 
 # Write a single page:
 sub write_page {
-  my $data    = shift || die 'Missing argument';
-  my $target  = shift || '';
-  my $root    = shift || '';
-  my $content = shift || '';
-  my $heading = shift || $conf->{blog}->{title} || 'My Blog';
-  my $index   = shift || '';
+  my $data     = shift || die 'Missing argument';
+  my $target   = shift || '';
+  my $root     = shift || '';
+  my $content  = shift || '';
+  my $heading  = shift || $conf->{blog}->{title} || 'My Blog';
+  my $keywords = shift || '';
+  my $index    = shift || '';
 
   # Initialize required variables:
   my $home    = fix_link($root);
   my $temp    = $root || '#';
 
   # Read required data from the configuration:
-  my $ext     = $conf->{core}->{extension}    || 'html';
+  my $conf_keywords  = $conf->{blog}->{keywords}  || 'blog keywords';
+  my $conf_extension = $conf->{core}->{extension} || 'html';
 
   # Load the template:
   my $template = format_template($data);
 
+  # Substitute the keywords:
+  if ($keywords) {
+    $template  =~ s/%keywords%/$keywords, $conf_keywords/ig;
+  }
+  else {
+    $template  =~ s/%keywords%/$conf_keywords/ig;
+  }
+
   # Substitute the page title:
-  $template    =~ s/<!--\s*page-title\s*-->/$heading/ig;
+  $template =~ s/<!--\s*page-title\s*-->/$heading/ig;
 
   # Add the page content:
-  $template    =~ s/<!--\s*content\s*-->/$content/ig;
+  $template =~ s/<!--\s*content\s*-->/$content/ig;
 
   # Substitute the root directory:
-  $template    =~ s/%root%/$root/ig;
+  $template =~ s/%root%/$root/ig;
 
   # Substitute the home page:
-  $template    =~ s/%home%/$home/ig;
+  $template =~ s/%home%/$home/ig;
 
   # Substitute the `blog post / page / tag with the selected ID'
   # placeholder:
@@ -1028,8 +1044,8 @@ sub write_page {
 
   # Prepare the file name:
   my $file = $target
-           ? catfile($target, "index$index.$ext")
-           : "index$index.$ext";
+           ? catfile($target, "index$index.$conf_extension")
+           : "index$index.$conf_extension";
 
   # Open the file for writing:
   open(FILE, ">$file") or return 0;
@@ -1235,7 +1251,7 @@ sub generate_index {
         $body .= format_navigation('next', $next) if $page;
 
         # Write the index page:
-        write_page($data, $target, '', $body, $blog_title, $index)
+        write_page($data, $target, '', $body, $blog_title, '', $index)
           or return 0;
 
         # Clear the page body:
@@ -1265,7 +1281,7 @@ sub generate_index {
       $body .= format_navigation('next', $next) if $page;
 
       # Write the index page:
-      write_page($data, $target, '', $body, $blog_title, $index)
+      write_page($data, $target, '', $body, $blog_title, '', $index)
         or return 0;
     }
   }
@@ -1333,8 +1349,8 @@ sub generate_posts {
                : catdir($destdir, $year, $month, $record->{url});
 
     # Write the blog post:
-    write_page($data, $target, '../../../', $post_body, $record->{title})
-      or return 0;
+    write_page($data, $target, '../../../', $post_body, $record->{title},
+               $record->{keywords}) or return 0;
 
     # Set the year:
     $year_curr = $year;
@@ -1355,7 +1371,8 @@ sub generate_posts {
       $target = ($destdir eq '.') ? $year : catdir($destdir, $year);
 
       # Write the yearly archive index page:
-      write_page($data, $target, '../', $year_body, $title) or return 0;
+      write_page($data, $target, '../', $year_body, $title, $title)
+        or return 0;
 
       # Change the previous year to the currently processed one:
       $year_last = $year_curr;
@@ -1398,8 +1415,8 @@ sub generate_posts {
               : catdir($destdir, $year, $month);
 
       # Write the monthly archive index page:
-      write_page($data, $target, '../../', $month_body, $title, $index)
-        or return 0;
+      write_page($data, $target, '../../', $month_body, $title, $title,
+                 $index) or return 0;
 
       # Check whether the month has changed:
       if ($month_curr ne $month_last) {
@@ -1454,8 +1471,8 @@ sub generate_posts {
             : catdir($destdir, $year, $month);
 
     # Write the monthly archive index page:
-    write_page($data, $target, '../../', $month_body, $title, $index)
-      or return 0;
+    write_page($data, $target, '../../', $month_body, $title, $title,
+               $index) or return 0;
   }
 
   # Return success:
@@ -1521,8 +1538,8 @@ sub generate_tags {
                          $data->{links}->{tags}->{$tag}->{url});
 
         # Write the tag index page:
-        write_page($data, $target, '../../', $tag_body, $title, $index)
-          or return 0;
+        write_page($data, $target, '../../', $tag_body, $title, $title,
+                   $index) or return 0;
 
         # Clear the tag body:
         $tag_body  = '';
@@ -1563,8 +1580,8 @@ sub generate_tags {
                        $data->{links}->{tags}->{$tag}->{url});
 
       # Write the tag index page:
-      write_page($data, $target, '../../', $tag_body, $title, $index)
-        or return 0;
+      write_page($data, $target, '../../', $tag_body, $title, $title,
+                 $index) or return 0;
     }
   }
 
@@ -1581,8 +1598,8 @@ sub generate_tags {
     my $target = ($destdir eq '.') ? 'tags' : catdir($destdir, 'tags');
 
     # Write the tag list index page:
-    write_page($data, $target, '../', $taglist_body, $tags_string)
-      or return 0;
+    write_page($data, $target, '../', $taglist_body, $tags_string,
+               $tags_string) or return 0;
   }
 
   # Return success:
@@ -1604,7 +1621,8 @@ sub generate_pages {
                : catdir($destdir, $record->{url});
 
     # Write the page:
-    write_page($data, $target, '../', $body, $record->{title}) or return 0;
+    write_page($data, $target, '../', $body, $record->{title},
+               $record->{keywords}) or return 0;
   }
 
   # Return success:
