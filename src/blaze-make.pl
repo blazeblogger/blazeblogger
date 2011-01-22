@@ -646,7 +646,7 @@ sub list_of_posts {
 
     # Add the post link to the list:
     $list .= "<li><a href=\"" . fix_link("%root%$year/$month/$url") .
-             "\">$title</a></li>\n";
+             "\" rel=\"permalink\">$title</a></li>\n";
 
     # Increase the counter:
     $count++;
@@ -709,7 +709,8 @@ sub format_heading {
   my $link  = shift || '';
 
   # Return the result:
-  return $link ? "<h2 class=\"post\"><a href=\"$link\">$title</a></h2>\n"
+  return $link ? "<h2 class=\"post\"><a href=\"$link\"" .
+                 " rel=\"permalink\">$title</a></h2>\n"
                : "<h2 class=\"post\">$title</h2>\n";
 }
 
@@ -832,16 +833,25 @@ sub format_navigation {
   # Read required data from the configuration:
   my $conf_extension = $conf->{core}->{extension} || 'html';
 
-  # Read required data from the localization:
-  my $prev_string = $locale->{lang}->{previous} || '&laquo; Previous';
-  my $next_string = $locale->{lang}->{next}     || 'Next &raquo;';
+  # Check the navigation type:
+  if ($type eq 'previous') {
+    # Read required data from the localization:
+    my $label = $locale->{lang}->{previous} || '&laquo; Previous';
 
-  # Prepare the label:
-  my $label = ($type eq 'previous') ? $prev_string : $next_string;
+    # Return the result:
+    return "<div class=\"previous\">" .
+           "<a href=\"index$index.$conf_extension\" rel=\"prev\">" .
+           "$label</a></div>\n";
+  }
+  else {
+    # Read required data from the localization:
+    my $label = $locale->{lang}->{next}     || 'Next &raquo;';
 
-  # Return the result:
-  return "<div class=\"$type\"><a href=\"index$index.$conf_extension\">" .
-         "$label</a></div>\n";
+    # Return the result:
+    return "<div class=\"next\">" .
+           "<a href=\"index$index.$conf_extension\" rel=\"next\">" .
+           "$label</a></div>\n";
+    }
 }
 
 # Prepare a template:

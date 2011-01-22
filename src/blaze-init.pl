@@ -262,13 +262,13 @@ sub create_theme {
 <div id="wrapper">
   <div id="shadow">
     <div id="heading">
-      <h1><a href="%home%"><!-- title --></a></h1>
+      <h1><a href="%home%" rel="index"><!-- title --></a></h1>
       <!-- subtitle -->
     </div>
 
     <div id="menu">
       <ul>
-<li><a href="%home%">Home</a></li>
+<li><a href="%home%" rel="index">Home</a></li>
 <!-- pages -->
       </ul>
     </div>
