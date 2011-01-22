@@ -224,62 +224,35 @@ sub make_url {
   return $url;
 }
 
-# Fix erroneous or missing header data:
-sub fix_header {
+# Look for erroneous or missing header data:
+sub check_header {
   my $data = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
   my $type = shift || die 'Missing argument';
 
   # Check whether the title is specified:
-  if ($data->{header}->{title}) {
-    # Strip trailing spaces:
-    $data->{header}->{title} =~ s/\s+$//;
-  }
-  else {
-    # Assign the default value:
-    my $title = $data->{header}->{title} = 'Untitled';
-
+  unless ($data->{header}->{title}) {
     # Display the appropriate warning:
-    display_warning("Missing title in the $type with ID $id. " .
-                    "Using `$title' instead.");
+    display_warning("Missing title in the $type with ID $id.");
   }
 
   # Check whether the author is specified:
   unless ($data->{header}->{author}) {
-    # Assign the default value:
-    my $author = $data->{header}->{author}
-               = $conf->{user}->{name} || 'admin';
-
     # Report the missing author:
-    display_warning("Missing author in the $type with ID $id. " .
-                    "Using `$author' instead.");
+    display_warning("Missing author in the $type with ID $id.");
   }
 
   # Check whether the date is specified:
   if (my $date = $data->{header}->{date}) {
     # Check whether the format is valid:
     unless ($date =~ /\d{4}-[01]\d-[0-3]\d/) {
-      # Use current date instead:
-      $date = $data->{header}->{date} = date_to_string(time);
-
       # Report the invalid date:
-      display_warning("Invalid date in the $type with ID $id. " .
-                      "Using `$date' instead.");
+      display_warning("Invalid date in the $type with ID $id.");
     }
   }
   else {
-    # Use current date instead:
-    my $date = $data->{header}->{date} = date_to_string(time);
-
     # Report the missing date:
-    display_warning("Missing date in the $type with ID $id. " .
-                    "Using `$date' instead.");
-  }
-
-  # Check whether the keywords are specified:
-  if ($data->{header}->{keywords}) {
-    # Strip quotation marks:
-    $data->{header}->{keywords} =~ s/"//g;
+    display_warning("Missing date in the $type with ID $id.");
   }
 
   # Check whether the tags are specified:
@@ -287,16 +260,13 @@ sub fix_header {
     # Make all tags lower case:
     $tags = lc($tags);
 
-    # Strip superfluous spaces:
+    # Strip superfluous characters:
     $tags =~ s/\s{2,}/ /g;
     $tags =~ s/\s+$//;
-
-    # Strip trailing commas:
     $tags =~ s/^,+|,+$//g;
 
     # Remove duplicates:
     my %temp = map { $_, 1 } split(/,+\s*/, $tags);
-    $data->{header}->{tags} = join(', ', sort(keys %temp));
 
     # Make sure none of the tags will have an empty URL:
     foreach my $tag (keys %temp) {
@@ -316,20 +286,17 @@ sub fix_header {
   if (my $url = $data->{header}->{url}) {
     # Check whether it contains forbidden characters:
     if ($url =~ /[^\w\-]/) {
-      # Strip forbidden characters:
-      $data->{header}->{url} = $url = make_url($url);
-
       # Report the invalid URL:
-      display_warning("Invalid URL in the $type with ID $id. " .
-                      ($url ? "Stripping to `$url'."
-                            : "It will be derived from the title."));
+      display_warning("Invalid URL in the $type with ID $id." .
+                      ($url ? "" : " It will be derived from the title."));
     }
   }
 
   # Make sure the URL can be derived from the title if necessary:
   unless ($data->{header}->{url}) {
     # Derive the URL from the post or page title:
-    my $url = make_url(lc($data->{header}->{title}));
+    my $title = $data->{header}->{title} || '';
+    my $url   = make_url(lc($title));
 
     # Check whether the URL is not empty:
     unless ($url) {
@@ -392,8 +359,8 @@ sub save_record {
     }
   }
 
-  # Fix erroneous or missing header data:
-  fix_header($data, $id, $type);
+  # Look for erroneous or missing header data:
+  check_header($data, $id, $type);
 
   # Write the record header to the temporary file:
   write_ini($temp_head, $data) or return 0;
