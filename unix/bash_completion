@@ -1,6 +1,6 @@
 # blazeblogger, a bash completion script for BlazeBlogger
 # Copyright (C) 2009 Miroslav Hradílek
-# Revision  (C) 2010 Jaromir Hradilek
+# Revision  (C) 2010-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -160,8 +160,8 @@ user.nickname user.email"
     # add handler code ----------------------------------------------------
       # utility specifick options
       local specopts="-b --blogdir -E --editor -t --title -a --author -d \
---date -T --tags -u --url -p --page -P --post -C --no-processor  -q \
---quiet -V --verbose -h --help -v --version"
+--date -k --keywords -T --tags -u --url -p --page -P --post -C \
+--no-processor  -q --quiet -V --verbose -h --help -v --version"
 
       # argument completions
       case "$prev" in
@@ -173,7 +173,7 @@ user.nickname user.email"
           COMPREPLY=( $(date +%Y-%m-%d) )
           return 0
           ;;
-        -E|--editor|-t|--title|-a|--author|-T|--tags|-u|-url)
+        -E|--editor|-t|--title|-a|--author|-k|--keywords|-T|--tags|-u|-url)
           COMPREPLY=()
           return 0
           ;;
