@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # blaze, a command wrapper for BlazeBlogger
-# Copyright (C) 2009-2010 Jaromir Hradilek
+# Copyright (C) 2009-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -46,21 +46,19 @@ case "$COMMAND" in
         echo "Usage: $NAME COMMAND [OPTION...]"
         echo
         echo "Basic commands:"
-        echo "  init     Creates or recovers a BlazeBlogger repository."
-        echo "  config   Displays or sets BlazeBlogger configuration options."
-        echo "  add      Adds a blog post or a page to the BlazeBlogger repository."
-        echo "  edit     Edits a blog post or a page in the BlazeBlogger repository."
-        echo "  remove   Removes a blog post or a page from the BlazeBlogger repository."
-        echo "  list     Lists blog posts or pages in the BlazeBlogger repository."
-        echo "  make     Generates a blog from the BlazeBlogger repository."
-        echo "  log      Displays the BlazeBlogger repository log."
+        echo "  init     create or recover a BlazeBlogger repository"
+        echo "  config   display or set BlazeBlogger configuration options"
+        echo "  add      add a blog post or page to a BlazeBlogger repository"
+        echo "  edit     edit a blog post or page in a BlazeBlogger repository"
+        echo "  remove   remove a blog post or page from a BlazeBlogger repository"
+        echo "  list     list blog posts or pages in a BlazeBlogger repository"
+        echo "  make     generate a blog from a BlazeBlogger repository"
+        echo "  log      display a BlazeBlogger repository log"
         echo
         echo "Additional commands:"
-        echo "  help [COMMAND]  Displays usage information on the selected command."
-        echo "  man [COMMAND]   Displays a man page for the selected command."
-        echo "  version         Displays version information."
-        echo
-        echo "Type \`$NAME help COMMAND' for command details."
+        echo "  help [COMMAND]  display usage information on the selected command"
+        echo "  man [COMMAND]   display a manual page for the selected command"
+        echo "  version         display version information"
 
         # Return success:
         exit 0
@@ -71,14 +69,14 @@ case "$COMMAND" in
     # Get the command, if any:
     COMMAND=$1
 
-    # Parse the command, and display its man page:
+    # Parse the command, and display its manual page:
     case "$COMMAND" in
       "add" | "log" | "edit" | "init" | "list" | "make" | "config" | "remove")
         # Display the utility usage information:
         exec man blaze-$COMMAND
         ;;
       *)
-        # Display general manual page:
+        # Display a general manual page:
         exec man blaze
         ;;
     esac
@@ -87,7 +85,7 @@ case "$COMMAND" in
     # Display version information:
     echo "BlazeBlogger $VERSION"
     echo
-    echo "Copyright (C) 2008-2010 Jaromir Hradilek"
+    echo "Copyright (C) 2008-2011 Jaromir Hradilek"
     echo "This program is free software; see the source for copying conditions. It is"
     echo "distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;"
     echo "without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-"

@@ -1,7 +1,7 @@
 @echo off
 
 REM blaze, a command wrapper for BlazeBlogger
-REM Copyright (C) 2009 Sergey Kuznetsov
+REM Copyright (C) 2009-2011 Sergey Kuznetsov
 REM
 REM This program is  free software:  you can redistribute it and/or modify it
 REM under  the terms  of the  GNU General Public License  as published by the
@@ -38,13 +38,13 @@ if /i "%1"=="help" (
 echo Usage: %BLAZENAME% COMMAND [OPTION...]
 echo.
 echo Available commands:
-echo   init    Create or recover a BlazeBlogger repository.
-echo   config  Display or set the BlazeBlogger repository options.
-echo   add     Add new post or a page to the BlazeBlogger repository.
-echo   edit    Edit a post or page in the BlazeBlogger repository.
-echo   remove  Remove a post or page from the BlazeBlogger repository.
-echo   list    Browse the content of the BlazeBlogger repository.
-echo   make    Generate static content from the BlazeBlogger repository.
-echo   log     Display the BlazeBlogger repository log.
+echo   init    create or recover a BlazeBlogger repository
+echo   config  display or set BlazeBlogger configuration options
+echo   add     add a blog post or page to a BlazeBlogger repository
+echo   edit    edit a blog post or page in a BlazeBlogger repository
+echo   remove  remove a blog post or page from a BlazeBlogger repository
+echo   list    list blog posts or pages in a BlazeBlogger repository
+echo   make    generate a blog from a BlazeBlogger repository
+echo   log     display a BlazeBlogger repository log
 echo.
 echo Type \`%BLAZENAME% help COMMAND' for command details.
