@@ -30,7 +30,7 @@ case "$COMMAND" in
   "ls")         COMMAND="list";;
   "mk")         COMMAND="make";;
   "rm" | "del") COMMAND="remove";;
-  "cf" | "cfg") COMMAND="config";;
+  "cf" | "cfg") COMMAND="config";;
   "vs" | "ver") COMMAND="version";;
 esac
 
