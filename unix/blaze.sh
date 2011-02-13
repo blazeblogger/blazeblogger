@@ -19,11 +19,20 @@
 NAME=${0##*/}
 VERSION='1.1.2'
 
-# Get the command, if any:
+# Get the command if any, and shift command line options:
 COMMAND=$1
-
-# Shift command line options:
 shift
+
+# Substitute aliases:
+case "$COMMAND" in
+  "ed")         COMMAND="edit";;
+  "in")         COMMAND="init";;
+  "ls")         COMMAND="list";;
+  "mk")         COMMAND="make";;
+  "rm" | "del") COMMAND="remove";;
+  "cf" | "cfg") COMMAND="config";;
+  "vs" | "ver") COMMAND="version";;
+esac
 
 # Parse the command and perform an appropriate action:
 case "$COMMAND" in
@@ -59,6 +68,15 @@ case "$COMMAND" in
         echo "  help [COMMAND]  display usage information on the selected command"
         echo "  man [COMMAND]   display a manual page for the selected command"
         echo "  version         display version information"
+        echo
+        echo "Command aliases:"
+        echo "  in       init"
+        echo "  ed       edit"
+        echo "  ls       list"
+        echo "  mk       make"
+        echo "  cf, cfg  config"
+        echo "  rm, del  remove"
+        echo "  vs, ver  version"
 
         # Return success:
         exit 0
