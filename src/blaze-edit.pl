@@ -332,17 +332,20 @@ sub read_record {
   my $tags     = $data->{header}->{tags}     || '';
   my $url      = $data->{header}->{url}      || '';
 
-  # Open the file for writing:
-  if (open(FOUT, ">$file")) {
-    # Write the header:
-    print FOUT << "END_HEADER";
-# This and following lines beginning with  '#' are the $type header.  Please
-# take your time and replace these options with desired values. Just remem-
-# ber that the date has to be in an YYYY-MM-DD form, tags are a comma sepa-
-# rated list of categories the post (pages ignore these) belong to, and the
-# url, if provided, should consist of alphanumeric characters,  hyphens and
-# underscores only. Specifying your own url  is especially recommended when
-# you use non-ASCII characters in your $type title.
+  # Declare other necessary variables:
+  my $head;
+
+  # Prepare the temporary file header:
+  if ($type eq 'post') {
+    # Use the variant for a blog post:
+    $head = << "END_POST_HEADER";
+# This and the following lines beginning with '#' are the blog post header.
+# Please take your time and replace these options with desired values. Just
+# remember that the date has to be in the YYYY-MM-DD form, tags are a comma
+# separated list of categories the post (pages ignore these) belong to, and
+# the url,  if provided, should consist of alphanumeric characters, hyphens
+# and underscores only.  Specifying your own url  is especially recommended
+# in case you use non-ASCII characters in your blog post title.
 #
 #   title:    $title
 #   author:   $author
@@ -351,8 +354,32 @@ sub read_record {
 #   tags:     $tags
 #   url:      $url
 #
-# The header ends here. The rest is the content of your $type.
-END_HEADER
+# The header ends here. The rest is the content of your blog post.
+END_POST_HEADER
+  }
+  else {
+    # Use the variant for a page:
+    $head = << "END_PAGE_HEADER";
+# This and the following lines beginning with '#' are the page header. Ple-
+# ase take your time and replace these  options with  desired  values. Just
+# remember that the date has to be in the YYYY-MM-DD form, and the  url, if
+# provided, should  consist of alphanumeric characters,  hyphens and under-
+# scores only. Specifying your own url  is especially  recommended  in case
+# you use non-ASCII characters in your page title.
+#
+#   title:    $title
+#   date:     $date
+#   keywords: $keywords
+#   url:      $url
+#
+# The header ends here. The rest is the content of your page.
+END_PAGE_HEADER
+  }
+
+  # Open the file for writing:
+  if (open(FOUT, ">$file")) {
+    # Write the header:
+    print FOUT $head;
 
     # Skip this part when forced to create empty raw file:
     unless ($process && ! -e $raw && $force) {
