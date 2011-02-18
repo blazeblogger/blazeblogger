@@ -1,5 +1,5 @@
 # makefile for BlazeBlogger, a CMS without boundaries
-# Copyright (C) 2009-2010 Jaromir Hradilek
+# Copyright (C) 2009-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -15,7 +15,7 @@
 
 # General information:
 NAME    = blazeblogger
-VERSION = 1.1.2
+VERSION = 1.2.0
 
 # General settings:
 SHELL   = /bin/sh

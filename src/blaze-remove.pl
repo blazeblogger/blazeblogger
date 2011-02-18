@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 # blaze-remove - removes a post or page from the BlazeBlogger repository
-# Copyright (C) 2008-2010 Jaromir Hradilek
+# Copyright (C) 2008-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
 # under  the terms  of the  GNU General Public License  as published by the
@@ -23,7 +23,7 @@ use Getopt::Long;
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
-use constant VERSION => '1.1.2';                    # Script version.
+use constant VERSION => '1.2.0';                    # Script version.
 
 # General script settings:
 our $blogdir = '.';                                 # Repository location.
@@ -95,7 +95,7 @@ sub display_version {
   print << "END_VERSION";
 $NAME $VERSION
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 This program is free software; see the source for copying conditions. It is
 distributed in the hope  that it will be useful,  but WITHOUT ANY WARRANTY;
 without even the implied warranty of  MERCHANTABILITY or FITNESS FOR A PAR-
@@ -361,7 +361,7 @@ discussion group at <http://groups.google.com/group/blazeblogger/>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2008-2010 Jaromir Hradilek
+Copyright (C) 2008-2011 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;

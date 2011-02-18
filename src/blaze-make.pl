@@ -28,7 +28,7 @@ use Time::Local 'timelocal_nocheck';
 
 # General script information:
 use constant NAME    => basename($0, '.pl');        # Script name.
-use constant VERSION => '1.1.2';                    # Script version.
+use constant VERSION => '1.2.0';                    # Script version.
 
 # General script settings:
 our $blogdir     = '.';                             # Repository location.
