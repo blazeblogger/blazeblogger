@@ -874,6 +874,11 @@ Configure the RSS feed:
   ~]$ blaze-config feed.baseurl http://blaze.blackened.cz/
   The option has been successfully saved.
 
+Enable the use of the Markdown markup language:
+
+  ~]$ blaze-config core.processor 'markdown %in% > %out%'
+  The option has been successfully saved.
+
 Open the configuration in a text editor:
 
   ~]$ blaze-config -e
