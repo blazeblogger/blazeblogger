@@ -709,9 +709,9 @@ sub format_heading {
   my $link  = shift || '';
 
   # Return the result:
-  return $link ? "<h2 class=\"post\"><a href=\"$link\"" .
-                 " rel=\"permalink\">$title</a></h2>\n"
-               : "<h2 class=\"post\">$title</h2>\n";
+  return $link ? "      <h2 class=\"post-heading\"><a href=\"$link\"" .
+                 " rel=\"permalink\">$title</a></h2>"
+               : "      <h2 class=\"post-heading\">$title</h2>";
 }
 
 # Return formatted blog post or page information:
@@ -721,7 +721,7 @@ sub format_information {
   my $type   = shift || 'top';
 
   # Initialize required variables:
-  my $class  = ($type eq 'top') ? 'information' : 'post-footer';
+  my $class  = ($type eq 'top') ? 'post-header' : 'post-footer';
   my ($date, $author, $taglist) = ('', '', '');
 
   # Read required data from the configuration:
@@ -766,7 +766,9 @@ sub format_information {
   # Check if there is anything to return:
   if ($date || $author || $taglist) {
     # Return the result:
-    return "<div class=\"$class\">\n  \u$date$author$taglist\n</div>\n";
+    return "      <div class=\"$class\">\n" .
+           "        \u$date$author$taglist\n" .
+           "      </div>";
   }
   else {
     # Return an empty string:
@@ -785,7 +787,7 @@ sub format_entry {
   my $tags    = $data->{links}->{tags};
   my $title   = $record->{title};
   my $id      = $record->{id};
-  my ($link, $information, $post_footer) = ('', '', '');
+  my ($link, $post_header, $post_footer) = ('', '', '');
 
   # If the synopsis is requested, prepare the entry link:
   if ($excerpt) {
@@ -804,17 +806,24 @@ sub format_entry {
   }
 
   # Prepare the blog post or page heading, and the body or the synopsis:
-  my $heading = format_heading($title, $link);
-  my $body    = read_entry($id, $type, $link, $excerpt);
+  my $post_heading = format_heading($title, $link);
+  my $post_body    = read_entry($id, $type, $link, $excerpt);
 
   # For blog posts, prepare its additional information:
   if ($type eq 'post') {
-    $information = format_information($record, $tags, 'top');
+    $post_header = format_information($record, $tags, 'top');
     $post_footer = format_information($record, $tags, 'bottom');
   }
 
   # Return the result:
-  return "\n$heading$information$body$post_footer";
+  return << "END_ENTRY";
+    <div class="post">
+$post_heading
+$post_header
+$post_body
+$post_footer
+    </div>
+END_ENTRY
 }
 
 # Return a formatted section title:
