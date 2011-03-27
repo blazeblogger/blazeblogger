@@ -716,7 +716,7 @@ leaving all user data (that is, both blog posts and pages) intact.
 =item B<-b> I<directory>, B<--blogdir> I<directory>
 
 Allows you to specify a I<directory> in which the BlazeBlogger repository
-is to be blaced. The default option is a current working directory.
+is to be placed. The default option is a current working directory.
 
 =item B<-f>, B<--force>
 
