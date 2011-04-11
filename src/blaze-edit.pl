@@ -309,12 +309,12 @@ sub read_record {
   my $type = shift || 'post';
 
   # Prepare the record file names:
-  my $head = catfile($blogdir, '.blaze', "${type}s", 'head', $id);
-  my $body = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
-  my $raw  = catfile($blogdir, '.blaze', "${type}s", 'raw',  $id);
+  my $head_file = catfile($blogdir, '.blaze', "${type}s", 'head', $id);
+  my $body_file = catfile($blogdir, '.blaze', "${type}s", 'body', $id);
+  my $raw_file  = catfile($blogdir, '.blaze', "${type}s", 'raw',  $id);
 
   # If the processor is enabled, make sure the raw file exists:
-  if ($process && ! -e $raw) {
+  if ($process && ! -e $raw_file) {
     exit_with_error("The raw file does not exist. Use `--force' to create " .
                     "a new one, or `--no-processor' to disable the " .
                     "processor.", 1)
@@ -322,7 +322,7 @@ sub read_record {
   }
 
   # Parse the record header data:
-  my $data = read_ini($head) or return 0;
+  my $data = read_ini($head_file) or return 0;
 
   # Collect the data for the file header:
   my $author   = $data->{header}->{author}   || '';
@@ -382,9 +382,9 @@ END_PAGE_HEADER
     print FOUT $head;
 
     # Skip this part when forced to create empty raw file:
-    unless ($process && ! -e $raw && $force) {
+    unless ($process && ! -e $raw_file && $force) {
       # Open the record for the reading:
-      open(FIN, ($process ? $raw : $body)) or return 0;
+      open(FIN, ($process ? $raw_file : $body_file)) or return 0;
 
       # Add the content of the record body to the file:
       while (my $line = <FIN>) {
