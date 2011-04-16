@@ -297,7 +297,7 @@ sub make_record {
   }
 
   # Check whether the author is specified:
-  unless ($author) {
+  unless ($author || $type eq 'page') {
     # Assign the default value:
     $author = $conf->{user}->{name} || 'admin';
 

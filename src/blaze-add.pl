@@ -237,7 +237,7 @@ sub check_header {
   }
 
   # Check whether the author is specified:
-  unless ($data->{header}->{author}) {
+  unless ($data->{header}->{author} || $type eq 'page') {
     # Report the missing author:
     display_warning("Missing author in the $type with ID $id.");
   }
