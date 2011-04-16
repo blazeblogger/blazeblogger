@@ -1254,8 +1254,8 @@ sub generate_index {
     display_warning("Invalid blog.posts option. Using the default value.");
   }
 
-  # Check whether the blog posts are enabled:
-  if ($with_posts) {
+  # Check whether the blog posts are enabled and present:
+  if ($with_posts && scalar(@{$data->{headers}->{posts}}) > 0) {
     # Process the requested number of blog posts:
     foreach my $record (@{$data->{headers}->{posts}}) {
       # Check whether the number of listed blog posts reached the limit:
