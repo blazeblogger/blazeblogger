@@ -73,32 +73,33 @@ sub display_help {
   # Display the usage:
   print << "END_HELP";
 Usage: $NAME [-cpqrsCPSV] [-b DIRECTORY] [-I ID] [-a AUTHOR]
-                  [-t TITLE] [-T TAG] [-d DAY] [-m MONTH] [-y YEAR]
-                  [-n NUMBER]
+                  [-t TITLE] [-k KEYWORD] [-T TAG] [-d DAY] [-m MONTH]
+                  [-y YEAR] [-n NUMBER]
        $NAME -h|-v
 
-  -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
-                              repository is placed
-  -I, --id ID                 display a single blog post or a page
-  -a, --author AUTHOR         list blog posts or pages by selected author
-  -t, --title TITLE           list blog posts or pages with matching title
-  -T, --tag TAG               list blog posts or pages with matching tag
-  -d, --day DAY               list blog posts or pages from selected day
-  -m, --month MONTH           list blog posts or pages from selected month
-  -y, --year YEAR             list blog posts or pages from selected year
-  -n, --number NUMBER         specify a number of blog posts or pages to
-                              be listed
-  -p, --pages                 list pages
-  -P, --posts                 list blog posts
-  -S, --stats                 display repository statistics
-  -s, --short                 display blog posts or pages on a single line
-  -r, --reverse               display blog posts or pages in reverse order
-  -c, --color                 enable colored output
-  -C, --no-color              disable colored output
-  -q, --quiet                 do not display unnecessary messages
-  -V, --verbose               display all messages
-  -h, --help                  display this help and exit
-  -v, --version               display version information and exit
+  -b, --blogdir DIRECTORY  specify a directory in which the BlazeBlogger
+                           repository is placed
+  -I, --id ID              display a single blog post or page
+  -a, --author AUTHOR      list blog posts by a particular author
+  -t, --title TITLE        list blog posts or pages with a matching title
+  -k, --keyword KEYWORD    list blog posts or pages with a matching keyword
+  -T, --tag TAG            list blog posts or pages with a matching tag
+  -d, --day DAY            list blog posts or pages from a given day
+  -m, --month MONTH        list blog posts or pages from a given month
+  -y, --year YEAR          list blog posts or pages from a given year
+  -n, --number NUMBER      specify a number of blog posts or pages to
+                           be listed
+  -p, --pages              list pages
+  -P, --posts              list blog posts
+  -S, --stats              display repository statistics
+  -s, --short              display blog posts or pages on a single line
+  -r, --reverse            display blog posts or pages in reverse order
+  -c, --color              enable colored output
+  -C, --no-color           disable colored output
+  -q, --quiet              do not display unnecessary messages
+  -V, --verbose            display all messages
+  -h, --help               display this help and exit
+  -v, --version            display version information and exit
 END_HELP
 
   # Return success:
@@ -553,8 +554,8 @@ blaze-list - lists blog posts or pages in the BlazeBlogger repository
 =head1 SYNOPSIS
 
 B<blaze-list> [B<-cpqrsCPSV>] [B<-b> I<directory>] [B<-I> I<id>]
-[B<-a> I<author>] [B<-t> I<title>] [B<-T> I<tag>] [B<-d> I<day>]
-[B<-m> I<month>] [B<-y> I<year>] [B<-n> I<number>]
+[B<-a> I<author>] [B<-t> I<title>] [B<-k> I<keyword>] [B<-T> I<tag>]
+[B<-d> I<day>] [B<-m> I<month>] [B<-y> I<year>] [B<-n> I<number>]
 
 B<blaze-list> B<-h>|B<-v>
 
@@ -583,11 +584,15 @@ Allows you to list blog posts or pages by the selected I<author>.
 
 =item B<-t> I<title>, B<--title> I<title>
 
-Allows you to list blog posts or pages with matching I<title>.
+Allows you to list blog posts or pages with a matching I<title>.
+
+=item B<-k> I<keyword>, B<--keyword> I<keyword>
+
+Allows you to list blog posts or pages with a matching I<keyword>.
 
 =item B<-T> I<tag>, B<--tag> I<tag>
 
-Allows you to list blog posts or pages with matching I<tag>.
+Allows you to list blog posts or pages with a matching I<tag>.
 
 =item B<-d> I<day>, B<--day> I<day>
 
