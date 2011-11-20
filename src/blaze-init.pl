@@ -345,8 +345,8 @@ sub create_style {
  */
 
 body {
-  margin: 0px 0px 10px 0px;
-  padding: 0px;
+  margin: 0 0 10px 0;
+  padding: 0;
   color: #000000;
   background-color: #e7e7e7;
   font-family: "DejaVu Sans", Arial, sans;
@@ -355,7 +355,7 @@ body {
 
 #wrapper {
   margin: auto;
-  padding: 0px;
+  padding: 0;
   width: 768px;
   border-left: 1px solid #d6d6d6;
   border-right: 1px solid #d6d6d6;
@@ -364,8 +364,8 @@ body {
 }
 
 #shadow {
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
   border-bottom: 2px solid #e7e7e7;
 }
 
@@ -379,7 +379,7 @@ body {
 }
 
 #heading a, #heading h1 {
-  margin: 0px;
+  margin: 0;
   text-decoration: none;
   color: #ffffff;
 }
@@ -397,14 +397,14 @@ body {
 
 #menu ul {
   padding: 4px 15px 4px 15px;
-  margin: 0px;
+  margin: 0;
   list-style-type: none;
 }
 
 #menu li {
   display: inline;
   padding: 4px 10px 5px 10px;
-  margin: 0px;
+  margin: 0;
 }
 
 #menu li:hover {
@@ -425,15 +425,15 @@ body {
 
 #content {
   float: left;
-  margin: 0px;
+  margin: 0;
   padding: 10px 10px 20px 20px;
   width: 528px;
   text-align: justify;
 }
 
 #content h2.post {
-  margin-bottom: 0px;
-  padding-bottom: 0px;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 #content .post a {
@@ -489,19 +489,19 @@ body {
 }
 
 #content .previous {
-  padding: 10px 0px 10px 0px;
+  padding: 10px 0 10px 0;
   float: left;
 }
 
 #content .next {
-  padding: 10px 0px 10px 0px;
+  padding: 10px 0 10px 0;
   float: right;
 }
 
 #sidebar {
   float: right;
-  margin: 0px;
-  padding: 10px 20px 20px 0px;
+  margin: 0;
+  padding: 10px 20px 20px 0;
   width: 180px;
 }
 
@@ -512,7 +512,7 @@ body {
 #sidebar ul {
   list-style-type: none;
   padding-left: 1em;
-  margin-left: 0px;
+  margin-left: 0;
 }
 
 #sidebar a {
@@ -526,7 +526,7 @@ body {
 
 #footer {
   clear: both;
-  margin: 0px;
+  margin: 0;
   padding: 10px 20px 10px 20px;
   border-top: 2px solid #e7e7e7;
   border-bottom: 1px solid #3d3d3d;
