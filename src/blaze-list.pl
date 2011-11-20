@@ -38,16 +38,6 @@ our $number     = 0;                                # Listed records limit.
 # Global variables:
 our $conf       = {};                               # Configuration.
 
-# Command line options:
-my  $type       = 'post';                           # Type: post or page.
-my  $id         = '';                               # ID search pattern.
-my  $title      = '';                               # Title search pattern.
-my  $author     = '';                               # Name search pattern.
-my  $year       = '';                               # Year search pattern.
-my  $month      = '';                               # Month search pattern.
-my  $day        = '';                               # Day search pattern.
-my  $tag        = '';                               # Tag search pattern.
-
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__}  = sub {
   print STDERR NAME . ": " . (shift);
@@ -380,13 +370,17 @@ sub display_record {
 # Display a list of matching records:
 sub display_records {
   my $type    = shift || 'post';
-  my $id      = shift || '.*';
-  my $author  = shift || '.*';
-  my $title   = shift || '';
-  my $tag     = shift || '.*';
-  my $year    = shift || '....';
-  my $month   = shift || '..';
-  my $day     = shift || '..';
+  my $pattern = shift || die 'Missing argument';
+
+  # Prepare the patterns:
+  my $id      = $pattern->{id}      || '.*';
+  my $author  = $pattern->{author}  || '.*';
+  my $title   = $pattern->{title}   || '';
+  my $keyword = $pattern->{keyword} || '.*';
+  my $tag     = $pattern->{tag}     || '.*';
+  my $year    = $pattern->{year}    || '....';
+  my $month   = $pattern->{month}   || '..';
+  my $day     = $pattern->{day}     || '..';
 
   # Initialize required variables:
   my $count   = 0;
@@ -397,11 +391,12 @@ sub display_records {
   # Process each header:
   foreach my $record (@headers) {
     # Check whether the record matches the pattern:
-    unless ($record->{date}   =~ /^$year-$month-$day$/i &&
-            $record->{title}  =~ /^.*$title.*$/i &&
-            $record->{tags}   =~ /^(|.*, *)$tag(,.*|)$/i &&
-            $record->{author} =~ /^$author$/i &&
-            $record->{id}     =~ /^$id$/i) {
+    unless ($record->{date}     =~ /^$year-$month-$day$/i &&
+            $record->{title}    =~ /^.*$title.*$/i &&
+            $record->{keywords} =~ /^(|.*, *)$keyword(,.*|)$/i &&
+            $record->{tags}     =~ /^(|.*, *)$tag(,.*|)$/i &&
+            $record->{author}   =~ /^$author$/i &&
+            $record->{id}       =~ /^$id$/i) {
       # Skip the record:
       next;
     }
@@ -457,6 +452,17 @@ sub display_statistics {
   return 1;
 }
 
+# Initialize command line options:
+my $type       = 'post';
+my $id         = '';
+my $title      = '';
+my $author     = '';
+my $year       = '';
+my $month      = '';
+my $day        = '';
+my $keyword    = '';
+my $tag        = '';
+
 # Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
 
@@ -471,7 +477,8 @@ GetOptions(
   'id|I=i'               => sub { $id       = $_[1];   },
   'author|a=s'           => sub { $author   = $_[1];   },
   'title|t=s'            => sub { $title    = $_[1];   },
-  'tags|tag|T=s'         => sub { $tag      = $_[1];   },
+  'keyword|k=s'          => sub { $keyword  = $_[1];   },
+  'tag|T=s'              => sub { $tag      = $_[1];   },
   'year|y=i'             => sub { $year     = sprintf("%04d", $_[1]); },
   'month|m=i'            => sub { $month    = sprintf("%02d", $_[1]); },
   'day|d=i'              => sub { $day      = sprintf("%02d", $_[1]); },
@@ -508,20 +515,24 @@ unless (defined $coloured) {
 # Check whether to list blog posts or pages, or display repository
 # statistics:
 unless ($type eq 'stats') {
+  # Initialize required variables:
+  my $pattern = {};
+
   # Prepare the list of reserved characters:
   my $reserved  = '[\\\\\^\.\$\|\(\)\[\]\*\+\?\{\}]';
 
-  # Escape all reserved characters:
-  $id     =~ s/($reserved)/\\$1/g if $id;
-  $author =~ s/($reserved)/\\$1/g if $author;
-  $title  =~ s/($reserved)/\\$1/g if $title;
-  $tag    =~ s/($reserved)/\\$1/g if $tag;
-  $year   =~ s/($reserved)/\\$1/g if $year;
-  $month  =~ s/($reserved)/\\$1/g if $month;
-  $day    =~ s/($reserved)/\\$1/g if $day;
+  # Escape all reserved characters and prepare patterns:
+  ($pattern->{id}      = $id)      =~ s/($reserved)/\\$1/g if $id;
+  ($pattern->{author}  = $author)  =~ s/($reserved)/\\$1/g if $author;
+  ($pattern->{title}   = $title)   =~ s/($reserved)/\\$1/g if $title;
+  ($pattern->{keyword} = $keyword) =~ s/($reserved)/\\$1/g if $keyword;
+  ($pattern->{tag}     = $tag)     =~ s/($reserved)/\\$1/g if $tag;
+  ($pattern->{year}    = $year)    =~ s/($reserved)/\\$1/g if $year;
+  ($pattern->{month}   = $month)   =~ s/($reserved)/\\$1/g if $month;
+  ($pattern->{day}     = $day)     =~ s/($reserved)/\\$1/g if $day;
 
   # Display the list of matching records:
-  display_records($type, $id, $author, $title, $tag, $year, $month, $day)
+  display_records($type, $pattern)
     or exit_with_error("Cannot read repository data.", 13);
 }
 else {
