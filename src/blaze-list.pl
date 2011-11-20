@@ -367,7 +367,6 @@ sub display_record {
   return 1;
 }
 
-
 # Display a list of matching records:
 sub display_records {
   my $type    = shift || 'post';
@@ -382,6 +381,10 @@ sub display_records {
   my $year    = $pattern->{year}    || '....';
   my $month   = $pattern->{month}   || '..';
   my $day     = $pattern->{day}     || '..';
+
+  # Allow users to search entries without tags or keywords:
+  $tag        = '' if ($tag     eq 'NONE' or $tag     eq 'NULL');
+  $keyword    = '' if ($keyword eq 'NONE' or $keyword eq 'NULL');
 
   # Initialize required variables:
   my $count   = 0;
