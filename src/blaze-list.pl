@@ -591,11 +591,15 @@ Allows you to list blog posts or pages with a matching I<title>.
 
 =item B<-k> I<keyword>, B<--keyword> I<keyword>
 
-Allows you to list blog posts or pages with a matching I<keyword>.
+Allows you to list blog posts or pages with a matching I<keyword>. To list
+blog posts or pages that do not have any keywords specified, use B<NONE>
+or B<NULL> (both uppercase) as a keyword.
 
 =item B<-T> I<tag>, B<--tag> I<tag>
 
-Allows you to list blog posts or pages with a matching I<tag>.
+Allows you to list blog posts or pages with a matching I<tag>. To list blog
+posts or pages that do not have any tags specified, use B<NONE> or B<NULL>
+(both uppercase) as a keyword.
 
 =item B<-d> I<day>, B<--day> I<day>
 
