@@ -194,7 +194,7 @@ sub read_conf {
 sub make_record {
   my $type = shift || die 'Missing argument';
   my $id   = shift || die 'Missing argument';
-  my ($title, $author, $date, $tags, $url) = @_;
+  my ($title, $author, $date, $keywords, $tags) = @_;
 
   # Check whether the title is specified:
   if ($title) {
@@ -211,7 +211,7 @@ sub make_record {
   }
 
   # Check whether the author is specified:
-  unless ($author) {
+  unless ($author || $type eq 'page') {
     # Assign the default value:
     $author = $conf->{user}->{name} || 'admin';
 
@@ -241,6 +241,12 @@ sub make_record {
                     "Using `$date' instead.");
   }
 
+  # Check whether the keywords are specified:
+  if ($keywords) {
+    # Strip quotation marks:
+    $keywords =~ s/"//g;
+  }
+
   # Check whether the tags are specified:
   if ($tags) {
     # Make all tags lower case:
@@ -264,12 +270,12 @@ sub make_record {
 
   # Return the composed record:
   return {
-    'id'     => $id,
-    'title'  => $title,
-    'author' => $author,
-    'date'   => $date,
-    'tags'   => $tags,
-    'url'    => $url,
+    'id'       => $id,
+    'title'    => $title,
+    'author'   => $author,
+    'date'     => $date,
+    'keywords' => $keywords,
+    'tags'     => $tags,
   };
 }
 
@@ -305,16 +311,16 @@ sub collect_headers {
     next if $id =~ /^\.\.?$/;
 
     # Parse the header data:
-    my $data = read_ini(catfile($head, $id)) or next;
-    my $date   = $data->{header}->{date};
-    my $tags   = $data->{header}->{tags};
-    my $author = $data->{header}->{author};
-    my $url    = $data->{header}->{url};
-    my $title  = $data->{header}->{title};
+    my $data     = read_ini(catfile($head, $id)) or next;
+    my $title    = $data->{header}->{title}    || '';
+    my $author   = $data->{header}->{author}   || '';
+    my $date     = $data->{header}->{date}     || '';
+    my $keywords = $data->{header}->{keywords} || '';
+    my $tags     = $data->{header}->{tags}     || '';
 
     # Create the record:
     my $record = make_record($type, $id, $title, $author, $date,
-                             $tags, $url);
+                             $keywords, $tags);
 
     # Add the record to the beginning of the list:
     push(@records, $record);
@@ -329,6 +335,7 @@ sub collect_headers {
 
 # Display a record:
 sub display_record {
+  my $type   = shift || die 'Missing argument';
   my $record = shift || die 'Missing argument';
 
   # Check whether to use compact listing:
@@ -336,20 +343,24 @@ sub display_record {
     # Check whether colors are enabled:
     unless ($coloured) {
       # Display plain record header:
-      print "ID: $record->{id} | Date: $record->{date} | Author: " .
-            "$record->{author}\n\n";
+      print "ID: $record->{id} | Date: $record->{date}" .
+            (($type eq 'post') ? " | Author: $record->{author}" : "") .
+            "\n\n";
     }
     else {
       # Display colored record header:
-      print colored ("ID: $record->{id} | Date: $record->{date} | " .
-                     "Author: $record->{author}", 'yellow');
+      print colored ("ID: $record->{id} | Date: $record->{date}" .
+                     (($type eq 'post') ? " | Author: $record->{author}"
+                                       : ""), 'yellow');
       print "\n\n";
     }
 
     # Display the record body:
-    print wrap('    ', ' ' x 11, "Title: $record->{title}\n");
-    print wrap('    ', ' ' x 11, "Tags:  $record->{tags}\n")
-      if ($type eq 'post');
+    print wrap('    ', ' ' x 11, "Title:    $record->{title}\n");
+    print wrap('    ', ' ' x 11, "Keywords: $record->{keywords}\n")
+      if ($record->{keywords});
+    print wrap('    ', ' ' x 11, "Tags:     $record->{tags}\n")
+      if ($record->{tags} && $type eq 'post');
     print "\n";
   }
   else {
@@ -393,7 +404,7 @@ sub display_records {
     }
 
     # Display the record:
-    display_record($record);
+    display_record($type, $record);
 
     # Check whether the limited number of displayed records is requested:
     if ($number > 0) {
