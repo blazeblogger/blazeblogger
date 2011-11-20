@@ -340,20 +340,23 @@ sub display_record {
 
   # Check whether to use compact listing:
   unless ($compact) {
-    # Check whether colors are enabled:
-    unless ($coloured) {
-      # Display plain record header:
-      print "ID: $record->{id} | Date: $record->{date}" .
-            (($type eq 'post') ? " | Author: $record->{author}" : "") .
-            "\n\n";
+    # Change the color if requested:
+    print color 'yellow' if ($coloured);
+
+    # Check whether to display a header for a blog post or page:
+    if ($type eq 'post') {
+      # Display a record header for a blog post:
+      printf "ID: %-4d | Date: %s | Author: %s",
+             $record->{id}, $record->{date}, $record->{author};
     }
     else {
-      # Display colored record header:
-      print colored ("ID: $record->{id} | Date: $record->{date}" .
-                     (($type eq 'post') ? " | Author: $record->{author}"
-                                       : ""), 'yellow');
-      print "\n\n";
+      # Display a record header for a page:
+      printf "ID: %-4d | Date: %s", $record->{id}, $record->{date};
     }
+
+    # Reset the color if necessary and add new lines:
+    print color 'reset' if ($coloured);
+    print "\n\n";
 
     # Display the record body:
     print wrap('    ', ' ' x 11, "Title:    $record->{title}\n");
@@ -364,7 +367,7 @@ sub display_record {
     print "\n";
   }
   else {
-    # Display the short record:
+    # Display a short record:
     printf "%-4d | %s | %s\n", $record->{id}, $record->{date},
                                $record->{title};
   }
@@ -434,11 +437,13 @@ sub display_statistics {
 
   # Check whether to use compact listing:
   unless ($compact) {
-    # Display full results:
-    print "Number of pages: $pages_count\n";
-    print "Number of posts: $posts_count\n";
-    print "Last post date:  $last_post\n"  if @posts;
-    print "First post date: $first_post\n" if @posts;
+    # Display plain full results:
+    print "Pages:      $pages_count\n";
+    print "Posts:      $posts_count\n";
+    if (@posts) {
+      print "Last post:  $last_post\n";
+      print "First post: $first_post\n";
+    }
   }
   else {
     # Display shortened results:
