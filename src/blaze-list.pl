@@ -643,54 +643,58 @@ Displays version information and exits.
 
 =head1 EXAMPLE USAGE
 
-List all blog post:
+List all blog posts:
 
   ~]$ blaze-list
-  ID: 11 | 2010-07-05 | Jaromir Hradilek
+  ID: 11 | Date: 2010-07-05 | Author: Jaromir Hradilek
 
-      Title: Join #blazeblogger on IRC
-      Tags:  announcement
+      Title:    Join #blazeblogger on IRC
+      Keywords: IRC, channel
+      Tags:     announcement
 
-  ID: 10 | 2009-12-16 | Jaromir Hradilek
+  ID: 10 | Date: 2009-12-16 | Author: Jaromir Hradilek
 
-      Title: Debian and Fedora Packages
-      Tags:  announcement
+      Title:    Debian and Fedora Packages
+      Keywords: Debian, Fedora, package
+      Tags:     announcement
 
   etc.
 
-List all blog post in reverse order:
+List all blog posts in reverse order:
 
   ~]$ blaze-list -r
-  ID: 1 | 2009-02-10 | Jaromir Hradilek
+  ID: 1 | Date: 2009-02-10 | Author: Jaromir Hradilek
 
-      Title: BlazeBlogger 0.7.0
-      Tags:  release
+      Title:    BlazeBlogger 0.7.0
+      Tags:     release
 
-  ID: 2 | 2009-02-11 | Jaromir Hradilek
+  ID: 2 | Date: 2009-02-11 | Author: Jaromir Hradilek
 
-      Title: BlazeBlogger 0.7.1
-      Tags:  release
+      Title:    BlazeBlogger 0.7.1
+      Tags:     release
 
   etc.
 
 List all pages:
 
   ~]$ blaze-list -p
-  ID: 5 | 2009-02-10 | Jaromir Hradilek
+  ID: 5 | Date: 2009-02-10
 
-      Title: Downloads
+      Title:    Downloads
+      Keywords: downloads, translations, graphics, development
 
-  ID: 4 | 2009-02-10 | Jaromir Hradilek
+  ID: 4 | Date: 2009-02-10
 
-      Title: Themes
+      Title:    Themes
+      Keywords: themes
 
   etc.
 
 List each blog post on a single line:
 
   ~]$ blaze-list -s
-  ID: 11 | 2010-07-05 | Join #blazeblogger on IRC
-  ID: 10 | 2009-12-16 | Debian and Fedora Packages
+  11   | 2010-07-05 | Join #blazeblogger on IRC
+  10   | 2009-12-16 | Debian and Fedora Packages
   etc.
 
 Display a short version of blog statistics:
