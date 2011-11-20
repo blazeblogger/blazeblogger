@@ -404,7 +404,6 @@ body {
 #menu li {
   display: inline;
   padding: 4px 10px 5px 10px;
-  margin: 0;
 }
 
 #menu li:hover {
