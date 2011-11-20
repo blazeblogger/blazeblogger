@@ -336,13 +336,13 @@ sub display_record {
     # Check whether colors are enabled:
     unless ($coloured) {
       # Display plain record header:
-      print "ID: $record->{id} | $record->{date} | " .
+      print "ID: $record->{id} | Date: $record->{date} | Author: " .
             "$record->{author}\n\n";
     }
     else {
       # Display colored record header:
-      print colored ("ID: $record->{id} | $record->{date} | " .
-                     "$record->{author}", 'yellow');
+      print colored ("ID: $record->{id} | Date: $record->{date} | " .
+                     "Author: $record->{author}", 'yellow');
       print "\n\n";
     }
 
@@ -354,7 +354,8 @@ sub display_record {
   }
   else {
     # Display the short record:
-    print "ID: $record->{id} | $record->{date} | $record->{title}\n";
+    printf "%-4d | %s | %s\n", $record->{id}, $record->{date},
+                               $record->{title};
   }
 
   # Return success:
