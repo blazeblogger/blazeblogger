@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-make - generates a blog from the BlazeBlogger repository
+# blaze-make - generates a blog from a BlazeBlogger repository
 # Copyright (C) 2009-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -45,6 +45,7 @@ our $full_paths  = 0;                               # Generate full paths?
 # Global variables:
 our $conf        = {};                              # Configuration.
 our $locale      = {};                              # Localization.
+our $data        = {};                              # Blog data.
 our $cache_theme = '';                              # Cached template.
 
 # Set up the __WARN__ signal handler:
@@ -420,13 +421,13 @@ sub collect_headers {
     next if $id =~ /^\.\.?$/;
 
     # Parse header data:
-    my $data     = read_ini(catfile($head, $id)) or next;
-    my $title    = $data->{header}->{title};
-    my $author   = $data->{header}->{author};
-    my $date     = $data->{header}->{date};
-    my $keywords = $data->{header}->{keywords};
-    my $tags     = $data->{header}->{tags};
-    my $url      = $data->{header}->{url};
+    my $raw_data = read_ini(catfile($head, $id)) or next;
+    my $title    = $raw_data->{header}->{title};
+    my $author   = $raw_data->{header}->{author};
+    my $date     = $raw_data->{header}->{date};
+    my $keywords = $raw_data->{header}->{keywords};
+    my $tags     = $raw_data->{header}->{tags};
+    my $url      = $raw_data->{header}->{url};
 
     # Create the record:
     my $record = make_record($type, $id, $title, $author, $date,
@@ -778,7 +779,6 @@ sub format_information {
 
 # Return a formatted blog post or page entry:
 sub format_entry {
-  my $data    = shift || die 'Missing argument';
   my $record  = shift || die 'Missing argument';
   my $type    = shift || 'post';
   my $excerpt = shift || 0;
@@ -865,14 +865,13 @@ sub format_navigation {
 
 # Prepare a template:
 sub format_template {
-  my $data          = shift || die 'Missing argument';
   my $theme_file    = shift || $conf->{blog}->{theme} || 'default.html';
   my $style_file    = shift || $conf->{blog}->{style} || 'default.css';
 
   # Restore the template from the cache if available:
   return $cache_theme if $cache_theme;
 
-  # Read required data from the documentation:
+  # Read required data from the configuration:
   my $conf_doctype  = $conf->{core}->{doctype}     || 'html';
   my $conf_encoding = $conf->{core}->{encoding}    || 'UTF-8';
   my $conf_title    = $conf->{blog}->{title}       || 'Blog Title';
@@ -984,14 +983,16 @@ sub format_template {
 
 # Write a single page:
 sub write_page {
-  my $data     = shift || die 'Missing argument';
-  my $target   = shift || '';
-  my $root     = shift || '';
-  my $content  = shift || '';
-  my $heading  = shift || $conf->{blog}->{title} || 'My Blog';
-  my $keywords = shift || '';
-  my $index    = shift || '';
+  my $content  = shift || die 'Missing argument';
+  my $metadata = shift || die 'Missing argument';
 
+  # Get metadata:
+  my $target   = $metadata->{target_directory} || '';
+  my $root     = $metadata->{root_directory}   || '';
+  my $keywords = $metadata->{page_keywords}    || '';
+  my $index    = $metadata->{page_index}       || '';
+  my $heading  = $metadata->{page_title}       || $conf->{blog}->{title}
+                                               || 'My Blog';
   # Initialize required variables:
   my $home    = fix_link($root);
   my $temp    = $root || '#';
@@ -1001,7 +1002,7 @@ sub write_page {
   my $conf_extension = $conf->{core}->{extension} || 'html';
 
   # Load the template:
-  my $template = format_template($data);
+  my $template = format_template();
 
   # Substitute the keywords:
   if ($keywords) {
@@ -1104,8 +1105,6 @@ sub copy_stylesheet {
 
 # Generate the RSS feed:
 sub generate_rss {
-  my $data          = shift || die 'Missing argument';
-
   # Read required data from the configuration:
   my $core_encoding  = $conf->{core}->{encoding}  || 'UTF-8';
   my $blog_title     = $conf->{blog}->{title}     || 'My Blog';
@@ -1231,8 +1230,6 @@ sub generate_rss {
 
 # Generate the index page:
 sub generate_index {
-  my $data       = shift || die 'Missing argument';
-
   # Initialize required variables:
   my $body       = '';                              # List of posts.
   my $count      = 0;                               # Post counter.
@@ -1270,8 +1267,9 @@ sub generate_index {
         $body .= format_navigation('next', $next) if $page;
 
         # Write the index page:
-        write_page($data, $target, '', $body, $blog_title, '', $index)
-          or return 0;
+        write_page($body, { 'target_directory' => $target,
+                            'page_title'       => $blog_title,
+                            'page_index'       => $index }) or return 0;
 
         # Clear the page body:
         $body  = '';
@@ -1284,7 +1282,7 @@ sub generate_index {
       }
 
       # Add the blog post synopsis to the page body:
-      $body .= format_entry($data, $record, 'post', 1);
+      $body .= format_entry($record, 'post', 1);
 
       # Increase the number of listed blog posts:
       $count++;
@@ -1300,13 +1298,15 @@ sub generate_index {
       $body .= format_navigation('next', $next) if $page;
 
       # Write the index page:
-      write_page($data, $target, '', $body, $blog_title, '', $index)
-        or return 0;
+      write_page($body, { 'target_directory' => $target,
+                          'page_title'       => $blog_title,
+                          'page_index'       => $index }) or return 0;
     }
   }
   else {
     # Write an empty index page:
-    write_page($data, $target, '', $body, $blog_title) or return 0;
+    write_page($body, { 'target_directory' => $target,
+                        'page_title'       => $blog_title }) or return 0;
   }
 
   # Return success:
@@ -1315,8 +1315,6 @@ sub generate_index {
 
 # Generate the blog posts:
 sub generate_posts {
-  my $data         = shift || die 'Missing argument';
-
   # Read required data from the configuration:
   my $blog_posts   = $conf->{blog}->{posts}      || 10;
 
@@ -1360,7 +1358,7 @@ sub generate_posts {
     ($year, $month) = split(/-/, $record->{date});
 
     # Prepare the blog post body:
-    $post_body = format_entry($data, $record, 'post', 0);
+    $post_body = format_entry($record, 'post', 0);
 
     # Prepare the target directory name:
     $target    = ($destdir eq '.')
@@ -1368,8 +1366,11 @@ sub generate_posts {
                : catdir($destdir, $year, $month, $record->{url});
 
     # Write the blog post:
-    write_page($data, $target, '../../../', $post_body, $record->{title},
-               $record->{keywords}) or return 0;
+    write_page($post_body, { 'target_directory' => $target,
+                             'root_directory'   => '../../../',
+                             'page_title'       => $record->{title},
+                             'page_keywords'    => $record->{keywords} })
+      or return 0;
 
     # Set the year:
     $year_curr = $year;
@@ -1390,8 +1391,10 @@ sub generate_posts {
       $target = ($destdir eq '.') ? $year : catdir($destdir, $year);
 
       # Write the yearly archive index page:
-      write_page($data, $target, '../', $year_body, $title, $title)
-        or return 0;
+      write_page($year_body, { 'target_directory' => $target,
+                               'root_directory'   => '../',
+                               'page_title'       => $title,
+                               'page_keywords'    => $title }) or return 0;
 
       # Change the previous year to the currently processed one:
       $year_last = $year_curr;
@@ -1434,8 +1437,11 @@ sub generate_posts {
               : catdir($destdir, $year, $month);
 
       # Write the monthly archive index page:
-      write_page($data, $target, '../../', $month_body, $title, $title,
-                 $index) or return 0;
+      write_page($month_body, { 'target_directory' => $target,
+                                'root_directory'   => '../../',
+                                'page_title'       => $title,
+                                'page_keywords'    => $title,
+                                'page_index'       => $index }) or return 0;
 
       # Check whether the month has changed:
       if ($month_curr ne $month_last) {
@@ -1458,7 +1464,7 @@ sub generate_posts {
     }
 
     # Add the blog post synopsis:
-    $month_body .= format_entry($data, $record, 'post', 1);
+    $month_body .= format_entry($record, 'post', 1);
 
     # Increase the number of listed blog posts:
     $month_count++;
@@ -1490,8 +1496,11 @@ sub generate_posts {
             : catdir($destdir, $year, $month);
 
     # Write the monthly archive index page:
-    write_page($data, $target, '../../', $month_body, $title, $title,
-               $index) or return 0;
+    write_page($month_body, { 'target_directory' => $target,
+                              'root_directory'   => '../../',
+                              'page_title'       => $title,
+                              'page_keywords'    => $title,
+                              'page_index'       => $index }) or return 0;
   }
 
   # Return success:
@@ -1500,8 +1509,6 @@ sub generate_posts {
 
 # Generate the tags:
 sub generate_tags {
-  my $data         = shift || die 'Missing argument';
-
   # Read required data from the configuration:
   my $blog_posts   = $conf->{blog}->{posts}      || 10;
 
@@ -1557,8 +1564,11 @@ sub generate_tags {
                          $data->{links}->{tags}->{$tag}->{url});
 
         # Write the tag index page:
-        write_page($data, $target, '../../', $tag_body, $title, $title,
-                   $index) or return 0;
+        write_page($tag_body, { 'target_directory' => $target,
+                                'root_directory'   => '../../',
+                                'page_title'       => $title,
+                                'page_keywords'    => $title,
+                                'page_index'       => $index }) or return 0;
 
         # Clear the tag body:
         $tag_body  = '';
@@ -1571,7 +1581,7 @@ sub generate_tags {
       }
 
       # Add the blog post synopsis:
-      $tag_body .= format_entry($data, $record, 'post', 1);
+      $tag_body .= format_entry($record, 'post', 1);
 
       # Increase the number of listed blog posts:
       $tag_count++;
@@ -1599,8 +1609,11 @@ sub generate_tags {
                        $data->{links}->{tags}->{$tag}->{url});
 
       # Write the tag index page:
-      write_page($data, $target, '../../', $tag_body, $title, $title,
-                 $index) or return 0;
+      write_page($tag_body, { 'target_directory' => $target,
+                              'root_directory'   => '../../',
+                              'page_title'       => $title,
+                              'page_keywords'    => $title,
+                              'page_index'       => $index }) or return 0;
     }
   }
 
@@ -1617,8 +1630,11 @@ sub generate_tags {
     my $target = ($destdir eq '.') ? 'tags' : catdir($destdir, 'tags');
 
     # Write the tag list index page:
-    write_page($data, $target, '../', $taglist_body, $tags_string,
-               $tags_string) or return 0;
+    write_page($taglist_body, { 'target_directory' => $target,
+                                'root_directory'   => '../',
+                                'page_title'       => $tags_string,
+                                'page_keywords'    => $tags_string })
+      or return 0;
   }
 
   # Return success:
@@ -1627,12 +1643,10 @@ sub generate_tags {
 
 # Generate the pages:
 sub generate_pages {
-  my $data = shift || die 'Missing argument';
-
   # Process each record:
   foreach my $record (@{$data->{headers}->{pages}}) {
     # Prepare the page body:
-    my $body   = format_entry($data, $record, 'page', 0);
+    my $body   = format_entry($record, 'page', 0);
 
     # Prepare the target directory name:
     my $target = ($destdir eq '.')
@@ -1640,8 +1654,11 @@ sub generate_pages {
                : catdir($destdir, $record->{url});
 
     # Write the page:
-    write_page($data, $target, '../', $body, $record->{title},
-               $record->{keywords}) or return 0;
+    write_page($body, { 'target_directory' => $target,
+                        'root_directory'   => '../',
+                        'page_title'       => $record->{title},
+                        'page_keywords'    => $record->{keywords} })
+      or return 0;
   }
 
   # Return success:
@@ -1706,7 +1723,7 @@ $conf    = read_conf();
 $locale  = read_lang($conf->{blog}->{lang});
 
 # Collect the metadata:
-my $data = collect_metadata();
+$data    = collect_metadata();
 
 # Copy the style sheet:
 copy_stylesheet()
@@ -1714,27 +1731,27 @@ copy_stylesheet()
   if $with_css;
 
 # Generate RSS feed:
-generate_rss($data)
+generate_rss()
   or exit_with_error("An error has occurred while creating the RSS feed.")
   if $with_rss;
 
 # Generate index page:
-generate_index($data)
+generate_index()
   or exit_with_error("An error has occurred while creating the index page.")
   if $with_index;
 
 # Generate posts:
-generate_posts($data)
+generate_posts()
   or exit_with_error("An error has occurred while creating the blog posts.")
   if $with_posts;
 
 # Generate tags:
-generate_tags($data)
+generate_tags()
   or exit_with_error("An error has occurred while creating the tags.")
   if $with_tags;
 
 # Generate pages:
-generate_pages($data)
+generate_pages()
   or exit_with_error("An error has occurred while creating the pages.")
   if $with_pages;
 
@@ -1748,7 +1765,7 @@ __END__
 
 =head1 NAME
 
-blaze-make - generates a blog from the BlazeBlogger repository
+blaze-make - generates a blog from a BlazeBlogger repository
 
 =head1 SYNOPSIS
 
@@ -1758,7 +1775,7 @@ B<blaze-make> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-make> reads the BlazeBlogger repository, and generates a complete
+B<blaze-make> reads a BlazeBlogger repository and generates a complete
 directory tree of static pages, including blog posts, single pages, monthly
 and yearly archives, tags, and even an RSS feed.
 
