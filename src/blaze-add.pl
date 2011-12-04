@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-add - adds a blog post or a page to the BlazeBlogger repository
+# blaze-add - adds a blog post or a page to a BlazeBlogger repository
 # Copyright (C) 2008-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -701,7 +701,7 @@ __END__
 
 =head1 NAME
 
-blaze-add - adds a blog post or a page to the BlazeBlogger repository
+blaze-add - adds a blog post or a page to a BlazeBlogger repository
 
 =head1 SYNOPSIS
 
@@ -713,11 +713,11 @@ B<blaze-add> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-add> adds a blog post or a page to the BlazeBlogger repository. If
-a I<file> is supplied, it adds the content of that file, otherwise an
-external text editor is opened for you. Note that there are several special
-forms and placeholders that can be used in the text, and that will be
-replaced with a proper data when the blog is generated.
+B<blaze-add> adds a blog post or a page to a BlazeBlogger repository. If a
+I<file> is supplied, B<blaze-add> adds the content of that file, otherwise
+it opens a text editor for you. Note that there are several special forms
+and placeholders that can be used in the text and that will be replaced
+with a proper data when the blog is generated.
 
 =head2 Special Forms
 

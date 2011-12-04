@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-remove - removes a post or page from the BlazeBlogger repository
+# blaze-remove - removes a post or page from a BlazeBlogger repository
 # Copyright (C) 2008-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -266,7 +266,7 @@ __END__
 
 =head1 NAME
 
-blaze-remove  - removes a post or page from the BlazeBlogger repository
+blaze-remove - removes a post or page from a BlazeBlogger repository
 
 =head1 SYNOPSIS
 
@@ -277,7 +277,7 @@ B<blaze-remove> B<-h>|B<-v>
 =head1 DESCRIPTION
 
 B<blaze-remove> removes a blog post or a page with the specified I<id> from
-the BlazeBlogger repository.
+a BlazeBlogger repository.
 
 =head1 OPTIONS
 

@@ -705,7 +705,7 @@ B<blaze-init> B<-h>|B<-v>
 
 B<blaze-init> either creates a fresh new BlazeBlogger repository, or
 recovers an existing one in case it is corrupted. Optionally, it can also
-revert a configuration and default templates to their original state,
+revert configuration and default templates to their original state,
 leaving all user data (that is, both blog posts and pages) intact.
 
 =head1 OPTIONS

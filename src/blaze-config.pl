@@ -641,8 +641,8 @@ B<blaze-config> B<-h>|B<-v>
 =head1 DESCRIPTION
 
 B<blaze-config> either sets BlazeBlogger configuration options, or displays
-their current value. Additionally, it can also open a configuration file in
-an external text editor.
+their current value. Additionally, it can open the configuration file in an
+external text editor.
 
 =head1 OPTIONS
 

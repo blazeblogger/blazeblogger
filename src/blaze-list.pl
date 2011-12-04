@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-list - lists blog posts or pages in the BlazeBlogger repository
+# blaze-list - lists blog posts or pages in a BlazeBlogger repository
 # Copyright (C) 2009-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -552,7 +552,7 @@ __END__
 
 =head1 NAME
 
-blaze-list - lists blog posts or pages in the BlazeBlogger repository
+blaze-list - lists blog posts or pages in a BlazeBlogger repository
 
 =head1 SYNOPSIS
 
@@ -564,8 +564,8 @@ B<blaze-list> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-list> lists existing blog posts or pages in the BlazeBlogger
-repository. Additionally, it can also display basic repository statistics.
+B<blaze-list> lists existing blog posts or pages in a BlazeBlogger
+repository, as well as displays basic repository statistics.
 
 =head1 OPTIONS
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# blaze-edit - edits a blog post or a page in the BlazeBlogger repository
+# blaze-edit - edits a blog post or a page in a BlazeBlogger repository
 # Copyright (C) 2008-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -676,7 +676,7 @@ __END__
 
 =head1 NAME
 
-blaze-edit - edits a blog post or a page in the BlazeBlogger repository
+blaze-edit - edits a blog post or a page in a BlazeBlogger repository
 
 =head1 SYNOPSIS
 
@@ -688,7 +688,7 @@ B<blaze-edit> B<-h>|B<-v>
 
 B<blaze-edit> opens an existing blog post or a page with the specified
 I<id> in an external text editor. Note that there are several special forms
-and placeholders that can be used in the text, and that will be replaced
+and placeholders that can be used in the text and that will be replaced
 with a proper data when the blog is generated.
 
 =head2 Special Forms
