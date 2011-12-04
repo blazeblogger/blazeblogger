@@ -39,11 +39,6 @@ our $chosen   = 1;                                  # Available ID guess.
 our $reserved = undef;                              # Reserved ID list.
 our $conf     = {};                                 # Configuration.
 
-# Command line options:
-my  $type     = 'post';                             # Type: post or page.
-my  $added    = '';                                 # List of added IDs.
-my  $data     = {};                                 # Post/page meta data.
-
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
   print STDERR NAME . ": " . (shift);
@@ -629,6 +624,11 @@ sub add_to_log {
   # Return success:
   return 1;
 }
+
+# Set default options:
+my $type  = 'post';                                 # Type: post or page.
+my $added = '';                                     # List of added IDs.
+my $data  = {};                                     # Post/page metadata.
 
 # Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');

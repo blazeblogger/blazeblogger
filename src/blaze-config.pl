@@ -70,9 +70,6 @@ our %opt = (
   'user.email'       => 'admin@localhost',          # User's email.
 );
 
-# Command line options:
-my  $edit = 0;                                      # Open in text editor?
-
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
   print STDERR NAME . ": " . (shift);
@@ -565,6 +562,9 @@ sub display_option {
   # Return success:
   return 1;
 }
+
+# Set default options:
+my $edit = 0;                                       # Open in a text editor?
 
 # Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');

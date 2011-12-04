@@ -38,9 +38,6 @@ our $verbose = 1;                                   # Verbosity level.
 # Global variables:
 our $conf    = {};                                  # Configuration.
 
-# Command-line options:
-my  $type    = 'post';                              # Type: post or page.
-
 # Set up the __WARN__ signal handler:
 $SIG{__WARN__} = sub {
   print STDERR NAME . ": " . (shift);
@@ -618,6 +615,9 @@ sub add_to_log {
   # Return success:
   return 1;
 }
+
+# Set default options:
+my $type = 'post';                                  # Type: post or page.
 
 # Set up the option parser:
 Getopt::Long::Configure('no_auto_abbrev', 'no_ignore_case', 'bundling');
