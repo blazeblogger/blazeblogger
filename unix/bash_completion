@@ -1,5 +1,5 @@
 # blazeblogger, a bash completion script for BlazeBlogger
-# Copyright (C) 2009 Miroslav Hradílek
+# Copyright (C) 2009 Miroslav Hradilek
 # Revision  (C) 2010-2011 Jaromir Hradilek
 
 # This program is  free software:  you can redistribute it and/or modify it
@@ -309,8 +309,9 @@ user.nickname user.email"
     log)
     # log handler code ----------------------------------------------------
       # utility specifick options
-      local specopts="-b --blogdir -n --number -s --short -r --reverse -c \
---color -C --no-color -q --quiet -V --verbose -h --help -v --version"
+      local specopts="-b --blogdir -n --number -S --stats -s --short -r \
+--reverse -c --color -C --no-color -q --quiet -V --verbose -h --help -v \
+--version"
 
       # argument completions
       case "$prev" in
