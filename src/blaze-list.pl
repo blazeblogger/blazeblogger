@@ -620,15 +620,15 @@ value has to be in the C<YYYY> form.
 
 Allows you to specify a I<number> of blog posts or pages to be listed.
 
-=item B<-p>, B<--page>
+=item B<-p>, B<--page>, B<--pages>
 
 Tells B<blaze-list> to list pages.
 
-=item B<-P>, B<--post>
+=item B<-P>, B<--post>, B<--posts>
 
 Tells B<blaze-list> to list blog posts. This is the default option.
 
-=item B<-S>, B<--stats>
+=item B<-S>, B<--stat>, B<--stats>
 
 Tells B<blaze-list> to display statistics.
 

@@ -69,12 +69,13 @@ sub display_help {
 
   # Display the usage:
   print << "END_HELP";
-Usage: $NAME [-cqrsCV] [-b DIRECTORY] [-n NUMBER]
+Usage: $NAME [-cqrsCSV] [-b DIRECTORY] [-n NUMBER]
        $NAME -h|-v
 
   -b, --blogdir DIRECTORY     specify a directory in which the BlazeBlogger
                               repository is placed
   -n, --number NUMBER         specify a number of log entries to be listed
+  -S, --stats                 display log statistics
   -s, --short                 display each log entry on a single line
   -r, --reverse               display log entries in reverse order
   -c, --color                 enable colored output
@@ -361,13 +362,14 @@ blaze-log - displays a BlazeBlogger repository log
 
 =head1 SYNOPSIS
 
-B<blaze-log> [B<-cqrsCV>] [B<-b> I<directory>] [B<-n> I<number>]
+B<blaze-log> [B<-cqrsCSV>] [B<-b> I<directory>] [B<-n> I<number>]
 
 B<blaze-log> B<-h>|B<-v>
 
 =head1 DESCRIPTION
 
-B<blaze-log> displays the content of a BlazeBlogger repository log.
+B<blaze-log> displays the content of a BlazeBlogger repository log, as well
+the total number of log entries.
 
 =head1 OPTIONS
 
@@ -381,6 +383,10 @@ is placed. The default option is a current working directory.
 =item B<-n> I<number>, B<--number> I<number>
 
 Allows you to specify a I<number> of log entries to be listed.
+
+=item B<-S>, B<-stat>, B<-stats>
+
+Tells B<blaze-log> to display statistics.
 
 =item B<-s>, B<--short>
 
@@ -456,10 +462,15 @@ List the whole repository history in reverse order:
 
   etc.
 
-Display the very first log entry on a single line:
+Display the first log entry on a single line:
 
   ~]$ blaze-log -rs -n 1
   Tue Feb 10 00:40:16 2009 - Created/recovered a BlazeBlogger repository.
+
+Display a short version of log statistics:
+
+  ~]$ blaze-log -Ss
+  There is a total number of 158 log entries.
 
 =head1 SEE ALSO
 
