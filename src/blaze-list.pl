@@ -422,7 +422,7 @@ sub display_records {
   return 1;
 }
 
-# Display the repository statistics:
+# Display repository statistics:
 sub display_statistics {
   # Collect the necessary metadata:
   my @pages = collect_headers('page');
@@ -436,16 +436,16 @@ sub display_statistics {
 
   # Check whether to use compact listing:
   unless ($compact) {
-    # Display plain full results:
+    # Display full results:
     print "Pages:      $pages_count\n";
     print "Posts:      $posts_count\n";
     if (@posts) {
-      print "Last post:  $last_post\n";
       print "First post: $first_post\n";
+      print "Last post:  $last_post\n";
     }
   }
   else {
-    # Display shortened results:
+    # Display compact results:
     printf("There is a total number of $posts_count blog post%s " .
            "and $pages_count page%s in the repository.\n",
            (($posts_count != 1) ? 's' : ''),
