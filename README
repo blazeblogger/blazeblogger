@@ -3,7 +3,7 @@
                             general information
 
 
-   Copyright (C) 2009-2011 Jaromir Hradilek
+   Copyright (C) 2009-2015 Jaromir Hradilek
 
    Permission is granted to copy, distribute and/or modify this document
    under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -33,10 +33,10 @@ TABLE OF CONTENTS
 1. OVERVIEW
 
 BlazeBlogger is a simple to use but capable CMS for the command line. Being
-written in Perl as a cross-platform application,  and producing static con-
+written in Perl as  a cross-platform application  and producing static con-
 tent without the need of database  servers or server-side scripting,  it is
 literally a CMS without  boundaries suitable for a wide variety of web pre-
-sentations, from  a personal weblog to a  project page,  or  even a company
+sentations, from  a personal weblog  to a  project page  or  even a company
 website.
 
 1.1 Notable Features
@@ -49,39 +49,33 @@ website.
 
 1.2 Example Usage
 
-  ~]$ blaze-init   # Creates a new repository in .blaze/
+  ~]$ blaze-init   # Creates a new repository in .blaze
   ~]$ blaze-add    # Allows you to write a new post in your favorite editor
   ~]$ blaze-make   # Generates a blog from the repository
 
 
 2. DEVELOPMENT
 
-As a version control system for its source code, BlazeBlogger uses Git with
-a public repository located at gitorious.org. To get the latest development
-version, use the following command:
+As a revision control system  for its  source code,  BlazeBlogger  uses Git
+with a public repository  located on GitHub.  To get the latest development
+version of BlazeBlogger, type the following command at a shell prompt:
 
-  git clone git://gitorious.org/blazeblogger/mainline.git blazeblogger
+  git clone https://github.com/blazeblogger/blazeblogger.git
 
-Alternatively, if you are behind a restrictive firewall,  use the following
-command instead:
-
-  git clone http://git.gitorious.org/blazeblogger/mainline.git blazeblogger
-
-If you are planning to make some interesting changes, please, consider clo-
-ning the project on Gitorious, so that I can follow you and eventually pull
-your work to the upstream.
+If you are planning to make some interesting changes, please, consider for-
+king the project on GitHub  so that I can follow you  and eventually  merge
+your code with the upstream version.
 
 
 3. BUGS
 
 To report a bug or to send a patch, please, add a new issue to the bug tra-
-cker at <http://code.google.com/p/blazeblogger/issues/>,  or visit the dis-
-cussion group at <http://groups.google.com/group/blazeblogger/>.
+cker located at <https://github.com/blazeblogger/blazeblogger/issues>.
 
 
 4. COPYRIGHT
 
-Copyright (C) 2008-2011 Jaromir Hradilek
+Copyright (C) 2008-2015 Jaromir Hradilek
 
 This program is free software; see the source for copying conditions. It is
 distributed  in the hope that it will be useful,  but WITHOUT ANY WARRANTY;
